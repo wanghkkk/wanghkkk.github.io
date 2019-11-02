@@ -1,0 +1,216 @@
+<h1 id="Hexo-theme-obsidian"><a href="#Hexo-theme-obsidian" class="headerlink" title="Hexo-theme-obsidian"></a>Hexo-theme-obsidian</h1><p><a href="https://gitter.im/TriDiamond/hexo-theme-obsidian?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge" target="_blank" rel="noopener"><img src="https://badges.gitter.im/TriDiamond/hexo-theme-obsidian.svg" alt="Join the chat at https://gitter.im/TriDiamond/hexo-theme-obsidian"></a></p>
+<blockquote>
+<p>A dark Hexo theme, it’s responsive, simple but elegant.</p>
+</blockquote>
+<p><img src="https://img.shields.io/github/v/release/TriDiamond/hexo-theme-obsidian" alt="Latest Release Version"><br><img src="https://img.shields.io/github/release-date/TriDiamond/hexo-theme-obsidian" alt="Latest Release Date"><br><img src="https://img.shields.io/github/license/TriDiamond/hexo-theme-obsidian" alt="License"></p>
+<p><strong><a href="http://tridiamond.me" target="_blank" rel="noopener">PREVIEW</a></strong> |<br><strong><a href="https://github.com/TriDiamond/hexo-theme-obsidian/blob/master/README_CN.md" target="_blank" rel="noopener">中文文档</a></strong> |<br><strong><a href="https://github.com/TriDiamond/hexo-theme-obsidian/blob/master/CHANGELOG.md" target="_blank" rel="noopener">CHANGES</a></strong></p>
+<p><img src="https://res.cloudinary.com/tridiamond/image/upload/v1571332123/blog/A-Obsidian_mlnj3q.png" alt="screenshot"></p>
+<h2 id="Install"><a href="#Install" class="headerlink" title="Install"></a>Install</h2><pre><code class="bash">$ git <span class="built_in">clone</span> https://github.com/TriDiamond/hexo-theme-obsidian.git obsidian</code></pre>
+<h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><h3 id="Activate-Theme"><a href="#Activate-Theme" class="headerlink" title="Activate Theme"></a>Activate Theme</h3><p>Open <code>Hexo</code> config file <code>_config.yml</code>, set theme to <code>obsidian</code></p>
+<pre><code class="yaml"><span class="string">...</span>
+<span class="attr">theme:</span> <span class="string">obsidian</span>
+<span class="string">...</span></code></pre>
+<h3 id="Theme-settings"><a href="#Theme-settings" class="headerlink" title="Theme settings"></a>Theme settings</h3><p>Open <code>/themes/obsidian/_config.yml</code> can change the theme configs</p>
+<pre><code class="yaml"><span class="comment">#! ---------------------------------------------------------------</span>
+<span class="comment">#! Obsidian theme use manual highlight.js</span>
+<span class="comment">#! To maintain the code block css display properly</span>
+<span class="comment">#! please change your default highlight setting as off!!</span>
+<span class="comment">#! Rebuild files after you changed the config:</span>
+<span class="comment">#! `hexo clean &amp;&amp; hexo g`</span>
+<span class="comment">#! ---------------------------------------------------------------</span>
+<span class="comment">#! highlight:</span>
+<span class="comment">#!  enable: false</span>
+<span class="comment">#!  line_number: true</span>
+<span class="comment">#!  auto_detect: true</span>
+<span class="comment">#!  tab_replace:</span>
+<span class="comment">#! ---------------------------------------------------------------</span>
+
+<span class="comment"># ---------------------------------------------------------------</span>
+<span class="comment"># Theme default settings</span>
+<span class="comment"># ---------------------------------------------------------------</span>
+
+<span class="comment"># Menu setting | format = title_name: link_url</span>
+<span class="attr">menu:</span>
+  <span class="attr">PAGE:</span> <span class="string">/page</span>
+
+<span class="comment"># Enable table of content</span>
+<span class="attr">TOC:</span> <span class="literal">true</span>
+
+<span class="comment"># Home page first post default cover image, default use cover</span>
+<span class="attr">welcome_cover:</span> <span class="string">/img/cover.jpg</span>
+
+<span class="comment"># Article default cover image</span>
+<span class="attr">cover:</span> <span class="string">/img/welcome-cover.jpg</span>
+
+<span class="comment"># Avatar</span>
+<span class="attr">avatar:</span> <span class="string">https://s2.ax1x.com/2019/09/19/nLtSiD.png</span>
+
+<span class="comment"># Disable default scrollbar</span>
+<span class="attr">scrollbar:</span> <span class="literal">true</span>
+
+<span class="comment"># Website keywords used for SEO</span>
+<span class="attr">keywords:</span> <span class="string">TriDiamond</span> <span class="string">Obsidian</span>
+
+<span class="comment"># Website slogans</span>
+<span class="attr">descriptionOne:</span> <span class="string">"Think like an artist, develop like an artisan"</span>
+<span class="attr">descriptionTwo:</span> <span class="string">"艺术家思维去思考问题，工匠创造精神去开发"</span>
+
+<span class="comment"># If you use google analytics, please fill in the ID</span>
+<span class="attr">google_analytics:</span>
+
+<span class="comment"># Website favicon</span>
+<span class="attr">favicon:</span> <span class="string">/img/favicon.png</span>
+
+<span class="comment"># rss file</span>
+<span class="attr">rss:</span> <span class="string">atom.xml</span>
+
+<span class="comment"># ---------------------------------------------------------------</span>
+<span class="comment"># Article Music settings</span>
+<span class="comment"># ---------------------------------------------------------------</span>
+
+<span class="comment"># Auto play article audio</span>
+<span class="attr">autoplay:</span> <span class="literal">false</span>
+
+<span class="comment"># default mp3 file</span>
+<span class="attr">mp3:</span> 
+  <span class="bullet">-</span> <span class="string">statics/chengdu.mp3</span>
+
+<span class="comment"># ---------------------------------------------------------------</span>
+<span class="comment"># Plugins</span>
+<span class="comment"># ---------------------------------------------------------------</span>
+
+<span class="comment"># Gitalk comment plugin</span>
+<span class="comment"># see https://github.com/gitalk/gitalk</span>
+<span class="attr">gitalk:</span>
+  <span class="attr">enable:</span> <span class="literal">false</span>
+  <span class="attr">autoExpand:</span> <span class="literal">false</span>
+  <span class="attr">clientID:</span> <span class="string">''</span>
+  <span class="attr">clientSecret:</span> <span class="string">''</span>
+  <span class="attr">repo:</span> <span class="string">''</span>
+  <span class="attr">owner:</span> <span class="string">''</span>
+  <span class="attr">admin:</span> <span class="string">['']</span>
+  <span class="comment"># Ensure uniqueness and length less than 50</span>
+  <span class="attr">id:</span> <span class="string">location.pathname</span>
+  <span class="comment"># Facebook-like distraction</span>
+
+<span class="comment"># Valine comment plugin (recommended!)</span>
+<span class="comment"># see https://valine.js.org/quickstart.html</span>
+<span class="attr">valine:</span>
+  <span class="attr">enable:</span> <span class="literal">true</span>
+  <span class="attr">app_id:</span>
+  <span class="attr">app_key:</span>
+  <span class="attr">notify:</span> <span class="literal">false</span>
+  <span class="attr">verify:</span> <span class="literal">false</span>
+  <span class="attr">avatar:</span> <span class="string">'mp'</span>
+  <span class="attr">placeholder:</span> <span class="string">'Leave your throughs behind~'</span>
+  <span class="attr">visitor:</span> <span class="literal">true</span>
+
+<span class="comment"># Enable symbols-count-time plugin</span>
+<span class="comment"># see https://github.com/theme-next/hexo-symbols-count-time</span>
+<span class="attr">symbols_count_time:</span>
+  <span class="attr">enable:</span> <span class="literal">true</span>
+  <span class="attr">wordCount:</span> <span class="literal">true</span>
+  <span class="attr">readCount:</span> <span class="literal">true</span>
+  <span class="attr">awl:</span> <span class="number">4</span>
+  <span class="attr">wpm:</span> <span class="number">275</span>
+  <span class="attr">suffix:</span> <span class="string">mins.</span>
+
+<span class="comment"># Enable html truncate</span>
+<span class="comment"># see https://github.com/TriDiamond/hexo-html-truncate</span>
+<span class="attr">html_truncate:</span>
+  <span class="attr">enable:</span> <span class="literal">true</span>
+  <span class="comment"># Characters kept for posts</span>
+  <span class="attr">postLength:</span> <span class="number">250</span>
+  <span class="comment"># Characters kept for cover posts</span>
+  <span class="attr">coverLength:</span> <span class="number">100</span>
+  <span class="attr">ellipsis:</span> <span class="string">'...'</span>
+  <span class="comment"># Excluding html tags</span>
+  <span class="attr">excludes:</span> <span class="string">['img']</span>
+  <span class="comment"># Characters count including white spaces</span>
+  <span class="attr">keepWhitespaces:</span> <span class="literal">true</span>
+  <span class="comment"># Reserving the last complete word, without breaking the word</span>
+  <span class="attr">reserveLastWord:</span> <span class="literal">true</span>
+
+<span class="comment"># Enable Busuanzi statistic plugin</span>
+<span class="comment"># see http://ibruce.info/2015/04/04/busuanzi/</span>
+<span class="attr">busuanzi:</span>
+  <span class="attr">enable:</span> <span class="literal">true</span>
+
+<span class="comment"># Enable social media sharing</span>
+<span class="comment"># see https://github.com/overtrue/share.js/</span>
+<span class="attr">sharejs:</span>
+  <span class="attr">enable:</span> <span class="literal">true</span>
+  <span class="attr">disabled:</span> <span class="string">'facebook,douban,linkedin,diandian,tencent,google'</span>
+</code></pre>
+<h3 id="Comments"><a href="#Comments" class="headerlink" title="Comments"></a>Comments</h3><p>You can choose from using Valine or Gitalk</p>
+<ul>
+<li>If you are using <code>Valine</code>, you need to turn off <code>busuanzi</code>, because Valine has article view count support.</li>
+<li>If you are using <code>Gitalk</code>, you may turn on <code>busuanzi</code>, to have article view count enable.</li>
+</ul>
+<h3 id="Code-block-style"><a href="#Code-block-style" class="headerlink" title="Code block style"></a>Code block style</h3><blockquote>
+<p>Turn off default <code>highlight</code> to ensure code block style display properly.<br>  Because Obsidian theme use manual highlight.js<br>  To maintain the code block css display properly<br>  please change your default highlight setting as off!!</p>
+</blockquote>
+<p>Hexo configuration file <code>_config.yml</code> located at the ROOT path of your blog.</p>
+<blockquote>
+<p>⚠️ Please note do not make these changes in the theme’s config file,<br>  changing configs in the theme config file <code>_config.yml</code> will not work properly. </p>
+</blockquote>
+<pre><code class="yaml"><span class="string">...</span>
+
+<span class="attr">highlight:</span>
+  <span class="attr">enable:</span> <span class="literal">false</span>
+  <span class="attr">line_number:</span> <span class="literal">true</span>
+  <span class="attr">auto_detect:</span> <span class="literal">true</span>
+  <span class="attr">tab_replace:</span>
+
+<span class="string">...</span></code></pre>
+<p>Rebuild files after you changed the config</p>
+<pre><code class="bash">hexo clean &amp;&amp; hexo g</code></pre>
+<h3 id="Preview-character-length"><a href="#Preview-character-length" class="headerlink" title="Preview character length"></a>Preview character length</h3><p>This post parameter changes how many characters are kept for the preview at home page.</p>
+<pre><code class="markdown">
+title: My awesome title
+date: 2019-07-14 18:38:45
+categories:
+<span class="bullet">    - </span>Category1
+<span class="bullet">    - </span>Category2
+tags: 
+<span class="bullet">    - </span>Tag1
+<span class="bullet">    - </span>Tag2
+mp3: http://domain.com/awesome.mp3
+cover: http://domain.com/awesome.jpg
+preview: 300
+</code></pre>
+<h3 id="Post-template"><a href="#Post-template" class="headerlink" title="Post template"></a>Post template</h3><p>Post template settings</p>
+<pre><code class="markdown">
+title: My awesome title
+date: 2019-07-14 18:38:45
+categories:
+<span class="bullet">    - </span>Category1
+<span class="bullet">    - </span>Category2
+tags: 
+<span class="bullet">    - </span>Tag1
+<span class="bullet">    - </span>Tag2
+mp3: http://domain.com/awesome.mp3
+cover: http://domain.com/awesome.jpg
+</code></pre>
+<h3 id="Create-categories-page"><a href="#Create-categories-page" class="headerlink" title="Create categories page"></a>Create categories page</h3><p>Run Hexo command to generate categories page</p>
+<pre><code class="bash">hexo new page categories</code></pre>
+<p>Categories template</p>
+<pre><code>title: categories
+date: 2019-07-14 12:39:04
+type: &quot;categories&quot;</code></pre><blockquote>
+<p>Theme will auto generate categories contents.</p>
+</blockquote>
+<h3 id="Create-tags-page"><a href="#Create-tags-page" class="headerlink" title="Create tags page"></a>Create tags page</h3><p>Run Hexo command to generate tags page</p>
+<pre><code class="bash">hexo new page tags</code></pre>
+<p>Tags page template</p>
+<pre><code>title: tags
+date: 2014-12-22 12:39:04
+type: &quot;tags&quot;</code></pre><blockquote>
+<p>Theme will auto generate tags contents.</p>
+</blockquote>
+<h2 id="Update-Theme"><a href="#Update-Theme" class="headerlink" title="Update Theme"></a>Update Theme</h2><blockquote>
+<p>Please backup your <code>_config.yml</code> file before update</p>
+</blockquote>
+<pre><code class="bash"><span class="built_in">cd</span> themes/osidian
+git pull</code></pre>
+<h2 id="Related"><a href="#Related" class="headerlink" title="Related"></a>Related</h2><p>I have made a <a href="https://typora.io/" target="_blank" rel="noopener"><code>Typro</code></a> theme <a href="https://github.com/TriDiamond/typro-theme-obsidian" target="_blank" rel="noopener"><code>Obsidian</code></a> especially for this blog theme.</p>
