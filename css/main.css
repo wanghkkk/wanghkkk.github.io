@@ -834,6 +834,12 @@ pre .javascript .function {
 .post-body .note.danger h6 {
   color: #d9534f;
 }
+.pdfobject-container {
+  height: 500px;
+  overflow: auto;
+  position: relative;
+  width: 100%;
+}
 .pagination .prev,
 .pagination .next,
 .pagination .page-number,
@@ -946,7 +952,7 @@ pre .javascript .function {
 }
 .main-inner {
   margin: 0 auto;
-  width: calc(100% - 20px);
+  width: calc(100% - 26.666666666666668px);
 }
 @media (min-width: 1200px) {
   .main-inner {
@@ -955,7 +961,7 @@ pre .javascript .function {
 }
 @media (min-width: 1600px) {
   .main-inner {
-    width: 73%;
+    width: 91%;
   }
 }
 .header {
@@ -964,7 +970,7 @@ pre .javascript .function {
 .header-inner {
   margin: 0 auto;
   position: relative;
-  width: calc(100% - 20px);
+  width: calc(100% - 26.666666666666668px);
 }
 @media (min-width: 1200px) {
   .header-inner {
@@ -973,7 +979,7 @@ pre .javascript .function {
 }
 @media (min-width: 1600px) {
   .header-inner {
-    width: 73%;
+    width: 91%;
   }
 }
 .headband {
@@ -1223,7 +1229,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #d561f2;
+  background: #12ff96;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -1460,7 +1466,7 @@ pre .javascript .function {
   box-sizing: border-box;
   margin: 0 auto;
   text-align: center;
-  width: calc(100% - 20px);
+  width: calc(100% - 26.666666666666668px);
 }
 @media (min-width: 1200px) {
   .footer-inner {
@@ -1469,7 +1475,7 @@ pre .javascript .function {
 }
 @media (min-width: 1600px) {
   .footer-inner {
-    width: 73%;
+    width: 91%;
   }
 }
 .with-love {
@@ -2280,7 +2286,7 @@ ul.breadcrumb li + li:last-child {
 .header {
   margin: 0 auto;
   position: relative;
-  width: calc(100% - 20px);
+  width: calc(100% - 26.666666666666668px);
 }
 @media (min-width: 1200px) {
   .header {
@@ -2289,7 +2295,7 @@ ul.breadcrumb li + li:last-child {
 }
 @media (min-width: 1600px) {
   .header {
-    width: 73%;
+    width: 91%;
   }
 }
 @media (max-width: 991px) {
