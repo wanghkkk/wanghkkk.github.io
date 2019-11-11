@@ -1,141 +1,293 @@
-
 <!DOCTYPE html>
-<html lang="zh-CN" class="loading">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>markdown 语法参考 - Knner.Wang&#39;s Blog</title>
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="google" content="notranslate" />
-    <meta name="keywords" content="Knner.Wang,"> 
-    <meta name="description" content="Knner.Wang&#39;s Blog,for sharing IT technology and also my study notes.,Markdown 编辑器有很多，可以用vscode，typora，这里使用typora这个软件，markdown格式自动渲染，非常的不错。
-整体目录：Hexo 内无法显示，参考右侧的目录
-[toc],"> 
-    <meta name="author" content="Knner.Wang"> 
-    <link rel="alternative" href="atom.xml" title="Knner.Wang&#39;s Blog" type="application/atom+xml"> 
-    <link rel="icon" href="/img/favicon.png"> 
-    <link href="/font/Rubik-Bold-kern-latin.woff2" as="font" type="font/woff2" crossorigin="">
-    <link href="/font/Rubik-Regular-kern-latin.woff2" as="font" type="font/woff2" crossorigin="">
-    <link rel="stylesheet" href="//at.alicdn.com/t/font_1429596_nuy6s3evgdk.css">
-    <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.7.2/animate.min.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/css/share.min.css">
-    <link rel="stylesheet" href="/css/obsidian.css">
-    <link rel="stylesheet" href="/css/ball-atom.min.css">
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="Markdown 编辑器有很多，可以用vscode，typora，这里使用typora这个软件，markdown格式自动渲染，非常的不错。整体目录Hexo 内无法显示，参考右侧的目录[toc]Typora 链接官网：https:&#x2F;&#x2F;typora.io文档：http:&#x2F;&#x2F;support.typora.ioTypora 安装下载并安装Typora：WindowsMacLinux安装步骤下一步即可。下载">
+<meta name="keywords" content="markdown">
+<meta property="og:type" content="article">
+<meta property="og:title" content="markdown 语法参考">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;11&#x2F;05&#x2F;typora-markdown.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="Markdown 编辑器有很多，可以用vscode，typora，这里使用typora这个软件，markdown格式自动渲染，非常的不错。整体目录Hexo 内无法显示，参考右侧的目录[toc]Typora 链接官网：https:&#x2F;&#x2F;typora.io文档：http:&#x2F;&#x2F;support.typora.ioTypora 安装下载并安装Typora：WindowsMacLinux安装步骤下一步即可。下载">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;typora-export.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;headers.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;task.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;math.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;footnotes.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;inline-title.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;markdown-kuozhan.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;inline-math.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;xb.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;sb.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;gl.jpg">
+<meta property="og:updated_time" content="2019-11-10T11:34:14.457Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;typora-export.jpg">
+
+<link rel="canonical" href="https://knner.wang/2019/11/05/typora-markdown.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>markdown 语法参考 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
 </head>
 
-<body class="loading">
-    <div class="la-ball-atom la-2x">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
     </div>
-    <span id="config-title" style="display:none">Knner.Wang&#39;s Blog</span>
-    <div id="loader"></div>
-    <div id="single">
-    <div class="scrollbar gradient-bg-rev"></div>
-<div id="top" style="display: block;">
-    <div class="bar" style="width: 0;"></div>
-    <a id="home-icon" class="image-icon icon-home iconfont animated fadeIn" href="javascript:;" data-url="https://knner.wang"></a>
-    <div id="play-icon" title="Play/Pause" class="iconfont icon-play animated fadeIn"></div>
-    <h3 class="subtitle">markdown 语法参考</h3>
-    <div class="social">
-<!--        <div class="like-icon">-->
-<!--            <a href="javascript:;" class="likeThis active"><span class="icon-like"></span><span class="count">76</span></a>-->
-<!--        </div>-->
-        <div>
-            <div class="share animated fadeIn">
-                
-                    <a href="javascript:;" class="iconfont icon-share1"></a>
-                    <div class="share-component-cc" data-disabled="facebook,douban,linkedin,diandian,tencent,google"></div>
-                
-            </div>
-        </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
+  </div>
 </div>
 
-    <div class="section">
-        <div class= article-header-wrapper>
-    <div class="article-header">
-        <div class="article-cover animated fadeIn" style="
-            animation-delay: 600ms;
-            animation-duration: 1.2s;
-            background-image: 
-                radial-gradient(ellipse closest-side, rgba(0, 0, 0, 0.65), #100e17),
-                url(/img/cover.jpg);">
-        </div>
-        <div class="else">
-            <p class="animated fadeInDown">
-                
-                    <a href="/categories/typora"><b>「 </b>TYPORA<b> 」</b></a>
-                
-                十一月 05, 2019
-            </p>
-            <h3 class="post-title animated fadeInDown"><a href="/2019/11/05/typora-markdown.html" title="markdown 语法参考" class="">markdown 语法参考</a></h3>
-            
-                <p class="post-count animated fadeInDown">
-                    
-                        <span>
-                        <b class="iconfont icon-text2"></b> <i>文章字数</i>
-                        15k
-                    </span>
-                    
-                    
-                        <span>
-                        <b class="iconfont icon-timer__s"></b> <i>阅读约需</i>
-                        13 mins.
-                    </span>
-                    
-                    
-                    
-                        <span id="busuanzi_container_page_pv">
-                            <b class="iconfont icon-read"></b> <i>阅读次数</i>
-                            <span id="busuanzi_value_page_pv">0</span>
-                        </span>
-                    
-                </p>
-            
-            
-                <ul class="animated fadeInDown post-tags-list" itemprop="keywords"><li class="animated fadeInDown post-tags-list-item"><a class="animated fadeInDown post-tags-list-link" href="/tags/markdown/" rel="tag">markdown</a></li></ul>
-            
-        </div>
-    </div>
-</div>
 
-<div class="screen-gradient-after">
-    <div class="screen-gradient-content">
-        <div class="screen-gradient-content-inside">
-            <div class="bold-underline-links screen-gradient-sponsor">
-                <p>
-                    <span>markdown 语法参考，大部分是通用的语法，Hexo不适用的已经标注</span>
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
 
-<div class="article">
-    <div class='main'>
-        <div class="content markdown animated fadeIn slower">
-            <p>Markdown 编辑器有很多，可以用vscode，typora，这里使用typora这个软件，markdown格式自动渲染，非常的不错。</p>
-<p>整体目录：Hexo 内无法显示，参考右侧的目录</p>
-<p>[toc]</p>
-<h2 id="Typora-链接"><a href="#Typora-链接" class="headerlink" title="Typora 链接"></a>Typora 链接</h2><p>官网：</p>
-<p><a href="https://typora.io" target="_blank" rel="noopener">https://typora.io</a></p>
-<p>文档：</p>
-<p><a href="http://support.typora.io" target="_blank" rel="noopener">http://support.typora.io</a></p>
-<h2 id="Typora-安装"><a href="#Typora-安装" class="headerlink" title="Typora 安装"></a>Typora 安装</h2><h3 id="下载并安装Typora："><a href="#下载并安装Typora：" class="headerlink" title="下载并安装Typora："></a>下载并安装Typora：</h3><p><a href="https://typora.io/#windows" target="_blank" rel="noopener">Windows</a></p>
-<p><a href="https://typora.io/download/Typora.dmg" target="_blank" rel="noopener">Mac</a></p>
-<p><a href="https://typora.io/#linux" target="_blank" rel="noopener">Linux</a></p>
-<p>安装步骤下一步即可。</p>
-<h3 id="下载并安装Pandoc-typora导出的时候使用，如果不需要导出则不需要安装-："><a href="#下载并安装Pandoc-typora导出的时候使用，如果不需要导出则不需要安装-：" class="headerlink" title="下载并安装Pandoc(typora导出的时候使用，如果不需要导出则不需要安装)："></a>下载并安装Pandoc(typora导出的时候使用，如果不需要导出则不需要安装)：</h3><p><a href="http://support.typora.io/Install-and-Use-Pandoc/" target="_blank" rel="noopener">官网参考</a></p>
-<p>Typora支持的导出格式如下：</p>
-<p><img src="/images/typora-markdown/typora-export.jpg" alt="typora导出格式"></p>
-<p><a href="https://github.com/jgm/pandoc" target="_blank" rel="noopener">Pandoc GitHub</a></p>
-<p><a href="https://github.com/jgm/pandoc/releases/latest" target="_blank" rel="noopener">Pandoc下载</a>，选择对应版本下载安装即可</p>
-<h2 id="Markdown-语法"><a href="#Markdown-语法" class="headerlink" title="Markdown 语法"></a>Markdown 语法</h2><p><a href="http://support.typora.io/Markdown-Reference/" target="_blank" rel="noopener">官网参考</a></p>
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">2</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        
+            
+  <li class="menu-item menu-item-docs">
+
+    <a href="/docs/" rel="section"><i class="fa fa-fw fa-book"></i>Docs</a>
+
+  </li>
+
+
+      
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/05/typora-markdown.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          markdown 语法参考
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-05 09:47:03" itemprop="dateCreated datePublished" datetime="2019-11-05T09:47:03+08:00">2019-11-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-11-10 19:34:14" itemprop="dateModified" datetime="2019-11-10T19:34:14+08:00">2019-11-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/typora/" itemprop="url" rel="index">
+                    <span itemprop="name">typora</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/typora/markdown/" itemprop="url" rel="index">
+                    <span itemprop="name">markdown</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Markdown 编辑器有很多，可以用vscode，typora，这里使用typora这个软件，markdown格式自动渲染，非常的不错。</p><h2 id="整体目录"><a href="#整体目录" class="headerlink" title="整体目录"></a>整体目录</h2><p>Hexo 内无法显示，参考右侧的目录</p><p>[toc]</p><h2 id="Typora-链接"><a href="#Typora-链接" class="headerlink" title="Typora 链接"></a>Typora 链接</h2><p>官网：</p><p><a href="https://typora.io" target="_blank" rel="noopener">https://typora.io</a></p><p>文档：</p><p><a href="http://support.typora.io" target="_blank" rel="noopener">http://support.typora.io</a></p><h2 id="Typora-安装"><a href="#Typora-安装" class="headerlink" title="Typora 安装"></a>Typora 安装</h2><h3 id="下载并安装Typora："><a href="#下载并安装Typora：" class="headerlink" title="下载并安装Typora："></a>下载并安装Typora：</h3><p><a href="https://typora.io/#windows" target="_blank" rel="noopener">Windows</a></p><p><a href="https://typora.io/download/Typora.dmg" target="_blank" rel="noopener">Mac</a></p><p><a href="https://typora.io/#linux" target="_blank" rel="noopener">Linux</a></p><p>安装步骤下一步即可。</p><h3 id="下载并安装Pandoc："><a href="#下载并安装Pandoc：" class="headerlink" title="下载并安装Pandoc："></a>下载并安装Pandoc：</h3><p>typora导出的时候使用，如果不需要导出则不需要安装。<a href="http://support.typora.io/Install-and-Use-Pandoc/" target="_blank" rel="noopener">官网参考</a></p><p>Typora支持的导出格式如下：</p><p><img src="/images/typora-markdown/typora-export.jpg" alt="typora导出格式"></p><p><a href="https://github.com/jgm/pandoc" target="_blank" rel="noopener">Pandoc GitHub</a></p><p><a href="https://github.com/jgm/pandoc/releases/latest" target="_blank" rel="noopener">Pandoc下载</a>，选择对应版本下载安装即可</p><h2 id="Markdown-语法"><a href="#Markdown-语法" class="headerlink" title="Markdown 语法"></a>Markdown 语法</h2><a id="more"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p><a href="http://support.typora.io/Markdown-Reference/" target="_blank" rel="noopener">官网参考</a></p>
 <p>最原始的Markdown格式<a href="http://daringfireball.net/projects/markdown/syntax" target="_blank" rel="noopener">参考</a>, Typora使用的是<a href="https://help.github.com/cn/github/writing-on-github" target="_blank" rel="noopener">GitHub Flavored Markdown</a>。</p>
 <h3 id="块-（Block-Elements）"><a href="#块-（Block-Elements）" class="headerlink" title="块 （Block Elements）"></a>块 （Block Elements）</h3><blockquote>
 <p>Element<br>英 /ˈelɪmənt/  美 /ˈelɪmənt/  全球(英国)<br>n. 元素；要素；原理；成分；自然环境<br>n. (Element)人名；(德)埃勒门特；(英)埃利门特<br>复数 elements</p>
@@ -215,11 +367,11 @@
 - [x] completed</code></pre><p>显示效果如下：你可以点击前边的方块，来完成具体项。</p>
 <hr>
 <ul>
-<li><input disabled="" type="checkbox"> a task list item</li>
-<li><input disabled="" type="checkbox"> list syntax required</li>
-<li><input disabled="" type="checkbox"> normal <strong>formatting</strong>, @mentions, #1234 refs</li>
-<li><input disabled="" type="checkbox"> incomplete</li>
-<li><input checked="" disabled="" type="checkbox"> completed</li>
+<li><input disabled type="checkbox"> a task list item</li>
+<li><input disabled type="checkbox"> list syntax required</li>
+<li><input disabled type="checkbox"> normal <strong>formatting</strong>, @mentions, #1234 refs</li>
+<li><input disabled type="checkbox"> incomplete</li>
+<li><input checked disabled type="checkbox"> completed</li>
 </ul>
 <hr>
 <p>备注：有的markdown解释器可能无法识别，Hexo内显示正常，贴图如下：</p>
@@ -355,6 +507,56 @@ typora-root-url: ..
 <p><a href="http://example.net/" target="_blank" rel="noopener">This link</a> has no title attribute. </p>
 <p>Title的效果图：</p>
 <p><img src="/images/typora-markdown/inline-title.jpg" alt="inline-title"></p>
+<h6 id="问题："><a href="#问题：" class="headerlink" title="问题："></a>问题：</h6><p>如何增加链接跳转到本文内的其他位置呢？</p>
+<p>Markdown会自动给每一个h1-h6标题生成一个锚，其<code>id</code>就是<strong>标题内容</strong>。目录树中的每一项都是一个跳转链接，点击后就会跳转到其对应的锚点（即标题所在位置）</p>
+<p>两种方式：</p>
+<pre><code class="html">方式1：通过Markdown语法，推荐
+[跳转到目录](#整体目录)
+
+方式2：通过HTML语法：
+&lt;a href=&quot;#整体目录&quot;&gt;跳转到目录&lt;/a&gt;</code></pre>
+<p>显示效果：</p>
+<hr>
+<p>方式1：通过Markdown语法：<br><a href="#整体目录">跳转到目录</a></p>
+<p>方式2：通过HTML语法：<br><a href="#整体目录">跳转到目录</a></p>
+<hr>
+<h6 id="那么问题又来了"><a href="#那么问题又来了" class="headerlink" title="那么问题又来了"></a>那么问题又来了</h6><p>如果我不想跳转到某个标题呢，只想跳转到某段话呢？</p>
+<pre><code class="html">对于要跳转到的地方，需要定义好锚点
+&lt;span id=&quot;1&quot;&gt;跳转到这里1&lt;/span&gt;
+
+写超链接，定义跳转到哪里
+[跳转到1](#1)
+&lt;a href=&quot;#1&quot;&gt;跳转到1&lt;/a&gt;</code></pre>
+<p>显示效果：</p>
+<p><strong>注意</strong>: Typora不支持这种方式：但是Hexo网页上是可以的。</p>
+<hr>
+<p>对于要跳转到的地方，需要定义好锚点<br><span id="jump">跳转到这里1</span></p>
+<p>写超链接，定义跳转到哪里<br><a href="#jump">跳转到1</a><br><a href="#jump">跳转到1</a></p>
+<hr>
+<h6 id="另一个问题："><a href="#另一个问题：" class="headerlink" title="另一个问题："></a>另一个问题：</h6><p>如何跳转到其他文件呢？</p>
+<pre><code>[使用hexo + github pages 创建博客](my-first-blog.md)</code></pre><p>显示效果：</p>
+<hr>
+<p><a href="my-first-blog.md">使用hexo + github pages 创建博客</a></p>
+<hr>
+<p>原理：他会在当前目录内找圆括号内的文件，然后跳转打开。</p>
+<p><strong>注意</strong>：上面的链接在Hexo内无法打开，因为<code>hexo gen</code>或者<code>hexo dep</code>或者<code>hexp serv</code>，都会将xxx.md文件渲染成xxx.html。<em>_config.yml</em> 内定义的。这种方式只能跳转到和本文件同一目录的其他文件上。</p>
+<p>对于hexo如果需要跳转到其他的文章，可能不是同一时间内写的。</p>
+<p>本文的链接是：<a href="https://knner.wang/2019/11/05/typora-markdown.html">https://knner.wang/2019/11/05/typora-markdown.html</a></p>
+<p>可能要跳转到：<a href="https://knner.wang/2019/11/01/my-first-blog.html">https://knner.wang/2019/11/01/my-first-blog.html</a></p>
+<p>如何在markdown内增加链接呢？这就需要用到了Hexo的tag功能：</p>
+<p><a href="https://hexo.io/zh-cn/docs/tag-plugins" target="_blank" rel="noopener">官网参考</a></p>
+<pre><code>引用其他文章的链接。
+{% post_path slug %}
+{% post_link slug [title] [escape] %}
+在使用此标签时可以忽略文章文件所在的路径或者文章的永久链接信息、如语言、日期。
+例如，在文章中使用 {% post_link how-to-bake-a-cake %} 时，只需有一个名为 how-to-bake-a-cake.md 的文章文件即可。即使这个文件位于站点文件夹的 source/posts/2015-02-my-family-holiday 目录下、或者文章的永久链接是 2018/en/how-to-bake-a-cake，都没有影响。
+默认链接文字是文章的标题，你也可以自定义要显示的文本。此时不应该使用 Markdown 语法 []()。
+
+例如：
+跳转到&quot;使用hexo + github pages 创建博客&quot;这篇文章：
+{% post_link my-first-blog 使用hexo + github pages 创建博客 %}</code></pre><p>效果：</p>
+<a href="/2019/11/01/my-first-blog.html" title="使用hexo + github pages 创建博客">使用hexo + github pages 创建博客</a>
+
 <h5 id="Reference-Links"><a href="#Reference-Links" class="headerlink" title="Reference Links"></a>Reference Links</h5><p>格式：[内容][链接内容]，如下定义：</p>
 <pre><code>This is [an example][id] reference-style link.
 
@@ -413,13 +615,13 @@ ___haha___</code></pre><p>显示效果如下：</p>
 <p> <u>Underline</u> </p>
 <hr>
 <h3 id="下面是Markdown的扩展语法"><a href="#下面是Markdown的扩展语法" class="headerlink" title="下面是Markdown的扩展语法"></a>下面是Markdown的扩展语法</h3><p>Markdown的扩展语法，需要在Typora内开启，开启方式：文件–偏好设置–Markdown–勾选需要的扩展语法，如下图：</p>
-<p><img src="/images/typora-markdown/markdown-kuozhan.jpg" alt=""></p>
+<p><img src="/images/typora-markdown/markdown-kuozhan.jpg" alt></p>
 <p>简单介绍：</p>
 <h4 id="内联公式："><a href="#内联公式：" class="headerlink" title="内联公式："></a>内联公式：</h4><p>使用单个$将公式包裹即可：</p>
 <pre><code>$\lim_{x \to \infty} \exp(-x) = 0$</code></pre><p>显示效果：</p>
 <p>$\lim_{x \to \infty} \exp(-x) = 0$</p>
 <p>Hexo无法正常显示，贴图如下：</p>
-<p><img src="/images/typora-markdown/inline-math.jpg" alt=""></p>
+<p><img src="/images/typora-markdown/inline-math.jpg" alt></p>
 <h4 id="下标（Subscript）"><a href="#下标（Subscript）" class="headerlink" title="下标（Subscript）"></a>下标（Subscript）</h4><p>使用一个波浪线~(Shift + (数字1左边的键，tab键上边的键))将下标包裹：</p>
 <pre><code>H~2~O</code></pre><p>显示效果：</p>
 <p>H<del>2</del>O</p>
@@ -441,206 +643,261 @@ ___haha___</code></pre><p>显示效果如下：</p>
 <pre><code>&lt;span style=&quot;color:red&quot;&gt;this text is red&lt;/span&gt;</code></pre><p>显示效果：</p>
 <p><span style="color:red">this text is red</span></p>
 <p>详细的请参考<a href="http://support.typora.io/HTML/" target="_blank" rel="noopener">HTML</a></p>
+<h3 id="YAML-Copy-Test"><a href="#YAML-Copy-Test" class="headerlink" title="YAML Copy Test"></a>YAML Copy Test</h3><pre><code class="yaml">apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+nodeRegistration:
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+  kubeletExtraArgs:
+    cloud-provider: aws
+---
+apiServer:
+  timeoutForControlPlane: 4m0s
+  extraArgs:
+    cloud-provider: aws
+    runtime-config: &quot;api/all=true&quot;
+    audit-log-path: /var/log/kubernetes/audit.log
+apiVersion: kubeadm.k8s.io/v1beta2
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controllerManager:
+  extraArgs:
+    cloud-provider: aws
+    horizontal-pod-autoscaler-use-rest-clients: &quot;true&quot;
+    horizontal-pod-autoscaler-sync-period: &quot;10s&quot;
+    node-monitor-grace-period: &quot;10s&quot;
+dns:
+  type: CoreDNS
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+imageRepository: k8s.gcr.io
+kind: ClusterConfiguration
+kubernetesVersion: v1.16.1
+controlPlaneEndpoint: 172.17.0.180:64443
+networking:
+  dnsDomain: cluster.local
+  podSubnet: 10.101.0.0/16
+  serviceSubnet: 10.100.0.0/16
+scheduler: {}
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+bindAddress: 0.0.0.0
+mode: &quot;ipvs&quot;
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+address: 0.0.0.0
+cgroupDriver: systemd
+clusterDNS:
+- 10.100.0.10
+maxPods: 110
+staticPodPath: /etc/kubernetes/manifests</code></pre>
 
-            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
-            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
-                <source type="audio/mpeg" src="">
-            </audio>
-            
-                <ul id="audio-list" style="display:none">
-                    
-                        
-                            <li title='0' data-url='/statics/chengdu.mp3'></li>
-                        
-                    
-                </ul>
-            
-            
-                
-    <div id='gitalk-container' class="comment link"
-        data-ae='true'
-        data-ci='3c0b92836b994c2c8bee'
-        data-cs='1f2ad023babe37a80e92f4f6c42854ba2fc691a7'
-        data-r='wanghkkk.github.io'
-        data-o='wanghkkk'
-        data-a='wanghkkk'
-        data-d=''
-    >留言</div>
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2019/11/05/typora-markdown.html" title="markdown 语法参考">https://knner.wang/2019/11/05/typora-markdown.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
 
 
-            
-            
-        </div>
-        <div class="sidebar">
-            <div class="box animated fadeInRight">
-                <div class="subbox">
-                    <img src="https://s2.ax1x.com/2019/11/02/KqbqXT.jpg" height=300 width=300></img>
-                    <p>Knner.Wang</p>
-                    <span>Think like an artist, develop like an artisan</span>
-                    <dl>
-                        <dd><a href="https://github.com/wanghkkk" target="_blank"><span class=" iconfont icon-github"></span></a></dd>
-                        <dd><a href="https://twitter.com/TriDiamond6" target="_blank"><span class=" iconfont icon-twitter"></span></a></dd>
-                        <dd><a href="https://stackoverflow.com/users/7602324/tridiamond?tab=profile" target="_blank"><span class=" iconfont icon-stack-overflow"></span></a></dd>
-                    </dl>
-                </div>
-                <ul>
-                    <li><a href="/">3 <p>文章</p></a></li>
-                    <li><a href="/categories">3 <p>分类</p></a></li>
-                    <li><a href="/tags">2 <p>标签</p></a></li>
-                </ul>
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/markdown/" rel="tag"># markdown</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/11/01/my-first-blog.html" rel="next" title="使用hexo + github pages 创建博客">
+                  <i class="fa fa-chevron-left"></i> 使用hexo + github pages 创建博客
+                </a>
             </div>
-            
-                
-                
-                    <div class="box sticky animated fadeInRight faster">
-                        <div id="toc" class="subbox">
-                            <h4>目录</h4>
-                            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Typora-链接"><span class="toc-number">1.</span> <span class="toc-text">Typora 链接</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Typora-安装"><span class="toc-number">2.</span> <span class="toc-text">Typora 安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#下载并安装Typora："><span class="toc-number">2.1.</span> <span class="toc-text">下载并安装Typora：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#下载并安装Pandoc-typora导出的时候使用，如果不需要导出则不需要安装-："><span class="toc-number">2.2.</span> <span class="toc-text">下载并安装Pandoc(typora导出的时候使用，如果不需要导出则不需要安装)：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Markdown-语法"><span class="toc-number">3.</span> <span class="toc-text">Markdown 语法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#块-（Block-Elements）"><span class="toc-number">3.1.</span> <span class="toc-text">块 （Block Elements）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#段落和换行符（Paragraph-and-line-breaks）"><span class="toc-number">3.1.1.</span> <span class="toc-text">段落和换行符（Paragraph and line breaks）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#标题-（Headers）"><span class="toc-number">3.1.2.</span> <span class="toc-text">标题 （Headers）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#引用（Blockquotes）"><span class="toc-number">3.1.3.</span> <span class="toc-text">引用（Blockquotes）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#列表（lists）"><span class="toc-number">3.1.4.</span> <span class="toc-text">列表（lists）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#任务列表（Task-List）"><span class="toc-number">3.1.5.</span> <span class="toc-text">任务列表（Task List）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#代码块（Code-Blocks）"><span class="toc-number">3.1.6.</span> <span class="toc-text">代码块（Code Blocks）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#数学公式（Math-Blocks）"><span class="toc-number">3.1.7.</span> <span class="toc-text">数学公式（Math Blocks）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#表格（Tables）"><span class="toc-number">3.1.8.</span> <span class="toc-text">表格（Tables）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#脚注（Footnotes）"><span class="toc-number">3.1.9.</span> <span class="toc-text">脚注（Footnotes）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#水平线（Horizontal）"><span class="toc-number">3.1.10.</span> <span class="toc-text">水平线（Horizontal）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#YAML-前页（Front-Matter）"><span class="toc-number">3.1.11.</span> <span class="toc-text">YAML 前页（Front Matter）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#目录（Table-of-Contents：TOC）"><span class="toc-number">3.1.12.</span> <span class="toc-text">目录（Table of Contents：TOC）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#行内元素（Span-Elements）"><span class="toc-number">3.2.</span> <span class="toc-text">行内元素（Span Elements）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#链接（Links）"><span class="toc-number">3.2.1.</span> <span class="toc-text">链接（Links）</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Inline："><span class="toc-number">3.2.1.1.</span> <span class="toc-text">Inline：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Reference-Links"><span class="toc-number">3.2.1.2.</span> <span class="toc-text">Reference Links</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#斜体"><span class="toc-number">3.2.2.</span> <span class="toc-text">斜体</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#粗体（Strong）"><span class="toc-number">3.2.3.</span> <span class="toc-text">粗体（Strong）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#加粗斜体"><span class="toc-number">3.2.4.</span> <span class="toc-text">加粗斜体</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#代码（code）"><span class="toc-number">3.2.5.</span> <span class="toc-text">代码（code）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#删除线（Strikethrough）"><span class="toc-number">3.2.6.</span> <span class="toc-text">删除线（Strikethrough）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#下划线（Unerlines）"><span class="toc-number">3.2.7.</span> <span class="toc-text">下划线（Unerlines）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#下面是Markdown的扩展语法"><span class="toc-number">3.3.</span> <span class="toc-text">下面是Markdown的扩展语法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#内联公式："><span class="toc-number">3.3.1.</span> <span class="toc-text">内联公式：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#下标（Subscript）"><span class="toc-number">3.3.2.</span> <span class="toc-text">下标（Subscript）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#上标（Superscript）"><span class="toc-number">3.3.3.</span> <span class="toc-text">上标（Superscript）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#高亮（Highlight）"><span class="toc-number">3.3.4.</span> <span class="toc-text">高亮（Highlight）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HTML"><span class="toc-number">3.4.</span> <span class="toc-text">HTML</span></a></li></ol></li></ol>
-                        </div>
-                    </div>
-                
-            
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
         </div>
-    </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#整体目录"><span class="nav-number">1.</span> <span class="nav-text">整体目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Typora-链接"><span class="nav-number">2.</span> <span class="nav-text">Typora 链接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Typora-安装"><span class="nav-number">3.</span> <span class="nav-text">Typora 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#下载并安装Typora："><span class="nav-number">3.1.</span> <span class="nav-text">下载并安装Typora：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下载并安装Pandoc："><span class="nav-number">3.2.</span> <span class="nav-text">下载并安装Pandoc：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Markdown-语法"><span class="nav-number">4.</span> <span class="nav-text">Markdown 语法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#块-（Block-Elements）"><span class="nav-number">4.1.</span> <span class="nav-text">块 （Block Elements）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#段落和换行符（Paragraph-and-line-breaks）"><span class="nav-number">4.1.1.</span> <span class="nav-text">段落和换行符（Paragraph and line breaks）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#标题-（Headers）"><span class="nav-number">4.1.2.</span> <span class="nav-text">标题 （Headers）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#引用（Blockquotes）"><span class="nav-number">4.1.3.</span> <span class="nav-text">引用（Blockquotes）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列表（lists）"><span class="nav-number">4.1.4.</span> <span class="nav-text">列表（lists）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#任务列表（Task-List）"><span class="nav-number">4.1.5.</span> <span class="nav-text">任务列表（Task List）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码块（Code-Blocks）"><span class="nav-number">4.1.6.</span> <span class="nav-text">代码块（Code Blocks）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数学公式（Math-Blocks）"><span class="nav-number">4.1.7.</span> <span class="nav-text">数学公式（Math Blocks）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#表格（Tables）"><span class="nav-number">4.1.8.</span> <span class="nav-text">表格（Tables）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#脚注（Footnotes）"><span class="nav-number">4.1.9.</span> <span class="nav-text">脚注（Footnotes）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#水平线（Horizontal）"><span class="nav-number">4.1.10.</span> <span class="nav-text">水平线（Horizontal）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#YAML-前页（Front-Matter）"><span class="nav-number">4.1.11.</span> <span class="nav-text">YAML 前页（Front Matter）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#目录（Table-of-Contents：TOC）"><span class="nav-number">4.1.12.</span> <span class="nav-text">目录（Table of Contents：TOC）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#行内元素（Span-Elements）"><span class="nav-number">4.2.</span> <span class="nav-text">行内元素（Span Elements）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#链接（Links）"><span class="nav-number">4.2.1.</span> <span class="nav-text">链接（Links）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Inline："><span class="nav-number">4.2.1.1.</span> <span class="nav-text">Inline：</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#问题："><span class="nav-number">4.2.1.1.1.</span> <span class="nav-text">问题：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#那么问题又来了"><span class="nav-number">4.2.1.1.2.</span> <span class="nav-text">那么问题又来了</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#另一个问题："><span class="nav-number">4.2.1.1.3.</span> <span class="nav-text">另一个问题：</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Reference-Links"><span class="nav-number">4.2.1.2.</span> <span class="nav-text">Reference Links</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#斜体"><span class="nav-number">4.2.2.</span> <span class="nav-text">斜体</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#粗体（Strong）"><span class="nav-number">4.2.3.</span> <span class="nav-text">粗体（Strong）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#加粗斜体"><span class="nav-number">4.2.4.</span> <span class="nav-text">加粗斜体</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码（code）"><span class="nav-number">4.2.5.</span> <span class="nav-text">代码（code）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除线（Strikethrough）"><span class="nav-number">4.2.6.</span> <span class="nav-text">删除线（Strikethrough）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#下划线（Unerlines）"><span class="nav-number">4.2.7.</span> <span class="nav-text">下划线（Unerlines）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下面是Markdown的扩展语法"><span class="nav-number">4.3.</span> <span class="nav-text">下面是Markdown的扩展语法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#内联公式："><span class="nav-number">4.3.1.</span> <span class="nav-text">内联公式：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#下标（Subscript）"><span class="nav-number">4.3.2.</span> <span class="nav-text">下标（Subscript）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#上标（Superscript）"><span class="nav-number">4.3.3.</span> <span class="nav-text">上标（Superscript）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#高亮（Highlight）"><span class="nav-number">4.3.4.</span> <span class="nav-text">高亮（Highlight）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTML"><span class="nav-number">4.4.</span> <span class="nav-text">HTML</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#YAML-Copy-Test"><span class="nav-number">4.5.</span> <span class="nav-text">YAML Copy Test</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
 </div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
 
 
+
+      </div>
+
     </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
 </div>
-    <div id="back-to-top" class="animated fadeIn faster">
-        <div class="flow"></div>
-        <span class="percentage animated fadeIn faster">0%</span>
-        <span class="iconfont icon-top02 animated fadeIn faster"></span>
-    </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
 </body>
-<footer>
-    <p class="copyright" id="copyright">
-        &copy; 2019
-        <span class="gradient-text">
-            Knner.Wang
-        </span>.
-        Powered by <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a>
-        Theme
-        <span class="gradient-text">
-            <a href="https://github.com/TriDiamond/hexo-theme-obsidian" title="Obsidian" target="_blank" rel="noopener">Obsidian</a>
-        </span>
-        <small><a href="https://github.com/TriDiamond/hexo-theme-obsidian/blob/master/CHANGELOG.md" title="v1.3.4" target="_blank" rel="noopener">v1.3.4</a></small>
-    </p>
-</footer>
-
-    <link rel="stylesheet" href="//unpkg.com/gitalk/dist/gitalk.css">
-    <script src="//unpkg.com/gitalk/dist/gitalk.min.js"></script>
-
-<script src="//cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
-<script src="/js/plugin.js"></script>
-<script src="/js/obsidian.js"></script>
-<script src="/js/jquery.truncate.js"></script>
-<script src="//cdn.bootcss.com/typed.js/2.0.10/typed.min.js"></script>
-<script src="//cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/js/social-share.min.js"></script>
-
-
-    <script src="/js/busuanzi.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            if ($('span[id^="busuanzi_"]').length) {
-                initialBusuanzi();
-            }
-        });
-    </script>
-
-
-<link rel="stylesheet" href="//cdn.bootcss.com/photoswipe/4.1.3/photoswipe.min.css">
-<link rel="stylesheet" href="//cdn.bootcss.com/photoswipe/4.1.3/default-skin/default-skin.min.css">
-<script src="//cdn.bootcss.com/photoswipe/4.1.3/photoswipe.min.js"></script>
-<script src="//cdn.bootcss.com/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
-
-<!-- Root element of PhotoSwipe. Must have class pswp. -->
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-    <!-- Background of PhotoSwipe. 
-         It's a separate element as animating opacity is faster than rgba(). -->
-    <div class="pswp__bg"></div>
-    <!-- Slides wrapper with overflow:hidden. -->
-    <div class="pswp__scroll-wrap">
-        <!-- Container that holds slides. 
-            PhotoSwipe keeps only 3 of them in the DOM to save memory.
-            Don't modify these 3 pswp__item elements, data is added later on. -->
-        <div class="pswp__container">
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-        </div>
-        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
-        <div class="pswp__ui pswp__ui--hidden">
-            <div class="pswp__top-bar">
-                <!--  Controls are self-explanatory. Order can be changed. -->
-                <div class="pswp__counter"></div>
-                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-                <button class="pswp__button pswp__button--share" title="Share"></button>
-                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
-                <!-- element will get class pswp__preloader--active when preloader is running -->
-                <div class="pswp__preloader">
-                    <div class="pswp__preloader__icn">
-                      <div class="pswp__preloader__cut">
-                        <div class="pswp__preloader__donut"></div>
-                      </div>
-                    </div>
-                </div>
-            </div>
-            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                <div class="pswp__share-tooltip"></div> 
-            </div>
-            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-            </button>
-            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-            </button>
-            <div class="pswp__caption">
-                <div class="pswp__caption__center"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-
-
-
-    <!-- Highlight.js -->
-    <link rel="stylesheet" href="/css/dracula.css">
-    <script src="//cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js">
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            document.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightBlock(block);
-            });
-        });
-    </script>
-
-
-<script>
-    function initialTyped () {
-        var typedTextEl = $('.typed-text');
-        if (typedTextEl && typedTextEl.length > 0) {
-            var typed = new Typed('.typed-text', {
-                strings: ["Think like an artist, develop like an artisan", "艺术家思维去思考问题，工匠创造精神去开发"],
-                typeSpeed: 90,
-                loop: true,
-                loopCount: Infinity,
-                backSpeed: 20,
-            });
-        }
-    }
-
-    if ($('.article-header') && $('.article-header').length) {
-        $(document).ready(function () {
-            initialTyped();
-        });
-    }
-</script>
-
-
 </html>
