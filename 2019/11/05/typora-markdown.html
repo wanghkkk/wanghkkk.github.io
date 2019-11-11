@@ -71,7 +71,7 @@
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;xb.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;sb.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;gl.jpg">
-<meta property="og:updated_time" content="2019-11-11T03:56:52.357Z">
+<meta property="og:updated_time" content="2019-11-11T04:06:38.973Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;typora-markdown&#x2F;typora-export.jpg">
 
@@ -240,7 +240,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-11-11 11:56:52" itemprop="dateModified" datetime="2019-11-11T11:56:52+08:00">2019-11-11</time>
+                <time title="修改时间：2019-11-11 12:06:38" itemprop="dateModified" datetime="2019-11-11T12:06:38+08:00">2019-11-11</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -361,12 +361,15 @@
 <p><img src="/images/typora-markdown/task.jpg" alt="任务列表"></p>
 <h4 id="代码块（Code-Blocks）"><a href="#代码块（Code-Blocks）" class="headerlink" title="代码块（Code Blocks）"></a>代码块（Code Blocks）</h4><p>使用：三个反引号(```)把代码块包裹起来，手部的反引号后面可以标明代码块的语言，markdown自动进行高亮，如下：</p>
 <p>在typora中直接键入```号，然后回车，自动触发</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Here&apos;s an example:</span><br><span class="line"></span><br><span class="line">\</span><br></pre></td></tr></table></figure>
-<p>function test() {<br>  console.log(“notice the blank line before this function?”);<br>}<br>```</p>
-<p>syntax highlighting:<br>```ruby<br>require ‘redcarpet’<br>markdown = Redcarpet.new(“Hello World!”)<br>puts markdown.to_html<br>```</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">显示效果如下：</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">Here&apos;s an example:</span><br></pre></td></tr></table></figure>
-<p>function test() {<br>  console.log(“notice the blank line before this function?”);<br>}</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">syntax highlighting:</span><br><span class="line">```ruby</span><br><span class="line">require &apos;redcarpet&apos;</span><br><span class="line">markdown = Redcarpet.new(&quot;Hello World!&quot;)</span><br><span class="line">puts markdown.to_html</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Here&apos;s an example:</span><br><span class="line"></span><br><span class="line">\`\`\`</span><br><span class="line">function test() &#123;</span><br><span class="line">  console.log(&quot;notice the blank line before this function?&quot;);</span><br><span class="line">&#125;</span><br><span class="line">\`\`\`</span><br><span class="line"></span><br><span class="line">syntax highlighting:</span><br><span class="line">\`\`\`ruby</span><br><span class="line">require &apos;redcarpet&apos;</span><br><span class="line">markdown = Redcarpet.new(&quot;Hello World!&quot;)</span><br><span class="line">puts markdown.to_html</span><br><span class="line">\`\`\`</span><br></pre></td></tr></table></figure>
+
+<p>显示效果如下：</p>
+<hr>
+<p>Here’s an example:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">function test() &#123;</span><br><span class="line">  console.log(&quot;notice the blank line before this function?&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>syntax highlighting:</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="keyword">require</span> <span class="string">'redcarpet'</span></span><br><span class="line">markdown = Redcarpet.new(<span class="string">"Hello World!"</span>)</span><br><span class="line">puts markdown.to_html</span><br></pre></td></tr></table></figure>
 
 <hr>
 <h4 id="数学公式（Math-Blocks）"><a href="#数学公式（Math-Blocks）" class="headerlink" title="数学公式（Math Blocks）"></a>数学公式（Math Blocks）</h4><p>你可以通过使用MathJax来表示LaTeX数学表达式，使用$$把数学表达式进行包裹起来：</p>
