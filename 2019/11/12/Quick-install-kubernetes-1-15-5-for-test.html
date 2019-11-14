@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。这里介绍快速安装kubernetes集群，单台master，2台worker。环境介绍本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像，采用 m4.xlarge（4C 16G）。AWS 环境有两点需要注意：             注意1：安全组需要添加一条允许当前安全组访问组">
+<meta name="keywords" content="kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用kubeadm快速安装kubernetes 1.15.5测试环境">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;11&#x2F;12&#x2F;Quick-install-kubernetes-1-15-5-for-test.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。这里介绍快速安装kubernetes集群，单台master，2台worker。环境介绍本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像，采用 m4.xlarge（4C 16G）。AWS 环境有两点需要注意：             注意1：安全组需要添加一条允许当前安全组访问组">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Quick-install-kubernetes-1-15-5-for-test&#x2F;aws-disable-check.jpg">
+<meta property="og:updated_time" content="2019-11-12T02:02:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Quick-install-kubernetes-1-15-5-for-test&#x2F;aws-disable-check.jpg">
+
+<link rel="canonical" href="https://knner.wang/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>使用kubeadm快速安装kubernetes 1.15.5测试环境 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">5</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用kubeadm快速安装kubernetes 1.15.5测试环境
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-12 10:02:02" itemprop="dateCreated datePublished" datetime="2019-11-12T10:02:02+08:00">2019-11-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。</p><p>这里介绍快速安装kubernetes集群，单台master，2台worker。</p><h2 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h2><p>本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像，采用 m4.xlarge（4C 16G）。</p><p>AWS 环境有两点需要注意：</p><div class="note danger">
+            <p>注意1：安全组需要添加一条允许当前安全组访问组内EC2的规则。</p>
+          </div><div class="note danger">
+            <p>注意2：需要关闭“源/目标检查“，路径：EC2设置–联网–源/目标检查：如下图，选择“是，请禁用”</p><p><img src="/images/Quick-install-kubernetes-1-15-5-for-test/aws-disable-check.jpg" alt></p>
+          </div><table>
+<thead>
+<tr>
+<th>IP</th>
+<th>主机名</th>
+<th>角色</th>
+<th>Docker</th>
+<th>Kubernetes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>172.17.0.7</td>
+<td>k8s01.test.awsbj.cn</td>
+<td>master01</td>
+<td>docker-ce-18.06.3</td>
+<td>1.15.5</td>
+</tr>
+<tr>
+<td>172.17.0.213</td>
+<td>k8s02.test.awsbj.cn</td>
+<td>worker01</td>
+<td>docker-ce-18.06.3</td>
+<td>1.15.5</td>
+</tr>
+<tr>
+<td>172.17.0.230</td>
+<td>k8s03.test.awsbj.cn</td>
+<td>worker02</td>
+<td>docker-ce-18.06.3</td>
+<td>1.15.5</td>
+</tr>
+</tbody></table><a id="more"></a>
+
+
+
+
+
+
+
+
+<h2 id="环境初始化"><a href="#环境初始化" class="headerlink" title="环境初始化"></a>环境初始化</h2><p>直接一条ansible即可：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ansible-playbook playbooks/roles/site.yml -e server=test_k8s -e cloud=aws -e env=dev --private-key keys/aws/dev_keyPair2_awsbj_cn.pem -b --become-method=sudo</span><br></pre></td></tr></table></figure>
+
+<div class="note info">
+            <p>这里的ansible脚本只是为了初始化安装kubernetes所需的<strong>环境</strong>，其不包含安装kubernetes集群功能。</p>
+          </div>
+
+<p>ansible 所做的事情解释：</p>
+<ul>
+<li><p>common 基础系统配置：部分为非必须</p>
+<ul>
+<li>yum 更新软件</li>
+<li>配置主机名称</li>
+<li>创建运维用账户</li>
+<li>配置limits</li>
+<li>创建标准目录</li>
+<li>配置sshd</li>
+<li>关闭SELINUX</li>
+<li>关闭防火墙</li>
+<li>配置sudo</li>
+<li>配置ldap</li>
+<li>安装jdk</li>
+<li>安装python3</li>
+</ul>
+</li>
+<li><p>docker安装配置</p>
+<ul>
+<li><p>使用Aliyun镜像源安装docker： docker-ce-18.06.3</p>
+</li>
+<li><p>配置Docker： </p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># /etc/docker/daemon.json</span><br><span class="line">&#123;</span><br><span class="line">  &quot;log-level&quot;: &quot;warn&quot;,</span><br><span class="line">  &quot;selinux-enabled&quot;: false,</span><br><span class="line">  &quot;max-concurrent-downloads&quot;: 100,</span><br><span class="line">  &quot;max-concurrent-uploads&quot;: 50,</span><br><span class="line">  &quot;live-restore&quot;: false,</span><br><span class="line">  &quot;default-shm-size&quot;: &quot;128M&quot;,</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://nxxx5.mirror.aliyuncs.com&quot;,&quot;http://exxxd.m.daocloud.io&quot;],</span><br><span class="line">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="line">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="line">  &quot;log-opts&quot;: &#123;</span><br><span class="line">    &quot;max-size&quot;: &quot;20m&quot;,</span><br><span class="line">    &quot;max-file&quot;: &quot;5&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="line">  &quot;storage-opts&quot;: [</span><br><span class="line">    &quot;overlay2.override_kernel_check=true&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">     </span><br><span class="line"># 允许FORWARD</span><br><span class="line">iptables -P FORWARD ACCEPT</span><br><span class="line">     </span><br><span class="line"># 配置sysctl</span><br><span class="line">net.bridge.bridge-nf-call-ip6tables=1</span><br><span class="line">net.bridge.bridge-nf-call-iptables=1</span><br><span class="line">net.ipv4.ip_forward=1</span><br><span class="line">vm.swappiness=0</span><br><span class="line">     </span><br><span class="line"># 增加运维账户到docker组中，能方便操作docker</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>启动docker</p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>安装配置kubernetes</p>
+<ul>
+<li><p>配置ipvs:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># /etc/sysconfig/modules/ipvs.modules</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">ipvs_modules_dir=<span class="string">"/usr/lib/modules/`uname -r`/kernel/net/netfilter/ipvs"</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> `ls <span class="variable">$ipvs_modules_dir</span> | sed  -r <span class="string">'s#(.*).ko.*#\1#'</span>`; <span class="keyword">do</span></span><br><span class="line">    /sbin/modinfo -F filename <span class="variable">$i</span>  &amp;&gt; /dev/null</span><br><span class="line">    <span class="keyword">if</span> [ $? -eq 0 ]; <span class="keyword">then</span></span><br><span class="line">        /sbin/modprobe <span class="variable">$i</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用Aliyun镜像源安装kubectl，kubeadm，kubelet指定版本</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置好kubectl，kubeadm bash自动补全</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 下载好kubernetes所需docker镜像</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>下载kubernetes所需docker镜像脚本：docker-wrapper.py，参考：<a href="/2019/11/13/docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html" title="docker.io gcr.io k8s.gcr.io quay.io 中国区源">docker.io gcr.io k8s.gcr.io quay.io 中国区源</a></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">    <span class="comment">#!/usr/bin/python</span></span><br><span class="line">    <span class="comment"># coding=utf8</span></span><br><span class="line">  </span><br><span class="line">    <span class="keyword">import</span> os</span><br><span class="line">    <span class="keyword">import</span> sys</span><br><span class="line">  </span><br><span class="line">    <span class="comment"># azure mirrors for gcr.io,k8s.gcr.io,quay.io in china</span></span><br><span class="line">    gcr_mirror = <span class="string">"gcr.azk8s.cn"</span></span><br><span class="line">    docker_mirror = <span class="string">"dockerhub.azk8s.cn"</span></span><br><span class="line">    quay_mirror = <span class="string">"quay.azk8s.cn"</span></span><br><span class="line">    </span><br><span class="line">    k8s_namespace = <span class="string">"google_containers"</span></span><br><span class="line">    </span><br><span class="line">    gcr_prefix = <span class="string">"gcr.io"</span></span><br><span class="line">special_gcr_prefix = <span class="string">"k8s.gcr.io"</span></span><br><span class="line">    quay_prefix = <span class="string">"quay.io"</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">execute_sys_cmd</span><span class="params">(cmd)</span>:</span></span><br><span class="line">        result = os.system(cmd)</span><br><span class="line">    <span class="keyword">if</span> result != <span class="number">0</span>:</span><br><span class="line">            print(cmd + <span class="string">" failed."</span>)</span><br><span class="line">            sys.exit(<span class="number">-1</span>)</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">usage</span><span class="params">()</span>:</span></span><br><span class="line">        print(<span class="string">"Usage: "</span> + sys.argv[<span class="number">0</span>] + <span class="string">" pull "</span>)</span><br><span class="line">    print(<span class="string">"Examples:"</span>)</span><br><span class="line">        print(sys.argv[<span class="number">0</span>] + <span class="string">" pull k8s.gcr.io/kube-apiserver:v1.14.1"</span>)</span><br><span class="line">        print(sys.argv[<span class="number">0</span>] + <span class="string">" pull gcr.io/google_containers/kube-apiserver:v1.14.1"</span>)</span><br><span class="line">        print(sys.argv[<span class="number">0</span>] + <span class="string">" pull quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1"</span>)</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">        <span class="keyword">if</span> len(sys.argv) != <span class="number">3</span>:</span><br><span class="line">        usage()</span><br><span class="line">            sys.exit(<span class="number">-1</span>)</span><br><span class="line">        <span class="keyword">elif</span> sys.argv[<span class="number">1</span>] != <span class="string">'pull'</span>:</span><br><span class="line">            usage()</span><br><span class="line">        sys.exit(<span class="number">-1</span>)</span><br><span class="line">    </span><br><span class="line">        <span class="comment"># image name like k8s.gcr.io/kube-apiserver:v1.14.1 or gcr.io/google_containers/kube-apiserver:v1.14.1</span></span><br><span class="line">        image = sys.argv[<span class="number">2</span>]</span><br><span class="line">        imageArray = image.split(<span class="string">"/"</span>)</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">if</span> imageArray[<span class="number">0</span>] == gcr_prefix:</span><br><span class="line">            imageArray[<span class="number">0</span>] = gcr_mirror</span><br><span class="line">    <span class="keyword">elif</span> imageArray[<span class="number">0</span>] == special_gcr_prefix:</span><br><span class="line">            imageArray[<span class="number">0</span>] = gcr_mirror</span><br><span class="line">        imageArray.insert(<span class="number">1</span>, k8s_namespace)</span><br><span class="line">        <span class="keyword">elif</span> imageArray[<span class="number">0</span>] == quay_prefix:</span><br><span class="line">            imageArray[<span class="number">0</span>] = quay_mirror</span><br><span class="line">        <span class="keyword">elif</span> len(imageArray) == <span class="number">1</span>:</span><br><span class="line">            imageArray.insert(<span class="number">0</span>, docker_mirror)</span><br><span class="line">            imageArray.insert(<span class="number">1</span>, <span class="string">"library"</span>)</span><br><span class="line">        <span class="keyword">elif</span> len(imageArray) == <span class="number">2</span>:</span><br><span class="line">            imageArray.insert(<span class="number">0</span>, docker_mirror)</span><br><span class="line">    </span><br><span class="line">        temp_image = <span class="string">"/"</span>.join(imageArray)</span><br><span class="line"></span><br><span class="line">        cmd = <span class="string">"docker pull &#123;image&#125;"</span>.format(image=temp_image)</span><br><span class="line">        print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">        execute_sys_cmd(cmd)</span><br><span class="line"></span><br><span class="line">        cmd = <span class="string">"docker tag &#123;newImage&#125; &#123;image&#125;"</span>.format(newImage=temp_image, image=image)</span><br><span class="line">        print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">        execute_sys_cmd(cmd)</span><br><span class="line"></span><br><span class="line">        cmd = <span class="string">"docker rmi &#123;newImage&#125;"</span>.format(newImage=temp_image)</span><br><span class="line">        print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">        execute_sys_cmd(cmd)</span><br><span class="line">    </span><br><span class="line">        print(<span class="string">"------Pull %s done"</span> % image)</span><br><span class="line">        sys.exit(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>docker-wrapper.py 使用方式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker-wrapper.py pull k8s.gcr.io/kube-apiserver:v1.15.5</span><br></pre></td></tr></table></figure>
+
+<p>python脚本会自动从Azure中国镜像源下载对应的镜像，并重命名成所需的镜像。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="初始化k8s-master"><a href="#初始化k8s-master" class="headerlink" title="初始化k8s master"></a>初始化k8s master</h2><p>准备kubeadm-init.yaml文件：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeadm.k8s.io/v1beta2</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">InitConfiguration</span></span><br><span class="line"><span class="attr">nodeRegistration:</span></span><br><span class="line">  <span class="attr">taints:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">effect:</span> <span class="string">NoSchedule</span></span><br><span class="line">    <span class="attr">key:</span> <span class="string">node-role.kubernetes.io/master</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeadm.k8s.io/v1beta2</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterConfiguration</span></span><br><span class="line"><span class="attr">apiServer:</span></span><br><span class="line">  <span class="attr">timeoutForControlPlane:</span> <span class="string">4m0s</span></span><br><span class="line">  <span class="attr">extraArgs:</span></span><br><span class="line">    <span class="attr">runtime-config:</span> <span class="string">"api/all=true"</span></span><br><span class="line">    <span class="attr">audit-log-path:</span> <span class="string">/var/log/kubernetes/audit.log</span></span><br><span class="line"><span class="attr">certificatesDir:</span> <span class="string">/etc/kubernetes/pki</span></span><br><span class="line"><span class="attr">clusterName:</span> <span class="string">kubernetes</span></span><br><span class="line"><span class="attr">controllerManager:</span></span><br><span class="line">  <span class="attr">extraArgs:</span></span><br><span class="line">    <span class="attr">horizontal-pod-autoscaler-use-rest-clients:</span> <span class="string">"true"</span></span><br><span class="line">    <span class="attr">horizontal-pod-autoscaler-sync-period:</span> <span class="string">"10s"</span></span><br><span class="line">    <span class="attr">node-monitor-grace-period:</span> <span class="string">"10s"</span></span><br><span class="line"><span class="attr">scheduler:</span></span><br><span class="line">  <span class="attr">extraArgs:</span></span><br><span class="line">    <span class="attr">address:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">dns:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">CoreDNS</span></span><br><span class="line"><span class="attr">etcd:</span></span><br><span class="line">  <span class="attr">local:</span></span><br><span class="line">    <span class="attr">dataDir:</span> <span class="string">/var/lib/etcd</span></span><br><span class="line"><span class="attr">imageRepository:</span> <span class="string">k8s.gcr.io</span></span><br><span class="line"><span class="attr">kubernetesVersion:</span> <span class="string">v1.15.5</span></span><br><span class="line"><span class="attr">networking:</span></span><br><span class="line">  <span class="attr">dnsDomain:</span> <span class="string">cluster.local</span></span><br><span class="line">  <span class="attr">podSubnet:</span> <span class="number">10.101</span><span class="number">.0</span><span class="number">.0</span><span class="string">/16</span></span><br><span class="line">  <span class="attr">serviceSubnet:</span> <span class="number">10.100</span><span class="number">.0</span><span class="number">.0</span><span class="string">/16</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeproxy.config.k8s.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">KubeProxyConfiguration</span></span><br><span class="line"><span class="attr">bindAddress:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">mode:</span> <span class="string">"ipvs"</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubelet.config.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">KubeletConfiguration</span></span><br><span class="line"><span class="attr">address:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">cgroupDriver:</span> <span class="string">systemd</span></span><br><span class="line"><span class="attr">clusterDNS:</span></span><br><span class="line"><span class="bullet">-</span> <span class="number">10.100</span><span class="number">.0</span><span class="number">.10</span></span><br><span class="line"><span class="attr">maxPods:</span> <span class="number">110</span></span><br><span class="line"><span class="attr">staticPodPath:</span> <span class="string">/etc/kubernetes/manifests</span></span><br></pre></td></tr></table></figure>
+
+<div class="note danger">
+            <p><strong>注意：</strong></p><p>根据自己情况更改：podSubnet、serviceSubnet的网段。</p>
+          </div>
+
+<p>如何查询默认的kubeadm init 的yaml呢？很简单，如下命令即可：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubeadm config <span class="built_in">print</span> init-defaults --component-configs KubeProxyConfiguration,KubeletConfiguration</span><br></pre></td></tr></table></figure>
+
+<p>完整默认的init yaml如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeadm.k8s.io/v1beta2</span></span><br><span class="line"><span class="attr">caCertPath:</span> <span class="string">/etc/kubernetes/pki/ca.crt</span></span><br><span class="line"><span class="attr">discovery:</span></span><br><span class="line">  <span class="attr">bootstrapToken:</span></span><br><span class="line">    <span class="attr">apiServerEndpoint:</span> <span class="string">kube-apiserver:6443</span></span><br><span class="line">    <span class="attr">token:</span> <span class="string">abcdef.0123456789abcdef</span></span><br><span class="line">    <span class="attr">unsafeSkipCAVerification:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">timeout:</span> <span class="string">5m0s</span></span><br><span class="line">  <span class="attr">tlsBootstrapToken:</span> <span class="string">abcdef.0123456789abcdef</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">JoinConfiguration</span></span><br><span class="line"><span class="attr">nodeRegistration:</span></span><br><span class="line">  <span class="attr">criSocket:</span> <span class="string">/var/run/dockershim.sock</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">k8s01.test.awsbj.cn</span></span><br><span class="line">  <span class="attr">taints:</span> <span class="literal">null</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeproxy.config.k8s.io/v1alpha1</span></span><br><span class="line"><span class="attr">bindAddress:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">clientConnection:</span></span><br><span class="line">  <span class="attr">acceptContentTypes:</span> <span class="string">""</span></span><br><span class="line">  <span class="attr">burst:</span> <span class="number">10</span></span><br><span class="line">  <span class="attr">contentType:</span> <span class="string">application/vnd.kubernetes.protobuf</span></span><br><span class="line">  <span class="attr">kubeconfig:</span> <span class="string">/var/lib/kube-proxy/kubeconfig.conf</span></span><br><span class="line">  <span class="attr">qps:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">clusterCIDR:</span> <span class="string">""</span></span><br><span class="line"><span class="attr">configSyncPeriod:</span> <span class="string">15m0s</span></span><br><span class="line"><span class="attr">conntrack:</span></span><br><span class="line">  <span class="attr">maxPerCore:</span> <span class="number">32768</span></span><br><span class="line">  <span class="attr">min:</span> <span class="number">131072</span></span><br><span class="line">  <span class="attr">tcpCloseWaitTimeout:</span> <span class="string">1h0m0s</span></span><br><span class="line">  <span class="attr">tcpEstablishedTimeout:</span> <span class="string">24h0m0s</span></span><br><span class="line"><span class="attr">enableProfiling:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">healthzBindAddress:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span><span class="string">:10256</span></span><br><span class="line"><span class="attr">hostnameOverride:</span> <span class="string">""</span></span><br><span class="line"><span class="attr">iptables:</span></span><br><span class="line">  <span class="attr">masqueradeAll:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">masqueradeBit:</span> <span class="number">14</span></span><br><span class="line">  <span class="attr">minSyncPeriod:</span> <span class="string">0s</span></span><br><span class="line">  <span class="attr">syncPeriod:</span> <span class="string">30s</span></span><br><span class="line"><span class="attr">ipvs:</span></span><br><span class="line">  <span class="attr">excludeCIDRs:</span> <span class="literal">null</span></span><br><span class="line">  <span class="attr">minSyncPeriod:</span> <span class="string">0s</span></span><br><span class="line">  <span class="attr">scheduler:</span> <span class="string">""</span></span><br><span class="line">  <span class="attr">strictARP:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">syncPeriod:</span> <span class="string">30s</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">KubeProxyConfiguration</span></span><br><span class="line"><span class="attr">metricsBindAddress:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:10249</span></span><br><span class="line"><span class="attr">mode:</span> <span class="string">""</span></span><br><span class="line"><span class="attr">nodePortAddresses:</span> <span class="literal">null</span></span><br><span class="line"><span class="attr">oomScoreAdj:</span> <span class="number">-999</span></span><br><span class="line"><span class="attr">portRange:</span> <span class="string">""</span></span><br><span class="line"><span class="attr">resourceContainer:</span> <span class="string">/kube-proxy</span></span><br><span class="line"><span class="attr">udpIdleTimeout:</span> <span class="string">250ms</span></span><br><span class="line"><span class="attr">winkernel:</span></span><br><span class="line">  <span class="attr">enableDSR:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">networkName:</span> <span class="string">""</span></span><br><span class="line">  <span class="attr">sourceVip:</span> <span class="string">""</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">address:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubelet.config.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">authentication:</span></span><br><span class="line">  <span class="attr">anonymous:</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">webhook:</span></span><br><span class="line">    <span class="attr">cacheTTL:</span> <span class="string">2m0s</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">x509:</span></span><br><span class="line">    <span class="attr">clientCAFile:</span> <span class="string">/etc/kubernetes/pki/ca.crt</span></span><br><span class="line"><span class="attr">authorization:</span></span><br><span class="line">  <span class="attr">mode:</span> <span class="string">Webhook</span></span><br><span class="line">  <span class="attr">webhook:</span></span><br><span class="line">    <span class="attr">cacheAuthorizedTTL:</span> <span class="string">5m0s</span></span><br><span class="line">    <span class="attr">cacheUnauthorizedTTL:</span> <span class="string">30s</span></span><br><span class="line"><span class="attr">cgroupDriver:</span> <span class="string">cgroupfs</span></span><br><span class="line"><span class="attr">cgroupsPerQOS:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">clusterDNS:</span></span><br><span class="line"><span class="bullet">-</span> <span class="number">10.96</span><span class="number">.0</span><span class="number">.10</span></span><br><span class="line"><span class="attr">clusterDomain:</span> <span class="string">cluster.local</span></span><br><span class="line"><span class="attr">configMapAndSecretChangeDetectionStrategy:</span> <span class="string">Watch</span></span><br><span class="line"><span class="attr">containerLogMaxFiles:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">containerLogMaxSize:</span> <span class="string">10Mi</span></span><br><span class="line"><span class="attr">contentType:</span> <span class="string">application/vnd.kubernetes.protobuf</span></span><br><span class="line"><span class="attr">cpuCFSQuota:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">cpuCFSQuotaPeriod:</span> <span class="string">100ms</span></span><br><span class="line"><span class="attr">cpuManagerPolicy:</span> <span class="string">none</span></span><br><span class="line"><span class="attr">cpuManagerReconcilePeriod:</span> <span class="string">10s</span></span><br><span class="line"><span class="attr">enableControllerAttachDetach:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">enableDebuggingHandlers:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">enforceNodeAllocatable:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">pods</span></span><br><span class="line"><span class="attr">eventBurst:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">eventRecordQPS:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">evictionHard:</span></span><br><span class="line">  <span class="attr">imagefs.available:</span> <span class="number">15</span><span class="string">%</span></span><br><span class="line">  <span class="attr">memory.available:</span> <span class="string">100Mi</span></span><br><span class="line">  <span class="attr">nodefs.available:</span> <span class="number">10</span><span class="string">%</span></span><br><span class="line">  <span class="attr">nodefs.inodesFree:</span> <span class="number">5</span><span class="string">%</span></span><br><span class="line"><span class="attr">evictionPressureTransitionPeriod:</span> <span class="string">5m0s</span></span><br><span class="line"><span class="attr">failSwapOn:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">fileCheckFrequency:</span> <span class="string">20s</span></span><br><span class="line"><span class="attr">hairpinMode:</span> <span class="string">promiscuous-bridge</span></span><br><span class="line"><span class="attr">healthzBindAddress:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line"><span class="attr">healthzPort:</span> <span class="number">10248</span></span><br><span class="line"><span class="attr">httpCheckFrequency:</span> <span class="string">20s</span></span><br><span class="line"><span class="attr">imageGCHighThresholdPercent:</span> <span class="number">85</span></span><br><span class="line"><span class="attr">imageGCLowThresholdPercent:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">imageMinimumGCAge:</span> <span class="string">2m0s</span></span><br><span class="line"><span class="attr">iptablesDropBit:</span> <span class="number">15</span></span><br><span class="line"><span class="attr">iptablesMasqueradeBit:</span> <span class="number">14</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">KubeletConfiguration</span></span><br><span class="line"><span class="attr">kubeAPIBurst:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">kubeAPIQPS:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">makeIPTablesUtilChains:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">maxOpenFiles:</span> <span class="number">1000000</span></span><br><span class="line"><span class="attr">maxPods:</span> <span class="number">110</span></span><br><span class="line"><span class="attr">nodeLeaseDurationSeconds:</span> <span class="number">40</span></span><br><span class="line"><span class="attr">nodeStatusReportFrequency:</span> <span class="string">1m0s</span></span><br><span class="line"><span class="attr">nodeStatusUpdateFrequency:</span> <span class="string">10s</span></span><br><span class="line"><span class="attr">oomScoreAdj:</span> <span class="number">-999</span></span><br><span class="line"><span class="attr">podPidsLimit:</span> <span class="number">-1</span></span><br><span class="line"><span class="attr">port:</span> <span class="number">10250</span></span><br><span class="line"><span class="attr">registryBurst:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">registryPullQPS:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">resolvConf:</span> <span class="string">/etc/resolv.conf</span></span><br><span class="line"><span class="attr">rotateCertificates:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">runtimeRequestTimeout:</span> <span class="string">2m0s</span></span><br><span class="line"><span class="attr">serializeImagePulls:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">staticPodPath:</span> <span class="string">/etc/kubernetes/manifests</span></span><br><span class="line"><span class="attr">streamingConnectionIdleTimeout:</span> <span class="string">4h0m0s</span></span><br><span class="line"><span class="attr">syncFrequency:</span> <span class="string">1m0s</span></span><br><span class="line"><span class="attr">volumeStatsAggPeriod:</span> <span class="string">1m0s</span></span><br></pre></td></tr></table></figure>
+
+<p>登陆k8s master，初始化kubernetes：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubeadm init --config=kubeadm-init.yaml</span><br></pre></td></tr></table></figure>
+
+<p>初始化如下输出，代表成功：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[init] Using Kubernetes version: v1.15.5</span><br><span class="line">[preflight] Running pre-flight checks</span><br><span class="line">[preflight] Pulling images required for setting up a Kubernetes cluster</span><br><span class="line">[preflight] This might take a minute or two, depending on the speed of your internet connection</span><br><span class="line">[preflight] You can also perform this action in beforehand using &apos;kubeadm config images pull&apos;</span><br><span class="line">[kubelet-start] Writing kubelet environment file with flags to file &quot;/var/lib/kubelet/kubeadm-flags.env&quot;</span><br><span class="line">[kubelet-start] Writing kubelet configuration to file &quot;/var/lib/kubelet/config.yaml&quot;</span><br><span class="line">[kubelet-start] Activating the kubelet service</span><br><span class="line">[certs] Using certificateDir folder &quot;/etc/kubernetes/pki&quot;</span><br><span class="line">[certs] Generating &quot;front-proxy-ca&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;front-proxy-client&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;etcd/ca&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;etcd/server&quot; certificate and key</span><br><span class="line">[certs] etcd/server serving cert is signed for DNS names [k8s01.test.awsbj.cn localhost] and IPs [172.17.0.7 127.0.0.1 ::1]</span><br><span class="line">[certs] Generating &quot;etcd/peer&quot; certificate and key</span><br><span class="line">[certs] etcd/peer serving cert is signed for DNS names [k8s01.test.awsbj.cn localhost] and IPs [172.17.0.7 127.0.0.1 ::1]</span><br><span class="line">[certs] Generating &quot;etcd/healthcheck-client&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;apiserver-etcd-client&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;ca&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;apiserver&quot; certificate and key</span><br><span class="line">[certs] apiserver serving cert is signed for DNS names [k8s01.test.awsbj.cn kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local] and IPs [10.100.0.1 172.17.0.7]</span><br><span class="line">[certs] Generating &quot;apiserver-kubelet-client&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;sa&quot; key and public key</span><br><span class="line">[kubeconfig] Using kubeconfig folder &quot;/etc/kubernetes&quot;</span><br><span class="line">[kubeconfig] Writing &quot;admin.conf&quot; kubeconfig file</span><br><span class="line">[kubeconfig] Writing &quot;kubelet.conf&quot; kubeconfig file</span><br><span class="line">[kubeconfig] Writing &quot;controller-manager.conf&quot; kubeconfig file</span><br><span class="line">[kubeconfig] Writing &quot;scheduler.conf&quot; kubeconfig file</span><br><span class="line">[control-plane] Using manifest folder &quot;/etc/kubernetes/manifests&quot;</span><br><span class="line">[control-plane] Creating static Pod manifest for &quot;kube-apiserver&quot;</span><br><span class="line">[control-plane] Creating static Pod manifest for &quot;kube-controller-manager&quot;</span><br><span class="line">[control-plane] Creating static Pod manifest for &quot;kube-scheduler&quot;</span><br><span class="line">[etcd] Creating static Pod manifest for local etcd in &quot;/etc/kubernetes/manifests&quot;</span><br><span class="line">[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory &quot;/etc/kubernetes/manifests&quot;. This can take up to 4m0s</span><br><span class="line">[apiclient] All control plane components are healthy after 13.002203 seconds</span><br><span class="line">[upload-config] Storing the configuration used in ConfigMap &quot;kubeadm-config&quot; in the &quot;kube-system&quot; Namespace</span><br><span class="line">[kubelet] Creating a ConfigMap &quot;kubelet-config-1.15&quot; in namespace kube-system with the configuration for the kubelets in the cluster</span><br><span class="line">[upload-certs] Skipping phase. Please see --upload-certs</span><br><span class="line">[mark-control-plane] Marking the node k8s01.test.awsbj.cn as control-plane by adding the label &quot;node-role.kubernetes.io/master=&apos;&apos;&quot;</span><br><span class="line">[mark-control-plane] Marking the node k8s01.test.awsbj.cn as control-plane by adding the taints [node-role.kubernetes.io/master:NoSchedule]</span><br><span class="line">[bootstrap-token] Using token: 4m9zlz.0l3waicmvgl6envz</span><br><span class="line">[bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow certificate rotation for all node client certificates in the cluster</span><br><span class="line">[bootstrap-token] Creating the &quot;cluster-info&quot; ConfigMap in the &quot;kube-public&quot; namespace</span><br><span class="line">[addons] Applied essential addon: CoreDNS</span><br><span class="line">[addons] Applied essential addon: kube-proxy</span><br><span class="line"></span><br><span class="line">Your Kubernetes control-plane has initialized successfully!</span><br><span class="line"></span><br><span class="line">To start using your cluster, you need to run the following as a regular user:</span><br><span class="line"></span><br><span class="line">  mkdir -p $HOME/.kube</span><br><span class="line">  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br><span class="line">  sudo chown $(id -u):$(id -g) $HOME/.kube/config</span><br><span class="line"></span><br><span class="line">You should now deploy a pod network to the cluster.</span><br><span class="line">Run &quot;kubectl apply -f [podnetwork].yaml&quot; with one of the options listed at:</span><br><span class="line">  https://kubernetes.io/docs/concepts/cluster-administration/addons/</span><br><span class="line"></span><br><span class="line">Then you can join any number of worker nodes by running the following on each as root:</span><br><span class="line"></span><br><span class="line">kubeadm join 172.17.0.7:6443 --token 4m9zlz.0l3waicmvgl6envz \</span><br><span class="line">    --discovery-token-ca-cert-hash sha256:3ff0b4136b1af325e603f1f3d6d2554c7c3d04f78dc6d134696da3594ad63e0e</span><br></pre></td></tr></table></figure>
+
+<p>如果初始化失败，需要清理，如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubeadm reset</span><br><span class="line">iptables -F &amp;&amp; iptables -t nat -F &amp;&amp; iptables -t mangle -F &amp;&amp; iptables -X</span><br><span class="line">ipvsadm --clear</span><br></pre></td></tr></table></figure>
+
+<p>拷贝admin.conf</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">sudo cp -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">sudo chown $(id -u):$(id -g) <span class="variable">$HOME</span>/.kube/config</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="初始化k8s-worker节点"><a href="#初始化k8s-worker节点" class="headerlink" title="初始化k8s worker节点"></a>初始化k8s worker节点</h2><p>在所有其他的worker节点上都执行如下命令：从初始化master节点中输出的</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubeadm join 172.17.0.7:6443 --token 4m9zlz.0l3waicmvgl6envz \</span><br><span class="line">    --discovery-token-ca-cert-hash sha256:3ff0b4136b1af325e603f1f3d6d2554c7c3d04f78dc6d134696da3594ad63e0e</span><br></pre></td></tr></table></figure>
+
+<p>完整输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[preflight] Running pre-flight checks</span><br><span class="line">[preflight] Reading configuration from the cluster...</span><br><span class="line">[preflight] FYI: You can look at this config file with &apos;kubectl -n kube-system get cm kubeadm-config -oyaml&apos;</span><br><span class="line">[kubelet-start] Downloading configuration for the kubelet from the &quot;kubelet-config-1.15&quot; ConfigMap in the kube-system namespace</span><br><span class="line">[kubelet-start] Writing kubelet configuration to file &quot;/var/lib/kubelet/config.yaml&quot;</span><br><span class="line">[kubelet-start] Writing kubelet environment file with flags to file &quot;/var/lib/kubelet/kubeadm-flags.env&quot;</span><br><span class="line">[kubelet-start] Activating the kubelet service</span><br><span class="line">[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...</span><br><span class="line"></span><br><span class="line">This node has joined the cluster:</span><br><span class="line">* Certificate signing request was sent to apiserver and a response was received.</span><br><span class="line">* The Kubelet was informed of the new secure connection details.</span><br><span class="line"></span><br><span class="line">Run &apos;kubectl get nodes&apos; on the control-plane to see this node join the cluster.</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="检查Kubernetes集群"><a href="#检查Kubernetes集群" class="headerlink" title="检查Kubernetes集群"></a>检查Kubernetes集群</h2><p>登陆master节点，查看nodes</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@k8s01.test.awsbj.cn kubernetes]<span class="comment"># kubectl get node</span></span><br><span class="line">NAME                  STATUS     ROLES    AGE     VERSION</span><br><span class="line">k8s01.test.awsbj.cn   NotReady   master   6m30s   v1.15.5</span><br><span class="line">k8s02.test.awsbj.cn   NotReady   &lt;none&gt;   117s    v1.15.5</span><br><span class="line">k8s03.test.awsbj.cn   NotReady   &lt;none&gt;   43s     v1.15.5</span><br><span class="line"></span><br><span class="line">[root@k8s01.test.awsbj.cn microoak]<span class="comment"># kubectl cluster-info </span></span><br><span class="line">Kubernetes master is running at https://172.17.0.7:6443</span><br><span class="line">KubeDNS is running at https://172.17.0.7:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy</span><br><span class="line"></span><br><span class="line">To further debug and diagnose cluster problems, use <span class="string">'kubectl cluster-info dump'</span>.</span><br></pre></td></tr></table></figure>
+
+<p>都是NotReady状态，因为还没有安装网络插件呢。</p>
+<h2 id="安装网络插件：calico"><a href="#安装网络插件：calico" class="headerlink" title="安装网络插件：calico"></a>安装网络插件：calico</h2><p>这里使用calico 3.6版本，<a href="https://docs.projectcalico.org/v3.6/getting-started/kubernetes/installation/calico" target="_blank" rel="noopener">参考</a></p>
+<p>下载yaml文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl \</span><br><span class="line">https://docs.projectcalico.org/v3.6/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml \</span><br><span class="line">-O</span><br></pre></td></tr></table></figure>
+
+<p>更改podSubnet：</p>
+<p>搜索：CALICO_IPV4POOL_CIDR，将其value更改成：10.101.0.0/16</p>
+<p>应用calico.yaml:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f calico.yaml</span><br></pre></td></tr></table></figure>
+
+<p>稍等片刻再次查看nodes状态：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[microoak@k8s01.test.awsbj.cn kubernetes]$ kubectl get nodes </span><br><span class="line">NAME                  STATUS   ROLES    AGE     VERSION</span><br><span class="line">k8s01.test.awsbj.cn   Ready    master   4h29m   v1.15.5</span><br><span class="line">k8s02.test.awsbj.cn   Ready    &lt;none&gt;   4h25m   v1.15.5</span><br><span class="line">k8s03.test.awsbj.cn   Ready    &lt;none&gt;   4h23m   v1.15.5</span><br></pre></td></tr></table></figure>
+
+<p>至此kubernetes已经快速安装完成。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html" title="使用kubeadm快速安装kubernetes 1.15.5测试环境">https://knner.wang/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/11/05/typora-markdown.html" rel="next" title="markdown 语法参考">
+                  <i class="fa fa-chevron-left"></i> markdown 语法参考
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2019/11/13/docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html" rel="prev" title="docker.io gcr.io k8s.gcr.io quay.io 中国区加速">
+                  docker.io gcr.io k8s.gcr.io quay.io 中国区加速 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#环境介绍"><span class="nav-number">1.</span> <span class="nav-text">环境介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境初始化"><span class="nav-number">2.</span> <span class="nav-text">环境初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化k8s-master"><span class="nav-number">3.</span> <span class="nav-text">初始化k8s master</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化k8s-worker节点"><span class="nav-number">4.</span> <span class="nav-text">初始化k8s worker节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检查Kubernetes集群"><span class="nav-number">5.</span> <span class="nav-text">检查Kubernetes集群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装网络插件：calico"><span class="nav-number">6.</span> <span class="nav-text">安装网络插件：calico</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+</body>
+</html>

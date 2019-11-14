@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="安装Kubernetes默认的image源是：k8s.gcr.io，中国区安装极为痛苦，不FQ就拉取不下来，类似的还有Red Head的quay.io，虽然能下载，但是速度非常的慢。解决办法来了：中国区有了以上的docker registry镜像源了：中科大镜像 和 Azure中国镜像先上总结，方便直接查阅：总结鉴于中科大的源经常的出现not fount的错误，所以这里使用Azure的镜像源。do">
+<meta name="keywords" content="docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker.io gcr.io k8s.gcr.io quay.io 中国区加速">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;11&#x2F;13&#x2F;docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="安装Kubernetes默认的image源是：k8s.gcr.io，中国区安装极为痛苦，不FQ就拉取不下来，类似的还有Red Head的quay.io，虽然能下载，但是速度非常的慢。解决办法来了：中国区有了以上的docker registry镜像源了：中科大镜像 和 Azure中国镜像先上总结，方便直接查阅：总结鉴于中科大的源经常的出现not fount的错误，所以这里使用Azure的镜像源。do">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-13T07:20:42.000Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://knner.wang/2019/11/13/docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>docker.io gcr.io k8s.gcr.io quay.io 中国区加速 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">5</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/13/docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          docker.io gcr.io k8s.gcr.io quay.io 中国区加速
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-13 15:20:42" itemprop="dateCreated datePublished" datetime="2019-11-13T15:20:42+08:00">2019-11-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/docker/" itemprop="url" rel="index">
+                    <span itemprop="name">docker</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>安装Kubernetes默认的image源是：k8s.gcr.io，中国区安装极为痛苦，不FQ就拉取不下来，类似的还有Red Head的quay.io，虽然能下载，但是速度非常的慢。</p><p>解决办法来了：</p><p>中国区有了以上的docker registry镜像源了：</p><p><a href="https://github.com/ustclug/mirrorrequest" target="_blank" rel="noopener">中科大镜像</a> 和 <a href="https://github.com/Azure/container-service-for-azure-china" target="_blank" rel="noopener">Azure中国镜像</a></p><p>先上总结，方便直接查阅：</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>鉴于中科大的源经常的出现not fount的错误，所以这里使用Azure的镜像源。</p><h3 id="docker-io"><a href="#docker-io" class="headerlink" title="docker.io"></a>docker.io</h3><h4 id="docker官方维护"><a href="#docker官方维护" class="headerlink" title="docker官方维护"></a>docker官方维护</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull dockerhub.azk8s.cn/library/xxx:yyy</span><br></pre></td></tr></table></figure><h4 id="非官方维护"><a href="#非官方维护" class="headerlink" title="非官方维护"></a>非官方维护</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull dockerhub.azk8s.cn/uuu/xxx:yyy</span><br></pre></td></tr></table></figure><a id="more"></a>
+
+
+
+
+
+
+
+
+
+
+
+<h3 id="gcr-io-和-k8s-gcr-io"><a href="#gcr-io-和-k8s-gcr-io" class="headerlink" title="gcr.io 和 k8s.gcr.io"></a>gcr.io 和 k8s.gcr.io</h3><h4 id="gcr-io"><a href="#gcr-io" class="headerlink" title="gcr.io"></a>gcr.io</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull gcr.azk8s.cn/xxx/yyy:zzz</span><br></pre></td></tr></table></figure>
+
+<h4 id="k8s-gcr-io"><a href="#k8s-gcr-io" class="headerlink" title="k8s.gcr.io"></a>k8s.gcr.io</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull gcr.azk8s.cn/google-containers/xxx:yyy</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="quay-io"><a href="#quay-io" class="headerlink" title="quay.io"></a>quay.io</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull quay.azk8s.cn/xxx/yyy:zzz</span><br></pre></td></tr></table></figure>
+
+
+
+<p>下面详细讲解：</p>
+<h2 id="docker-io-镜像加速"><a href="#docker-io-镜像加速" class="headerlink" title="docker.io 镜像加速"></a>docker.io 镜像加速</h2><p>默认的docker registry是：<a href="https://hub.docker.com" target="_blank" rel="noopener">https://hub.docker.com</a></p>
+<h3 id="使用中科大镜像-docker-mirrors-ustc-edu-cn"><a href="#使用中科大镜像-docker-mirrors-ustc-edu-cn" class="headerlink" title="使用中科大镜像 docker.mirrors.ustc.edu.cn"></a>使用中科大镜像 docker.mirrors.ustc.edu.cn</h3><p>默认的一种拉取方式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull xxx:yyy</span><br><span class="line"></span><br><span class="line">这里没有指定用户，默认是docker官方维护的镜像</span><br><span class="line">xxx为镜像的名称</span><br><span class="line">yyy为镜像的tag版本</span><br></pre></td></tr></table></figure>
+
+<p>那么使用中科大镜像的方式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull docker.mirrors.ustc.edu.cn/library/xxx:yyy</span><br></pre></td></tr></table></figure>
+
+<p>例如：nginx:1.16-alpine</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull docker.mirrors.ustc.edu.cn/library/nginx:1.16-alpine</span><br></pre></td></tr></table></figure>
+
+
+
+<p>默认的另一种拉取方式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull uuu/xxx:yyy</span><br><span class="line"></span><br><span class="line">uuu为具体的用户，有其负责维护该镜像</span><br><span class="line">xxx为镜像的名称</span><br><span class="line">yyy为镜像的tag版本</span><br></pre></td></tr></table></figure>
+
+<p>那么使用中科大镜像的方式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull docker.mirrors.ustc.edu.cn/uuu/xxx:yyy</span><br></pre></td></tr></table></figure>
+
+<p>例如：wanghkkk/busyboxplus:latest</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull docker.mirrors.ustc.edu.cn/wanghkkk/busyboxplus</span><br></pre></td></tr></table></figure>
+
+<div class="note danger">
+            <p>默认中科大会提示：Error response from daemon: manifest for docker.mirrors.ustc.edu.cn/wanghkkk/busyboxplus:latest not found</p><p>因为默认中科大不会换成镜像的，需要多试几次，等中科大缓存完成后才能下载的。<strong>所以这里不推荐用中科大的</strong>。</p>
+          </div>
+
+
+
+<h3 id="使用Azure中国镜像-dockerhub-azk8s-cn"><a href="#使用Azure中国镜像-dockerhub-azk8s-cn" class="headerlink" title="使用Azure中国镜像 dockerhub.azk8s.cn"></a>使用Azure中国镜像 dockerhub.azk8s.cn</h3><p>还是使用上面的两个例子：</p>
+<p>nginx:1.16-alpine</p>
+<p>wanghkkk/busyboxplus</p>
+<p>对应的Azure中国镜像是：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull dockerhub.azk8s.cn/library/nginx:1.16-alpine</span><br><span class="line"></span><br><span class="line">$ docker pull dockerhub.azk8s.cn/wanghkkk/busyboxplus</span><br></pre></td></tr></table></figure>
+
+<div class="note sucess">
+            <p>这里推荐使用Azure，直接就拉取下来了，不像中科大需要他自己先下载缓存，然后才能下载，至少我试了好几次也没拉取下来。</p>
+          </div>
+
+<h2 id="gcr-io-和-k8s-gcr-io-镜像加速"><a href="#gcr-io-和-k8s-gcr-io-镜像加速" class="headerlink" title="gcr.io 和 k8s.gcr.io 镜像加速"></a>gcr.io 和 k8s.gcr.io 镜像加速</h2><p>gcr.io 和 k8s.gcr.io 实际上都是Google的镜像，默认中国区是根本访问不到的。</p>
+<h3 id="gcr-io-1"><a href="#gcr-io-1" class="headerlink" title="gcr.io"></a>gcr.io</h3><h4 id="使用中科大镜像-gcr-mirrors-ustc-edu-cn"><a href="#使用中科大镜像-gcr-mirrors-ustc-edu-cn" class="headerlink" title="使用中科大镜像 gcr.mirrors.ustc.edu.cn"></a>使用中科大镜像 gcr.mirrors.ustc.edu.cn</h4><p>默认gcr.io拉取方式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull gcr.io/xxx/yyy:zzz</span><br></pre></td></tr></table></figure>
+
+<p>那么更换成中科大的拉取方式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull gcr.mirrors.ustc.edu.cn/xxx/yyy:zzz</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<p>这里使用gcr.io/kubernetes-helm/tiller:v2.16.1为例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull gcr.mirrors.ustc.edu.cn/kubernetes-helm/tiller:v2.16.1</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="使用Azure中国镜像-gcr-azk8s-cn"><a href="#使用Azure中国镜像-gcr-azk8s-cn" class="headerlink" title="使用Azure中国镜像 gcr.azk8s.cn"></a>使用Azure中国镜像 gcr.azk8s.cn</h4><p>更换成Azure的拉取方式为：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull gcr.azk8s.cn/kubernetes-helm/tiller:v2.16.1</span><br></pre></td></tr></table></figure>
+
+<h3 id="k8s-gcr-io-1"><a href="#k8s-gcr-io-1" class="headerlink" title="k8s.gcr.io"></a>k8s.gcr.io</h3><p>对于按照kubernetes时候，用到的就是k8s.gcr.io开头的镜像，其实k8s.gcr.io就是等价于gcr.io/google-containers</p>
+<p>例如：k8s.gcr.io/kube-proxy:v1.15.5</p>
+<p>所以呢，对于中科大的拉取方式为：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull gcr.mirrors.ustc.edu.cn/google-containers/kube-proxy:v1.15.5</span><br></pre></td></tr></table></figure>
+
+<p>对于Azure的拉取方式为：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull gcr.azk8s.cn/google-containers/kube-proxy:v1.15.5</span><br></pre></td></tr></table></figure>
+
+
+
+<div class="note danger">
+            <p>对于中科大的拉取，经常的出现not found，而对于Azure来说非常的顺畅，很快的拉取下来了，所以非常的推荐使用Azure的镜像源。</p>
+          </div>
+
+<h2 id="quay-io-镜像加速"><a href="#quay-io-镜像加速" class="headerlink" title="quay.io 镜像加速"></a>quay.io 镜像加速</h2><p>例如拉取镜像：</p>
+<p>quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1</p>
+<h3 id="使用中科大镜像-quay-mirrors-ustc-edu-cn"><a href="#使用中科大镜像-quay-mirrors-ustc-edu-cn" class="headerlink" title="使用中科大镜像 quay.mirrors.ustc.edu.cn"></a>使用中科大镜像 quay.mirrors.ustc.edu.cn</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull quay.mirrors.ustc.edu.cn/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用Azure中国镜像-quay-azk8s-cn"><a href="#使用Azure中国镜像-quay-azk8s-cn" class="headerlink" title="使用Azure中国镜像 quay.azk8s.cn"></a>使用Azure中国镜像 quay.azk8s.cn</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull quay.azk8s.cn/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="一个python脚本全搞定"><a href="#一个python脚本全搞定" class="headerlink" title="一个python脚本全搞定"></a>一个python脚本全搞定</h2><p>docker-wrapper.py</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># coding=utf8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># azure mirrors for gcr.io,k8s.gcr.io,quay.io in china</span></span><br><span class="line">gcr_mirror = <span class="string">"gcr.azk8s.cn"</span></span><br><span class="line">docker_mirror = <span class="string">"dockerhub.azk8s.cn"</span></span><br><span class="line">quay_mirror = <span class="string">"quay.azk8s.cn"</span></span><br><span class="line"></span><br><span class="line">k8s_namespace = <span class="string">"google_containers"</span></span><br><span class="line"></span><br><span class="line">gcr_prefix = <span class="string">"gcr.io"</span></span><br><span class="line">special_gcr_prefix = <span class="string">"k8s.gcr.io"</span></span><br><span class="line">quay_prefix = <span class="string">"quay.io"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">execute_sys_cmd</span><span class="params">(cmd)</span>:</span></span><br><span class="line">    result = os.system(cmd)</span><br><span class="line">    <span class="keyword">if</span> result != <span class="number">0</span>:</span><br><span class="line">        print(cmd + <span class="string">" failed."</span>)</span><br><span class="line">        sys.exit(<span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">usage</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">"Usage: "</span> + sys.argv[<span class="number">0</span>] + <span class="string">" pull "</span>)</span><br><span class="line">    print(<span class="string">"Examples:"</span>)</span><br><span class="line">    print(sys.argv[<span class="number">0</span>] + <span class="string">" pull k8s.gcr.io/kube-apiserver:v1.14.1"</span>)</span><br><span class="line">    print(sys.argv[<span class="number">0</span>] + <span class="string">" pull gcr.io/google_containers/kube-apiserver:v1.14.1"</span>)</span><br><span class="line">    print(sys.argv[<span class="number">0</span>] + <span class="string">" pull quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1"</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    <span class="keyword">if</span> len(sys.argv) != <span class="number">3</span>:</span><br><span class="line">        usage()</span><br><span class="line">        sys.exit(<span class="number">-1</span>)</span><br><span class="line">    <span class="keyword">elif</span> sys.argv[<span class="number">1</span>] != <span class="string">'pull'</span>:</span><br><span class="line">        usage()</span><br><span class="line">        sys.exit(<span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># image name like k8s.gcr.io/kube-apiserver:v1.14.1 or gcr.io/google_containers/kube-apiserver:v1.14.1</span></span><br><span class="line">    image = sys.argv[<span class="number">2</span>]</span><br><span class="line">    imageArray = image.split(<span class="string">"/"</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> imageArray[<span class="number">0</span>] == gcr_prefix:</span><br><span class="line">        imageArray[<span class="number">0</span>] = gcr_mirror</span><br><span class="line">    <span class="keyword">elif</span> imageArray[<span class="number">0</span>] == special_gcr_prefix:</span><br><span class="line">        imageArray[<span class="number">0</span>] = gcr_mirror</span><br><span class="line">        imageArray.insert(<span class="number">1</span>, k8s_namespace)</span><br><span class="line">    <span class="keyword">elif</span> imageArray[<span class="number">0</span>] == quay_prefix:</span><br><span class="line">        imageArray[<span class="number">0</span>] = quay_mirror</span><br><span class="line">    <span class="keyword">elif</span> len(imageArray) == <span class="number">1</span>:</span><br><span class="line">        imageArray.insert(<span class="number">0</span>, docker_mirror)</span><br><span class="line">        imageArray.insert(<span class="number">1</span>, <span class="string">"library"</span>)</span><br><span class="line">    <span class="keyword">elif</span> len(imageArray) == <span class="number">2</span>:</span><br><span class="line">        imageArray.insert(<span class="number">0</span>, docker_mirror)</span><br><span class="line"></span><br><span class="line">    temp_image = <span class="string">"/"</span>.join(imageArray)</span><br><span class="line"></span><br><span class="line">    cmd = <span class="string">"docker pull &#123;image&#125;"</span>.format(image=temp_image)</span><br><span class="line">    print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">    execute_sys_cmd(cmd)</span><br><span class="line"></span><br><span class="line">    cmd = <span class="string">"docker tag &#123;newImage&#125; &#123;image&#125;"</span>.format(newImage=temp_image, image=image)</span><br><span class="line">    print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">    execute_sys_cmd(cmd)</span><br><span class="line"></span><br><span class="line">    cmd = <span class="string">"docker rmi &#123;newImage&#125;"</span>.format(newImage=temp_image)</span><br><span class="line">    print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">    execute_sys_cmd(cmd)</span><br><span class="line"></span><br><span class="line">    print(<span class="string">"------Pull %s done"</span> % image)</span><br><span class="line">    sys.exit(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<p>使用方式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ chmod +x docker-wrapper.py</span><br><span class="line">$ sudo mv docker-wrapper.py /usr/<span class="built_in">local</span>/bin/</span><br><span class="line">$ docker-wrapper.py pull xxx/yyy:zzz</span><br></pre></td></tr></table></figure>
+
+
+
+
+<blockquote>
+<p>参考：<a href="https://www.ilanni.com/?p=14534#一、docker.io镜像加速" target="_blank" rel="noopener">https://www.ilanni.com/?p=14534#一、docker.io镜像加速</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2019/11/13/docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html" title="docker.io gcr.io k8s.gcr.io quay.io 中国区加速">https://knner.wang/2019/11/13/docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"># docker</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html" rel="next" title="使用kubeadm快速安装kubernetes 1.15.5测试环境">
+                  <i class="fa fa-chevron-left"></i> 使用kubeadm快速安装kubernetes 1.15.5测试环境
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2019/11/14/Pre-trial-helm3.html" rel="prev" title="抢先试用Helm3，并安装nginx-ingress-controller">
+                  抢先试用Helm3，并安装nginx-ingress-controller <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#docker-io"><span class="nav-number">1.1.</span> <span class="nav-text">docker.io</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#docker官方维护"><span class="nav-number">1.1.1.</span> <span class="nav-text">docker官方维护</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#非官方维护"><span class="nav-number">1.1.2.</span> <span class="nav-text">非官方维护</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gcr-io-和-k8s-gcr-io"><span class="nav-number">1.2.</span> <span class="nav-text">gcr.io 和 k8s.gcr.io</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#gcr-io"><span class="nav-number">1.2.1.</span> <span class="nav-text">gcr.io</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#k8s-gcr-io"><span class="nav-number">1.2.2.</span> <span class="nav-text">k8s.gcr.io</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#quay-io"><span class="nav-number">1.3.</span> <span class="nav-text">quay.io</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-io-镜像加速"><span class="nav-number">2.</span> <span class="nav-text">docker.io 镜像加速</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用中科大镜像-docker-mirrors-ustc-edu-cn"><span class="nav-number">2.1.</span> <span class="nav-text">使用中科大镜像 docker.mirrors.ustc.edu.cn</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Azure中国镜像-dockerhub-azk8s-cn"><span class="nav-number">2.2.</span> <span class="nav-text">使用Azure中国镜像 dockerhub.azk8s.cn</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gcr-io-和-k8s-gcr-io-镜像加速"><span class="nav-number">3.</span> <span class="nav-text">gcr.io 和 k8s.gcr.io 镜像加速</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gcr-io-1"><span class="nav-number">3.1.</span> <span class="nav-text">gcr.io</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用中科大镜像-gcr-mirrors-ustc-edu-cn"><span class="nav-number">3.1.1.</span> <span class="nav-text">使用中科大镜像 gcr.mirrors.ustc.edu.cn</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用Azure中国镜像-gcr-azk8s-cn"><span class="nav-number">3.1.2.</span> <span class="nav-text">使用Azure中国镜像 gcr.azk8s.cn</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#k8s-gcr-io-1"><span class="nav-number">3.2.</span> <span class="nav-text">k8s.gcr.io</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#quay-io-镜像加速"><span class="nav-number">4.</span> <span class="nav-text">quay.io 镜像加速</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用中科大镜像-quay-mirrors-ustc-edu-cn"><span class="nav-number">4.1.</span> <span class="nav-text">使用中科大镜像 quay.mirrors.ustc.edu.cn</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Azure中国镜像-quay-azk8s-cn"><span class="nav-number">4.2.</span> <span class="nav-text">使用Azure中国镜像 quay.azk8s.cn</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一个python脚本全搞定"><span class="nav-number">5.</span> <span class="nav-text">一个python脚本全搞定</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+</body>
+</html>
