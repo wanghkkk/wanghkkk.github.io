@@ -146,12 +146,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">5</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">6</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">6</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">7</span></a>
 
   </li>
         <li class="menu-item menu-item-about">
@@ -183,6 +183,92 @@
             
 
   <div class="posts-expand">
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/20/Prometheus-Operator-test.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/20/Prometheus-Operator-test.html" class="post-title-link" itemprop="url">Prometheus-Operator 手动入门实战</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-20 14:27:55" itemprop="dateCreated datePublished" datetime="2019-11-20T14:27:55+08:00">2019-11-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>prometheus operator 手动入门实战</p><p>虽然生产中我们大部分都是通过<a href="https://github.com/helm/charts/tree/master/stable/prometheus-operator" target="_blank" rel="noopener">Helm的方式来安装Prometheus-Operator</a>，但是我们也是需要明白Prometheus Operator的原理，以及其中5个CRD的YAML定义方式，这里我们以手动的方式来安装部署Prometheus Operator以及Prometheus Server、Alertmanager集群，配置我们需要监控的对象。</p><p><a href="https://github.com/coreos/prometheus-operator" target="_blank" rel="noopener">Prometheus Operator GitHub</a></p><h2 id="Prometheus-Operator简介"><a href="#Prometheus-Operator简介" class="headerlink" title="Prometheus Operator简介"></a>Prometheus Operator简介</h2><h3 id="Prometheus-Operator-安装后提供如下功能："><a href="#Prometheus-Operator-安装后提供如下功能：" class="headerlink" title="Prometheus Operator 安装后提供如下功能："></a>Prometheus Operator 安装后提供如下功能：</h3><ul>
+<li>很容易的在kubernetes集群中特定的Namespace中创建和销毁prometheus实例；</li>
+<li>配置简单：使用kubernetes原生的方式（CRD）对prometheus的版本，持久化，数据保留，实例数进行配置；</li>
+<li>通过labels来指定生成对目标监控的配置；</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/20/Prometheus-Operator-test.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
         
   
   
@@ -763,19 +849,19 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
