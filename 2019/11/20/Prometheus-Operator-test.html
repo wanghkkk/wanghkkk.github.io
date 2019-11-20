@@ -60,6 +60,7 @@
 <meta property="og:site_name" content="Knner.Wang&#39;s Blog">
 <meta property="og:description" content="prometheus operator 手动入门实战虽然生产中我们大部分都是通过Helm的方式来安装Prometheus-Operator，但是我们也是需要明白Prometheus Operator的原理，以及其中5个CRD的YAML定义方式，这里我们以手动的方式来安装部署Prometheus Operator以及Prometheus Server、Alertmanager集群，配置我们需要监控的">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;prometheus.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Prometheus-Operator-test&#x2F;prometheus-operator.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Prometheus-Operator-test&#x2F;prometheus-01-config.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Prometheus-Operator-test&#x2F;example-app-target.jpg">
@@ -75,7 +76,7 @@
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Prometheus-Operator-test&#x2F;custom-metrics-elements.png">
 <meta property="og:updated_time" content="2019-11-20T06:27:55.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Prometheus-Operator-test&#x2F;prometheus-operator.png">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;prometheus.jpg">
 
 <link rel="canonical" href="https://knner.wang/2019/11/20/Prometheus-Operator-test.html">
 
@@ -256,10 +257,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>prometheus operator 手动入门实战</p><p>虽然生产中我们大部分都是通过<a href="https://github.com/helm/charts/tree/master/stable/prometheus-operator" target="_blank" rel="noopener">Helm的方式来安装Prometheus-Operator</a>，但是我们也是需要明白Prometheus Operator的原理，以及其中5个CRD的YAML定义方式，这里我们以手动的方式来安装部署Prometheus Operator以及Prometheus Server、Alertmanager集群，配置我们需要监控的对象。</p><p><a href="https://github.com/coreos/prometheus-operator" target="_blank" rel="noopener">Prometheus Operator GitHub</a></p><p>本文采用的环境以及版本：</p><ul>
+        <p>prometheus operator 手动入门实战</p><p><img src="/images/logos/prometheus.jpg" alt></p><p>虽然生产中我们大部分都是通过<a href="https://github.com/helm/charts/tree/master/stable/prometheus-operator" target="_blank" rel="noopener">Helm的方式来安装Prometheus-Operator</a>，但是我们也是需要明白Prometheus Operator的原理，以及其中5个CRD的YAML定义方式，这里我们以手动的方式来安装部署Prometheus Operator以及Prometheus Server、Alertmanager集群，配置我们需要监控的对象。</p><p><a href="https://github.com/coreos/prometheus-operator" target="_blank" rel="noopener">Prometheus Operator GitHub</a></p><p>本文采用的环境以及版本：</p><ul>
 <li>Kubernetes 1.15.5 + Calico v3.6.5</li>
 <li>Prometheus-Operator v0.34.0</li>
 </ul><a id="more"></a>
+
 
 
 
