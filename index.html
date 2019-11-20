@@ -242,10 +242,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>prometheus operator 手动入门实战</p><p>虽然生产中我们大部分都是通过<a href="https://github.com/helm/charts/tree/master/stable/prometheus-operator" target="_blank" rel="noopener">Helm的方式来安装Prometheus-Operator</a>，但是我们也是需要明白Prometheus Operator的原理，以及其中5个CRD的YAML定义方式，这里我们以手动的方式来安装部署Prometheus Operator以及Prometheus Server、Alertmanager集群，配置我们需要监控的对象。</p><p><a href="https://github.com/coreos/prometheus-operator" target="_blank" rel="noopener">Prometheus Operator GitHub</a></p><h2 id="Prometheus-Operator简介"><a href="#Prometheus-Operator简介" class="headerlink" title="Prometheus Operator简介"></a>Prometheus Operator简介</h2><h3 id="Prometheus-Operator-安装后提供如下功能："><a href="#Prometheus-Operator-安装后提供如下功能：" class="headerlink" title="Prometheus Operator 安装后提供如下功能："></a>Prometheus Operator 安装后提供如下功能：</h3><ul>
-<li>很容易的在kubernetes集群中特定的Namespace中创建和销毁prometheus实例；</li>
-<li>配置简单：使用kubernetes原生的方式（CRD）对prometheus的版本，持久化，数据保留，实例数进行配置；</li>
-<li>通过labels来指定生成对目标监控的配置；</li>
+          <p>prometheus operator 手动入门实战</p><p>虽然生产中我们大部分都是通过<a href="https://github.com/helm/charts/tree/master/stable/prometheus-operator" target="_blank" rel="noopener">Helm的方式来安装Prometheus-Operator</a>，但是我们也是需要明白Prometheus Operator的原理，以及其中5个CRD的YAML定义方式，这里我们以手动的方式来安装部署Prometheus Operator以及Prometheus Server、Alertmanager集群，配置我们需要监控的对象。</p><p><a href="https://github.com/coreos/prometheus-operator" target="_blank" rel="noopener">Prometheus Operator GitHub</a></p><p>本文采用的环境以及版本：</p><ul>
+<li>Kubernetes 1.15.5 + Calico v3.6.5</li>
+<li>Prometheus-Operator v0.34.0</li>
 </ul>
           <!--noindex-->
             <div class="post-button">
