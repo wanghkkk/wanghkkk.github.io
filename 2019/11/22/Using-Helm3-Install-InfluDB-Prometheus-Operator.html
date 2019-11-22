@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="在上篇文章中，Prometheus-Operator 手动入门实战，已经手动安装了Prometheus-Operator并且手动安装了Prometheus、Alertmanager、ServiceMonitor、PrometheusRule这些资源，明白的运行原理，但是实际生产中，需要监控的有很多包括Kubernetes集群本身，以及跑在Kubernetes集群之上的应用，都需要我们手动的去添加监">
+<meta name="keywords" content="prometheus,influxdb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Helm3安装Prometheus-Operator + InfluxDB">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;11&#x2F;22&#x2F;Using-Helm3-Install-InfluDB-Prometheus-Operator.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="在上篇文章中，Prometheus-Operator 手动入门实战，已经手动安装了Prometheus-Operator并且手动安装了Prometheus、Alertmanager、ServiceMonitor、PrometheusRule这些资源，明白的运行原理，但是实际生产中，需要监控的有很多包括Kubernetes集群本身，以及跑在Kubernetes集群之上的应用，都需要我们手动的去添加监">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Using-Helm3-Install-InfluDB-Prometheus-Operator&#x2F;prometheus-target-errors.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Using-Helm3-Install-InfluDB-Prometheus-Operator&#x2F;target-etcd-ok.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Using-Helm3-Install-InfluDB-Prometheus-Operator&#x2F;target-kube-proxy-ok.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Using-Helm3-Install-InfluDB-Prometheus-Operator&#x2F;prometheus-target-ok.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Using-Helm3-Install-InfluDB-Prometheus-Operator&#x2F;grafana-dashboard-list.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Using-Helm3-Install-InfluDB-Prometheus-Operator&#x2F;grafana-influxdb-resource.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Using-Helm3-Install-InfluDB-Prometheus-Operator&#x2F;prometheus-new-target-influxdb.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Using-Helm3-Install-InfluDB-Prometheus-Operator&#x2F;prometheus-up.png">
+<meta property="og:updated_time" content="2019-11-22T06:25:53.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Using-Helm3-Install-InfluDB-Prometheus-Operator&#x2F;prometheus-target-errors.jpg">
+
+<link rel="canonical" href="https://knner.wang/2019/11/22/Using-Helm3-Install-InfluDB-Prometheus-Operator.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>使用Helm3安装Prometheus-Operator + InfluxDB | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">8</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">10</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/22/Using-Helm3-Install-InfluDB-Prometheus-Operator.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用Helm3安装Prometheus-Operator + InfluxDB
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-22 14:25:53" itemprop="dateCreated datePublished" datetime="2019-11-22T14:25:53+08:00">2019-11-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在上篇文章中，<a href="/2019/11/20/Prometheus-Operator-test.html" title="Prometheus-Operator 手动入门实战">Prometheus-Operator 手动入门实战</a>，已经手动安装了Prometheus-Operator并且手动安装了Prometheus、Alertmanager、ServiceMonitor、PrometheusRule这些资源，明白的运行原理，但是实际生产中，需要监控的有很多包括Kubernetes集群本身，以及跑在Kubernetes集群之上的应用，都需要我们手动的去添加监控非常的麻烦，所以这篇文章主要记录使用Helm3安装prometheus-operator，来减轻手动的繁琐步骤。</p><p>本文采用的环境以及版本：</p><ul>
+<li>Kubernetes 1.15.5 + Calico v3.6.5</li>
+<li>Helm v3.0.0</li>
+<li>InfluxDB Chart Version：3.0.1，对应的InfluxDB版本：1.7.6</li>
+<li>Prometheus-Operator Chart Version：8.2.2  对应的是 Prometheus-Operator版本： v0.34.0</li>
+<li>所有的都安装到monitoring 命名空间中</li>
+</ul><a id="more"></a>
+
+
+<h2 id="前提依赖"><a href="#前提依赖" class="headerlink" title="前提依赖"></a>前提依赖</h2><ul>
+<li><p>Kubernetes 测试环境，参考：<a href="/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html" title="使用kubeadm快速安装kubernetes 1.15.5测试环境">使用kubeadm快速安装kubernetes 1.15.5测试环境</a></p>
+</li>
+<li><p>Helm3 已经安装完毕并配置好repo，参考：<a href="/2019/11/14/Pre-trial-helm3.html" title="抢先试用Helm3，并安装nginx-ingress-controller">抢先试用Helm3，并安装nginx-ingress-controller</a></p>
+</li>
+</ul>
+<p>生产环境要考虑Prometheus的持久化存储问题，当然可以参考前面的<a href="/2019/11/20/Prometheus-Operator-test.html" title="Prometheus-Operator 手动入门实战">Prometheus-Operator 手动入门实战</a>配置storage。不过当有多台prometheus server的时候数据的备份就很麻烦，所以这里使用influxDB作为prometheus server的<a href="https://prometheus.io/docs/operating/integrations/#remote-endpoints-and-storage" target="_blank" rel="noopener">remote-read，remote-write</a>。</p>
+<p>InfluxDB 也是比较流行的时序数据库，<a href="https://www.influxdata.com/products/influxdb-overview/" target="_blank" rel="noopener">参考官网</a></p>
+<blockquote>
+<p>摘自官方：<a href="https://prometheus.io/docs/operating/integrations" target="_blank" rel="noopener">https://prometheus.io/docs/operating/integrations</a></p>
+<h2 id="File-Service-Discovery"><a href="#File-Service-Discovery" class="headerlink" title="File Service Discovery"></a>File Service Discovery</h2><p>For service discovery mechanisms not natively supported by Prometheus, <a href="https://prometheus.io/docs/operating/configuration/#" target="_blank" rel="noopener">file-based service discovery</a> provides an interface for integrating.</p>
+<ul>
+<li><a href="https://github.com/ContainerSolutions/prometheus-swarm-discovery" target="_blank" rel="noopener">Docker Swarm</a></li>
+<li><a href="https://github.com/packethost/prometheus-packet-sd" target="_blank" rel="noopener">Packet</a></li>
+<li><a href="https://github.com/scaleway/prometheus-scw-sd" target="_blank" rel="noopener">Scaleway</a></li>
+</ul>
+<h2 id="Remote-Endpoints-and-Storage"><a href="#Remote-Endpoints-and-Storage" class="headerlink" title="Remote Endpoints and Storage"></a>Remote Endpoints and Storage</h2><p>The <a href="https://prometheus.io/docs/operating/configuration/#remote_write" target="_blank" rel="noopener">remote write</a> and <a href="https://prometheus.io/docs/operating/configuration/#remote_read" target="_blank" rel="noopener">remote read</a> features of Prometheus allow transparently sending and receiving samples. This is primarily intended for long term storage. It is recommended that you perform careful evaluation of any solution in this space to confirm it can handle your data volumes.</p>
+<ul>
+<li><a href="https://github.com/solarwinds/prometheus2appoptics" target="_blank" rel="noopener">AppOptics</a>: write</li>
+<li><a href="https://github.com/cosh/PrometheusToAdx" target="_blank" rel="noopener">Azure Data Explorer</a>: read and write</li>
+<li><a href="https://github.com/ChronixDB/chronix.ingester" target="_blank" rel="noopener">Chronix</a>: write</li>
+<li><a href="https://github.com/cortexproject/cortex" target="_blank" rel="noopener">Cortex</a>: read and write</li>
+<li><a href="https://github.com/crate/crate_adapter" target="_blank" rel="noopener">CrateDB</a>: read and write</li>
+<li><a href="https://github.com/infonova/prometheusbeat" target="_blank" rel="noopener">Elasticsearch</a>: write</li>
+<li><a href="https://gnocchi.xyz/prometheus.html" target="_blank" rel="noopener">Gnocchi</a>: write</li>
+<li><a href="https://github.com/prometheus/prometheus/tree/master/documentation/examples/remote_storage/remote_storage_adapter" target="_blank" rel="noopener">Graphite</a>: write</li>
+<li><a href="https://docs.influxdata.com/influxdb/latest/supported_protocols/prometheus" target="_blank" rel="noopener">InfluxDB</a>: read and write</li>
+<li><a href="https://github.com/circonus-labs/irondb-prometheus-adapter" target="_blank" rel="noopener">IRONdb</a>: read and write</li>
+<li><a href="https://github.com/Telefonica/prometheus-kafka-adapter" target="_blank" rel="noopener">Kafka</a>: write</li>
+<li><a href="https://m3db.github.io/m3/integrations/prometheus" target="_blank" rel="noopener">M3DB</a>: read and write</li>
+<li><a href="https://github.com/prometheus/prometheus/tree/master/documentation/examples/remote_storage/remote_storage_adapter" target="_blank" rel="noopener">OpenTSDB</a>: write</li>
+<li><a href="https://github.com/timescale/prometheus-postgresql-adapter" target="_blank" rel="noopener">PostgreSQL/TimescaleDB</a>: read and write</li>
+<li><a href="https://github.com/signalfx/metricproxy#prometheus" target="_blank" rel="noopener">SignalFx</a>: write</li>
+<li><a href="https://github.com/kebe7jun/ropee" target="_blank" rel="noopener">Splunk</a>: read and write</li>
+<li><a href="https://github.com/bragfoo/TiPrometheus" target="_blank" rel="noopener">TiKV</a>: read and write</li>
+<li><a href="https://github.com/thanos-io/thanos" target="_blank" rel="noopener">Thanos</a>: write</li>
+<li><a href="https://github.com/VictoriaMetrics/VictoriaMetrics" target="_blank" rel="noopener">VictoriaMetrics</a>: write</li>
+<li><a href="https://github.com/wavefrontHQ/prometheus-storage-adapter" target="_blank" rel="noopener">Wavefront</a>: write</li>
+</ul>
+<h2 id="Alertmanager-Webhook-Receiver"><a href="#Alertmanager-Webhook-Receiver" class="headerlink" title="Alertmanager Webhook Receiver"></a>Alertmanager Webhook Receiver</h2><p>For notification mechanisms not natively supported by the Alertmanager, the <a href="https://prometheus.io/docs/alerting/configuration/#webhook_config" target="_blank" rel="noopener">webhook receiver</a> allows for integration.</p>
+<ul>
+<li><a href="https://gitlab.com/yakshaving.art/alertsnitch" target="_blank" rel="noopener">Alertsnitch</a>: saves alerts to a MySQL database</li>
+<li><a href="https://github.com/DataReply/alertmanager-sns-forwarder" target="_blank" rel="noopener">AWS SNS</a></li>
+<li><a href="https://github.com/timonwong/prometheus-webhook-dingtalk" target="_blank" rel="noopener">DingTalk</a></li>
+<li><a href="https://github.com/b-com-software-basis/alertmanager2gelf" target="_blank" rel="noopener">GELF</a></li>
+<li><a href="https://github.com/multimfi/bot" target="_blank" rel="noopener">IRC Bot</a></li>
+<li><a href="https://github.com/free/jiralert" target="_blank" rel="noopener">JIRAlert</a></li>
+<li><a href="https://github.com/knyar/phalerts" target="_blank" rel="noopener">Phabricator / Maniphest</a></li>
+<li><a href="https://github.com/idealista/prom2teams" target="_blank" rel="noopener">prom2teams</a>: forwards notifications to Microsoft Teams</li>
+<li><a href="https://github.com/FXinnovation/alertmanager-webhook-servicenow" target="_blank" rel="noopener">ServiceNow</a></li>
+<li><a href="https://github.com/messagebird/sachet" target="_blank" rel="noopener">SMS</a>: supports <a href="https://github.com/messagebird/sachet/blob/master/examples/config.yaml" target="_blank" rel="noopener">multiple providers</a></li>
+<li><a href="https://github.com/maxwo/snmp_notifier" target="_blank" rel="noopener">SNMP traps</a></li>
+<li><a href="https://github.com/inCaller/prometheus_bot" target="_blank" rel="noopener">Telegram bot</a></li>
+<li><a href="https://github.com/jelmer/prometheus-xmpp-alerts" target="_blank" rel="noopener">XMPP Bot</a></li>
+<li><a href="https://github.com/Code2Life/nodess-apps/tree/master/src/zoom-alert-2.0" target="_blank" rel="noopener">Zoom</a></li>
+</ul>
+<h2 id="Management"><a href="#Management" class="headerlink" title="Management"></a>Management</h2><p>Prometheus does not include configuration management functionality, allowing you to integrate it with your existing systems or build on top of it.</p>
+<ul>
+<li><a href="https://github.com/coreos/prometheus-operator" target="_blank" rel="noopener">Prometheus Operator</a>: Manages Prometheus on top of Kubernetes</li>
+<li><a href="https://github.com/line/promgen" target="_blank" rel="noopener">Promgen</a>: Web UI and configuration generator for Prometheus and Alertmanager</li>
+</ul>
+<h2 id="Other"><a href="#Other" class="headerlink" title="Other"></a>Other</h2><ul>
+<li><a href="https://github.com/prymitive/karma" target="_blank" rel="noopener">karma</a>: alert dashboard</li>
+<li><a href="https://github.com/RobustPerception/PushProx" target="_blank" rel="noopener">PushProx</a>: Proxy to transverse NAT and similar network setups</li>
+<li><a href="https://github.com/promregator/promregator" target="_blank" rel="noopener">Promregator</a>: discovery and scraping for Cloud Foundry applications</li>
+</ul>
+</blockquote>
+<h2 id="Helm3-安装InfluxDB"><a href="#Helm3-安装InfluxDB" class="headerlink" title="Helm3 安装InfluxDB"></a>Helm3 安装InfluxDB</h2><p>在下载或者安装Chart的时候一定要记得更新Helm repo：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ helm repo update</span><br></pre></td></tr></table></figure>
+
+<p>搜索influxDB：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">$ helm search repo influxdb</span><br><span class="line">NAME            	CHART VERSION	APP VERSION	DESCRIPTION                                       </span><br><span class="line">stable/influxdb 	3.0.1        	1.7.6      	Scalable datastore <span class="keyword">for</span> metrics, events, and rea...</span><br><span class="line">stable/kapacitor	1.1.3        	1.5.2      	InfluxDB<span class="string">'s native data processing engine. It ca...</span></span><br></pre></td></tr></table></figure>
+
+<p>因为我们有很多的参数要定义，所以先下载下来，然后更改values.yaml</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ helm pull stable/influxdb</span><br><span class="line">$ tar xf influxdb-3.0.1.tgz</span><br></pre></td></tr></table></figure>
+
+<p>备份默认的values，方便回滚：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> influxdb</span><br><span class="line">$ cp values.yaml&#123;,.ori&#125;</span><br></pre></td></tr></table></figure>
+
+<p>更改values.yaml，如下，只截取了更改的部分：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">persistence:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment">## influxdb data Persistent Volume Storage Class</span></span><br><span class="line">  <span class="comment">## If defined, storageClassName: &lt;storageClass&gt;</span></span><br><span class="line">  <span class="comment">## If set to "-", storageClassName: "", which disables dynamic provisioning</span></span><br><span class="line">  <span class="comment">## If undefined (the default) or set to null, no storageClassName spec is</span></span><br><span class="line">  <span class="comment">##   set, choosing the default provisioner.  (gp2 on AWS, standard on</span></span><br><span class="line">  <span class="comment">##   GKE, AWS &amp; OpenStack)</span></span><br><span class="line">  <span class="comment">##</span></span><br><span class="line">  <span class="attr">storageClass:</span> <span class="string">rook-ceph-rbd</span> <span class="comment"># 指定storageClass，我这里没有storageClass，所以这里我关闭了。</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">  <span class="attr">accessMode:</span> <span class="string">ReadWriteOnce</span></span><br><span class="line">  <span class="attr">size:</span> <span class="string">8Gi</span></span><br><span class="line"><span class="attr">resources:</span> <span class="comment"># 资源建议稍微大些，否则查询很慢，可以安装后根据Grafana的大屏的值，再修改</span></span><br><span class="line">  <span class="attr">requests:</span></span><br><span class="line">    <span class="attr">memory:</span> <span class="string">2Gi</span></span><br><span class="line">    <span class="attr">cpu:</span> <span class="number">0.5</span></span><br><span class="line">  <span class="attr">limits:</span></span><br><span class="line">    <span class="attr">memory:</span> <span class="string">3Gi</span></span><br><span class="line">    <span class="attr">cpu:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">ingress:</span> <span class="comment"># 开启ingress</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">tls:</span> <span class="literal">false</span></span><br><span class="line">  <span class="comment"># secretName: my-tls-cert # 如果需要开启tls的请取消注释，并手动创建该secret</span></span><br><span class="line">  <span class="attr">hostname:</span> <span class="string">influxdb.test.aws.test.com</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">"nginx"</span></span><br><span class="line"></span><br><span class="line"><span class="attr">env:</span> <span class="comment">#在这里设置管理员admin密码，新加数据库，新加用户名密码，默认新加用户会有新加数据库的所有权限；注意：不要再setDefaultUser里设定，setDefaultUser里设定的话只能新加管理员，其他的数据库，新用户都创建不了。</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">INFLUXDB_ADMIN_ENABLED</span></span><br><span class="line">    <span class="attr">value:</span> <span class="string">"true"</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">INFLUXDB_ADMIN_USER</span></span><br><span class="line">    <span class="attr">value:</span> <span class="string">"admin"</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">INFLUXDB_ADMIN_PASSWORD</span></span><br><span class="line">    <span class="attr">value:</span> <span class="string">"Adm1n123"</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">INFLUXDB_DB</span></span><br><span class="line">    <span class="attr">value:</span> <span class="string">"prometheus"</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">INFLUXDB_USER</span></span><br><span class="line">    <span class="attr">value:</span> <span class="string">"prometheus"</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">INFLUXDB_USER_PASSWORD</span></span><br><span class="line">    <span class="attr">value:</span> <span class="string">"Pr0m123"</span></span><br><span class="line"><span class="attr">config:</span></span><br><span class="line">  <span class="attr">data:</span></span><br><span class="line">    <span class="attr">max_series_per_database:</span> <span class="number">0</span></span><br><span class="line">    <span class="attr">max_values_per_tag:</span> <span class="number">0</span></span><br><span class="line">  <span class="attr">admin:</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">    <span class="attr">auth_enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">initScripts:</span> <span class="comment"># 设定数据保留策略，默认是一直保留，需要手动清理，这里设置成保留180天。</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">scripts:</span></span><br><span class="line">    <span class="attr">retention.iql:</span> <span class="string">|+</span></span><br><span class="line">      <span class="string">CREATE</span> <span class="string">RETENTION</span> <span class="string">POLICY</span> <span class="string">"prometheus_retention_policy"</span> <span class="string">on</span> <span class="string">"prometheus"</span> <span class="string">DURATION</span> <span class="string">180d</span> <span class="string">REPLICATION</span> <span class="number">1</span> <span class="string">DEFAULT</span></span><br></pre></td></tr></table></figure>
+
+<div class="note danger">
+            <p>注意：</p><p>上面的配置是：</p><ul><li>开启influxdb auth认证</li><li>创建admin用户，密码为Adm1n123</li><li>创建prometheus数据库</li><li>创建用户prometheus，密码为Pr0m123；此时prometheus用户对prometheus数据库有读写权限</li><li>对数据库prometheus设置保留策略：保留180天</li></ul><p>警告：</p><p>警告，经过测试后，如果开启auth，并通过设定setDefaultUser（prometheus job）去设定管理员的用户名密码，此时管理员用户名密码是设置OK了，但是并没有创建数据库，也没有设置用户。所以这里建议不要用setDefaultUser这个，用env的方式，但是使用env的方式，如果进入到容器内是可以通过env命令查看到这些敏感信息的，需要做好pod/exec 权限。</p><p><a href="https://github.com/helm/charts/tree/master/stable/influxdb" target="_blank" rel="noopener">参考InfluxDB helm chart</a></p><p><a href="https://hub.docker.com/_/influxdb/?tab=description" target="_blank" rel="noopener">参考InfluxDB docker</a></p><p><a href="https://github.com/influxdata/influxdata-docker/tree/master/influxdb/1.7/alpine" target="_blank" rel="noopener">参考InfluxDB dockerfile</a></p>
+          </div>
+
+<p>安装influxdb：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl create ns monitoring</span><br><span class="line">$ <span class="built_in">cd</span> influxdb <span class="comment"># 进入influxdb helm chart目录</span></span><br><span class="line">$ helm install influxdb ./ --namespace monitoring</span><br><span class="line">NAME: influxdb</span><br><span class="line">LAST DEPLOYED: Thu Nov 21 18:04:11 2019</span><br><span class="line">NAMESPACE: monitoring</span><br><span class="line">STATUS: deployed</span><br><span class="line">REVISION: 1</span><br><span class="line">TEST SUITE: None</span><br><span class="line">NOTES:</span><br><span class="line">InfluxDB can be accessed via port 8086 on the following DNS name from within your cluster:</span><br><span class="line"></span><br><span class="line">- http://influxdb.monitoring:8086</span><br><span class="line"></span><br><span class="line">You can easily connect to the remote instance with your <span class="built_in">local</span> influx cli. To forward the API port to localhost:8086 run the following:</span><br><span class="line"></span><br><span class="line">- kubectl port-forward --namespace monitoring $(kubectl get pods --namespace monitoring -l app=influxdb -o jsonpath=<span class="string">'&#123; .items[0].metadata.name &#125;'</span>) 8086:8086</span><br><span class="line"></span><br><span class="line">You can also connect to the influx cli from inside the container. To open a shell session <span class="keyword">in</span> the InfluxDB pod run the following:</span><br><span class="line"></span><br><span class="line">- kubectl <span class="built_in">exec</span> -i -t --namespace monitoring $(kubectl get pods --namespace monitoring -l app=influxdb -o jsonpath=<span class="string">'&#123;.items[0].metadata.name&#125;'</span>) /bin/sh</span><br><span class="line"></span><br><span class="line">To tail the logs <span class="keyword">for</span> the InfluxDB pod run the following:</span><br><span class="line"></span><br><span class="line">- kubectl logs -f --namespace monitoring $(kubectl get pods --namespace monitoring -l app=influxdb -o jsonpath=<span class="string">'&#123; .items[0].metadata.name &#125;'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证是否启动</span></span><br><span class="line">$ kubectl -n monitoring get all</span><br><span class="line">NAME             READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod/influxdb-0   1/1     Running   0          31m</span><br><span class="line"></span><br><span class="line">NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE</span><br><span class="line">service/influxdb   ClusterIP   10.100.50.188   &lt;none&gt;        8086/TCP,8083/TCP,8088/TCP   31m</span><br><span class="line"></span><br><span class="line">NAME                        READY   AGE</span><br><span class="line">statefulset.apps/influxdb   1/1     31m</span><br></pre></td></tr></table></figure>
+
+<p>登陆到influxdb-0这个pod，验证一下上面的定义是否都正常：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl -n monitoring <span class="built_in">exec</span> -it influxdb-0 -- bash</span><br><span class="line">bash-4.4<span class="comment"># influx</span></span><br><span class="line">Connected to http://localhost:8086 version 1.7.6</span><br><span class="line">InfluxDB shell version: 1.7.6</span><br><span class="line">Enter an InfluxQL query</span><br><span class="line">&gt; show databases <span class="comment"># 查看数据库列表，发现没有权限</span></span><br><span class="line">ERR: unable to parse authentication credentials</span><br><span class="line">Warning: It is possible this error is due to not setting a database.</span><br><span class="line">Please <span class="built_in">set</span> a database with the <span class="built_in">command</span> <span class="string">"use &lt;database&gt;"</span>.</span><br><span class="line"></span><br><span class="line">&gt; auth admin Adm1n123  <span class="comment"># 使用admin账户登陆，再次查看数据库</span></span><br><span class="line">&gt; show databases <span class="comment"># 可以看到已经创建了prometheus数据库</span></span><br><span class="line">name: databases</span><br><span class="line">name</span><br><span class="line">----</span><br><span class="line">prometheus</span><br><span class="line">_internal</span><br><span class="line"></span><br><span class="line">&gt; show users  <span class="comment"># 查看所有用户</span></span><br><span class="line">user       admin</span><br><span class="line">----       -----</span><br><span class="line">admin      <span class="literal">true</span> <span class="comment"># 管理员</span></span><br><span class="line">prometheus <span class="literal">false</span> <span class="comment"># prometheus用户，非管理员</span></span><br><span class="line"></span><br><span class="line">&gt; show grants <span class="keyword">for</span> prometheus <span class="comment"># 查看prometheus的权限，对prometheus数据库有所有权限</span></span><br><span class="line">database   privilege</span><br><span class="line">--------   ---------</span><br><span class="line">prometheus ALL PRIVILEGE</span><br><span class="line"></span><br><span class="line">&gt; use prometheus <span class="comment"># 使用数据库prometheus</span></span><br><span class="line">Using database prometheus</span><br><span class="line">&gt; show retention policies <span class="comment"># 查询prometheus数据库的数据保留策略。4320/24=180</span></span><br><span class="line">name                        duration  shardGroupDuration replicaN default</span><br><span class="line">----                        --------  ------------------ -------- -------</span><br><span class="line">autogen                     0s        168h0m0s           1        <span class="literal">false</span></span><br><span class="line">prometheus_retention_policy 4320h0m0s 168h0m0s           1        <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>设置都是正常的，具体的influxdb的操作请参考：</p>
+<ul>
+<li><p><a href="https://docs.influxdata.com/influxdb/v1.7/query_language/database_management/#create-retention-policies-with-create-retention-policy" target="_blank" rel="noopener">数据保留策略</a></p>
+</li>
+<li><p><a href="https://docs.influxdata.com/influxdb/v1.7/administration/config/" target="_blank" rel="noopener">influxdb配置参考</a></p>
+</li>
+<li><p><a href="https://docs.influxdata.com/influxdb/v1.7/introduction/getting-started/" target="_blank" rel="noopener">基本操作</a></p>
+</li>
+<li><p><a href="https://docs.influxdata.com/influxdb/v1.7/administration/authentication_and_authorization/" target="_blank" rel="noopener">认证和授权</a></p>
+</li>
+</ul>
+<p>然后检查一下influxdb的配置文件：</p>
+<figure class="highlight"><table><tr><td class="code"><pre><span class="line">bash-4.4# cat /etc/influxdb/influxdb.conf </span><br><span class="line"><span class="attr">reporting-disabled</span> = <span class="literal">false</span></span><br><span class="line"><span class="attr">bind-address</span> = <span class="string">":8088"</span></span><br><span class="line"></span><br><span class="line"><span class="section">[meta]</span></span><br><span class="line">  dir = "/var/lib/influxdb/meta"</span><br><span class="line">  retention-autocreate = true</span><br><span class="line">  logging-enabled = true</span><br><span class="line"></span><br><span class="line"><span class="section">[data]</span></span><br><span class="line">  dir = "/var/lib/influxdb/data"</span><br><span class="line">  wal-dir = "/var/lib/influxdb/wal"</span><br><span class="line">  query-log-enabled = true</span><br><span class="line">  cache-max-memory-size = 1073741824</span><br><span class="line">  cache-snapshot-memory-size = 26214400</span><br><span class="line">  cache-snapshot-write-cold-duration = "10m0s"</span><br><span class="line">  compact-full-write-cold-duration = "4h0m0s"</span><br><span class="line">  max-series-per-database = 0</span><br><span class="line">  max-values-per-tag = 0</span><br><span class="line">  trace-logging-enabled = false</span><br><span class="line"></span><br><span class="line"><span class="section">[coordinator]</span></span><br><span class="line">  write-timeout = "10s"</span><br><span class="line">  max-concurrent-queries = 0</span><br><span class="line">  query-timeout = "0s"</span><br><span class="line">  log-queries-after = "0s"</span><br><span class="line">  max-select-point = 0</span><br><span class="line">  max-select-series = 0</span><br><span class="line">  max-select-buckets = 0</span><br><span class="line"></span><br><span class="line"><span class="section">[retention]</span></span><br><span class="line">  enabled = true</span><br><span class="line">  check-interval = "30m0s"</span><br><span class="line"></span><br><span class="line"><span class="section">[shard-precreation]</span></span><br><span class="line">  enabled = true</span><br><span class="line">  check-interval = "10m0s"</span><br><span class="line">  advance-period = "30m0s"</span><br><span class="line"></span><br><span class="line"><span class="section">[admin]</span></span><br><span class="line">  enabled = true</span><br><span class="line">  bind-address = ":8083"</span><br><span class="line">  https-enabled = false</span><br><span class="line">  https-certificate = "/etc/ssl/influxdb.pem"</span><br><span class="line"></span><br><span class="line"><span class="section">[monitor]</span></span><br><span class="line">  store-enabled = true</span><br><span class="line">  store-database = "_internal"</span><br><span class="line">  store-interval = "10s"</span><br><span class="line"></span><br><span class="line"><span class="section">[subscriber]</span></span><br><span class="line">  enabled = true</span><br><span class="line">  http-timeout = "30s"</span><br><span class="line">  insecure-skip-verify = false</span><br><span class="line">  ca-certs = ""</span><br><span class="line">  write-concurrency = 40</span><br><span class="line">  write-buffer-size = 1000</span><br><span class="line"></span><br><span class="line"><span class="section">[http]</span></span><br><span class="line">  enabled = true</span><br><span class="line">  bind-address = ":8086"</span><br><span class="line">  flux-enabled = true</span><br><span class="line">  auth-enabled = true</span><br><span class="line">  log-enabled = true</span><br><span class="line">  write-tracing = false</span><br><span class="line">  pprof-enabled = true</span><br><span class="line">  https-enabled = false</span><br><span class="line">  https-certificate = "/etc/ssl/influxdb.pem"</span><br><span class="line">  https-private-key = ""</span><br><span class="line">  max-row-limit = 10000</span><br><span class="line">  max-connection-limit = 0</span><br><span class="line">  shared-secret = "beetlejuicebeetlejuicebeetlejuice"</span><br><span class="line">  realm = "InfluxDB"</span><br><span class="line">  unix-socket-enabled = false</span><br><span class="line">  bind-socket = "/var/run/influxdb.sock"</span><br><span class="line"></span><br><span class="line"><span class="comment"># <span class="doctag">TODO:</span> allow multiple graphite listeners</span></span><br><span class="line"></span><br><span class="line"><span class="section">[[graphite]]</span></span><br><span class="line">  enabled = false</span><br><span class="line">  bind-address = ":2003"</span><br><span class="line">  database = "graphite"</span><br><span class="line">  retention-policy = "autogen"</span><br><span class="line">  protocol = "tcp"</span><br><span class="line">  batch-size = 5000</span><br><span class="line">  batch-pending = 10</span><br><span class="line">  batch-timeout = "1s"</span><br><span class="line">  consistency-level = "one"</span><br><span class="line">  separator = "."</span><br><span class="line">  udp-read-buffer = 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># <span class="doctag">TODO:</span> allow multiple collectd listeners with templates</span></span><br><span class="line"></span><br><span class="line"><span class="section">[[collectd]]</span></span><br><span class="line">  enabled = false</span><br><span class="line">  bind-address = ":25826"</span><br><span class="line">  database = "collectd"</span><br><span class="line">  retention-policy = "autogen"</span><br><span class="line">  batch-size = 5000</span><br><span class="line">  batch-pending = 10</span><br><span class="line">  batch-timeout = "10s"</span><br><span class="line">  read-buffer = 0</span><br><span class="line">  typesdb = "/usr/share/collectd/types.db"</span><br><span class="line">  security-level = "none"</span><br><span class="line">  auth-file = "/etc/collectd/auth_file"</span><br><span class="line"></span><br><span class="line"><span class="comment"># <span class="doctag">TODO:</span> allow multiple opentsdb listeners with templates</span></span><br><span class="line"></span><br><span class="line"><span class="section">[[opentsdb]]</span></span><br><span class="line">  enabled = false</span><br><span class="line">  bind-address = ":4242"</span><br><span class="line">  database = "opentsdb"</span><br><span class="line">  retention-policy = "autogen"</span><br><span class="line">  consistency-level = "one"</span><br><span class="line">  tls-enabled = false</span><br><span class="line">  certificate = "/etc/ssl/influxdb.pem"</span><br><span class="line">  batch-size = 1000</span><br><span class="line">  batch-pending = 5</span><br><span class="line">  batch-timeout = "1s"</span><br><span class="line">  log-point-errors = true</span><br><span class="line"></span><br><span class="line"><span class="comment"># <span class="doctag">TODO:</span> allow multiple udp listeners with templates</span></span><br><span class="line"></span><br><span class="line"><span class="section">[[udp]]</span></span><br><span class="line">  enabled = false</span><br><span class="line">  bind-address = ":8089"</span><br><span class="line">  database = "udp"</span><br><span class="line">  retention-policy = "autogen"</span><br><span class="line">  batch-size = 5000</span><br><span class="line">  batch-pending = 10</span><br><span class="line">  read-buffer = 0</span><br><span class="line">  batch-timeout = "1s"</span><br><span class="line">  precision = "ns"</span><br><span class="line"></span><br><span class="line"><span class="section">[continuous_queries]</span></span><br><span class="line">  log-enabled = true</span><br><span class="line">  enabled = true</span><br><span class="line">  run-interval = "1s"</span><br><span class="line"></span><br><span class="line"><span class="section">[logging]</span></span><br><span class="line">  format =  "auto"</span><br><span class="line">  level =  "info"</span><br><span class="line">  supress-logo = false</span><br></pre></td></tr></table></figure>
+
+<p>InfluxDB 已经安装完毕，下面开始安装prometheus-operator。</p>
+<h2 id="Helm3-安装prometheus-operator"><a href="#Helm3-安装prometheus-operator" class="headerlink" title="Helm3 安装prometheus-operator"></a>Helm3 安装prometheus-operator</h2><p>因为我们有很多的自定义参数要更改，同样先要将prometheus-operator的chart下载下来：</p>
+<p>更新Helm repo：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ helm repo update</span><br></pre></td></tr></table></figure>
+
+<p>然后搜索prometheus-operator:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ helm search repo prometheus-operator</span><br><span class="line">NAME                      	CHART VERSION	APP VERSION	DESCRIPTION                                       </span><br><span class="line">stable/prometheus-operator	8.2.2        	0.34.0     	Provides easy monitoring definitions <span class="keyword">for</span> Kubern...</span><br></pre></td></tr></table></figure>
+
+<p>下载prometheus-operator chart：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ helm pull stable/prometheus-operator</span><br><span class="line">$ tar xf prometheus-operator-8.2.2.tgz</span><br><span class="line">$ ls</span><br><span class="line">prometheus-operator                 prometheus-operator-8.2.2.tgz</span><br></pre></td></tr></table></figure>
+
+<p>首先我们备份一下默认的values.yaml文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> prometheus-operator</span><br><span class="line">$ cp values.yaml&#123;,.ori&#125;</span><br><span class="line">$ ls</span><br><span class="line">charts  Chart.yaml  CONTRIBUTING.md  crds  README.md  requirements.lock  requirements.yaml  templates  values.yaml  values.yaml.ori</span><br></pre></td></tr></table></figure>
+
+<p>看一下整个Chart的目录结构吧：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ tree ./</span><br><span class="line">./</span><br><span class="line">├── charts</span><br><span class="line">│   ├── grafana <span class="comment"># 依赖：安装Grafana 大屏</span></span><br><span class="line">│   │   ├── Chart.yaml</span><br><span class="line">│   │   ├── ci</span><br><span class="line">│   │   │   ├── default-values.yaml</span><br><span class="line">│   │   │   ├── with-dashboard-json-values.yaml</span><br><span class="line">│   │   │   └── with-dashboard-values.yaml</span><br><span class="line">│   │   ├── dashboards</span><br><span class="line">│   │   │   └── custom-dashboard.json</span><br><span class="line">│   │   ├── README.md</span><br><span class="line">│   │   ├── templates</span><br><span class="line">│   │   │   ├── clusterrolebinding.yaml</span><br><span class="line">│   │   │   ├── clusterrole.yaml</span><br><span class="line">│   │   │   ├── configmap-dashboard-provider.yaml</span><br><span class="line">│   │   │   ├── configmap.yaml</span><br><span class="line">│   │   │   ├── dashboards-json-configmap.yaml</span><br><span class="line">│   │   │   ├── deployment.yaml</span><br><span class="line">│   │   │   ├── headless-service.yaml</span><br><span class="line">│   │   │   ├── _helpers.tpl</span><br><span class="line">│   │   │   ├── ingress.yaml</span><br><span class="line">│   │   │   ├── NOTES.txt</span><br><span class="line">│   │   │   ├── poddisruptionbudget.yaml</span><br><span class="line">│   │   │   ├── podsecuritypolicy.yaml</span><br><span class="line">│   │   │   ├── _pod.tpl</span><br><span class="line">│   │   │   ├── pvc.yaml</span><br><span class="line">│   │   │   ├── rolebinding.yaml</span><br><span class="line">│   │   │   ├── role.yaml</span><br><span class="line">│   │   │   ├── secret-env.yaml</span><br><span class="line">│   │   │   ├── secret.yaml</span><br><span class="line">│   │   │   ├── serviceaccount.yaml</span><br><span class="line">│   │   │   ├── service.yaml</span><br><span class="line">│   │   │   ├── statefulset.yaml</span><br><span class="line">│   │   │   └── tests</span><br><span class="line">│   │   │       ├── <span class="built_in">test</span>-configmap.yaml</span><br><span class="line">│   │   │       ├── <span class="built_in">test</span>-podsecuritypolicy.yaml</span><br><span class="line">│   │   │       ├── <span class="built_in">test</span>-rolebinding.yaml</span><br><span class="line">│   │   │       ├── <span class="built_in">test</span>-role.yaml</span><br><span class="line">│   │   │       ├── <span class="built_in">test</span>-serviceaccount.yaml</span><br><span class="line">│   │   │       └── test.yaml</span><br><span class="line">│   │   └── values.yaml</span><br><span class="line">│   ├── kube-state-metrics <span class="comment"># 依赖：安装kube-state-metrics</span></span><br><span class="line">│   │   ├── Chart.yaml</span><br><span class="line">│   │   ├── OWNERS</span><br><span class="line">│   │   ├── README.md</span><br><span class="line">│   │   ├── templates</span><br><span class="line">│   │   │   ├── clusterrolebinding.yaml</span><br><span class="line">│   │   │   ├── clusterrole.yaml</span><br><span class="line">│   │   │   ├── deployment.yaml</span><br><span class="line">│   │   │   ├── _helpers.tpl</span><br><span class="line">│   │   │   ├── NOTES.txt</span><br><span class="line">│   │   │   ├── podsecuritypolicy.yaml</span><br><span class="line">│   │   │   ├── psp-clusterrolebinding.yaml</span><br><span class="line">│   │   │   ├── psp-clusterrole.yaml</span><br><span class="line">│   │   │   ├── serviceaccount.yaml</span><br><span class="line">│   │   │   ├── servicemonitor.yaml</span><br><span class="line">│   │   │   └── service.yaml</span><br><span class="line">│   │   └── values.yaml</span><br><span class="line">│   └── prometheus-node-exporter <span class="comment"># 依赖：安装node-exporter</span></span><br><span class="line">│       ├── Chart.yaml</span><br><span class="line">│       ├── OWNERS</span><br><span class="line">│       ├── README.md</span><br><span class="line">│       ├── templates</span><br><span class="line">│       │   ├── daemonset.yaml</span><br><span class="line">│       │   ├── endpoints.yaml</span><br><span class="line">│       │   ├── _helpers.tpl</span><br><span class="line">│       │   ├── monitor.yaml</span><br><span class="line">│       │   ├── NOTES.txt</span><br><span class="line">│       │   ├── psp-clusterrolebinding.yaml</span><br><span class="line">│       │   ├── psp-clusterrole.yaml</span><br><span class="line">│       │   ├── psp.yaml</span><br><span class="line">│       │   ├── serviceaccount.yaml</span><br><span class="line">│       │   └── service.yaml</span><br><span class="line">│       └── values.yaml</span><br><span class="line">├── Chart.yaml</span><br><span class="line">├── CONTRIBUTING.md</span><br><span class="line">├── crds <span class="comment"># 所需的CRD</span></span><br><span class="line">│   ├── crd-alertmanager.yaml</span><br><span class="line">│   ├── crd-podmonitor.yaml</span><br><span class="line">│   ├── crd-prometheusrules.yaml</span><br><span class="line">│   ├── crd-prometheus.yaml</span><br><span class="line">│   └── crd-servicemonitor.yaml</span><br><span class="line">├── README.md</span><br><span class="line">├── requirements.lock</span><br><span class="line">├── requirements.yaml</span><br><span class="line">├── templates <span class="comment"># 本chart 的模板文件</span></span><br><span class="line">│   ├── alertmanager <span class="comment"># alertmanager的</span></span><br><span class="line">│   │   ├── alertmanager.yaml</span><br><span class="line">│   │   ├── ingress.yaml</span><br><span class="line">│   │   ├── podDisruptionBudget.yaml</span><br><span class="line">│   │   ├── psp-clusterrolebinding.yaml</span><br><span class="line">│   │   ├── psp-clusterrole.yaml</span><br><span class="line">│   │   ├── psp.yaml</span><br><span class="line">│   │   ├── secret.yaml</span><br><span class="line">│   │   ├── serviceaccount.yaml</span><br><span class="line">│   │   ├── servicemonitor.yaml</span><br><span class="line">│   │   └── service.yaml</span><br><span class="line">│   ├── exporters <span class="comment"># 监控k8s的组件：servicemonitor</span></span><br><span class="line">│   │   ├── core-dns</span><br><span class="line">│   │   │   ├── servicemonitor.yaml</span><br><span class="line">│   │   │   └── service.yaml</span><br><span class="line">│   │   ├── kube-api-server</span><br><span class="line">│   │   │   └── servicemonitor.yaml</span><br><span class="line">│   │   ├── kube-controller-manager</span><br><span class="line">│   │   │   ├── endpoints.yaml</span><br><span class="line">│   │   │   ├── servicemonitor.yaml</span><br><span class="line">│   │   │   └── service.yaml</span><br><span class="line">│   │   ├── kube-dns</span><br><span class="line">│   │   │   ├── servicemonitor.yaml</span><br><span class="line">│   │   │   └── service.yaml</span><br><span class="line">│   │   ├── kube-etcd</span><br><span class="line">│   │   │   ├── endpoints.yaml</span><br><span class="line">│   │   │   ├── servicemonitor.yaml</span><br><span class="line">│   │   │   └── service.yaml</span><br><span class="line">│   │   ├── kubelet</span><br><span class="line">│   │   │   └── servicemonitor.yaml</span><br><span class="line">│   │   ├── kube-proxy</span><br><span class="line">│   │   │   ├── endpoints.yaml</span><br><span class="line">│   │   │   ├── servicemonitor.yaml</span><br><span class="line">│   │   │   └── service.yaml</span><br><span class="line">│   │   ├── kube-scheduler</span><br><span class="line">│   │   │   ├── endpoints.yaml</span><br><span class="line">│   │   │   ├── servicemonitor.yaml</span><br><span class="line">│   │   │   └── service.yaml</span><br><span class="line">│   │   ├── kube-state-metrics</span><br><span class="line">│   │   │   └── serviceMonitor.yaml</span><br><span class="line">│   │   └── node-exporter</span><br><span class="line">│   │       └── servicemonitor.yaml</span><br><span class="line">│   ├── grafana <span class="comment"># Grafana 的大屏配置文件，以及搜集Grafana自身的serviceMonitor</span></span><br><span class="line">│   │   ├── configmap-dashboards.yaml</span><br><span class="line">│   │   ├── configmaps-datasources.yaml</span><br><span class="line">│   │   ├── dashboards</span><br><span class="line">│   │   │   ├── etcd.yaml</span><br><span class="line">│   │   │   ├── k8s-cluster-rsrc-use.yaml</span><br><span class="line">│   │   │   ├── k8s-node-rsrc-use.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-cluster.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-namespace.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-pod.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-workloads-namespace.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-workload.yaml</span><br><span class="line">│   │   │   ├── nodes.yaml</span><br><span class="line">│   │   │   ├── persistentvolumesusage.yaml</span><br><span class="line">│   │   │   ├── pods.yaml</span><br><span class="line">│   │   │   └── statefulset.yaml</span><br><span class="line">│   │   ├── dashboards-1.14</span><br><span class="line">│   │   │   ├── apiserver.yaml</span><br><span class="line">│   │   │   ├── cluster-total.yaml</span><br><span class="line">│   │   │   ├── controller-manager.yaml</span><br><span class="line">│   │   │   ├── etcd.yaml</span><br><span class="line">│   │   │   ├── k8s-coredns.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-cluster.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-namespace.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-node.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-pod.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-workloads-namespace.yaml</span><br><span class="line">│   │   │   ├── k8s-resources-workload.yaml</span><br><span class="line">│   │   │   ├── kubelet.yaml</span><br><span class="line">│   │   │   ├── namespace-by-pod.yaml</span><br><span class="line">│   │   │   ├── namespace-by-workload.yaml</span><br><span class="line">│   │   │   ├── node-cluster-rsrc-use.yaml</span><br><span class="line">│   │   │   ├── node-rsrc-use.yaml</span><br><span class="line">│   │   │   ├── nodes.yaml</span><br><span class="line">│   │   │   ├── persistentvolumesusage.yaml</span><br><span class="line">│   │   │   ├── pods.yaml</span><br><span class="line">│   │   │   ├── pod-total.yaml</span><br><span class="line">│   │   │   ├── prometheus-remote-write.yaml</span><br><span class="line">│   │   │   ├── prometheus.yaml</span><br><span class="line">│   │   │   ├── proxy.yaml</span><br><span class="line">│   │   │   ├── scheduler.yaml</span><br><span class="line">│   │   │   ├── statefulset.yaml</span><br><span class="line">│   │   │   └── workload-total.yaml</span><br><span class="line">│   │   └── servicemonitor.yaml</span><br><span class="line">│   ├── _helpers.tpl</span><br><span class="line">│   ├── NOTES.txt</span><br><span class="line">│   ├── prometheus <span class="comment"># prometheus实例</span></span><br><span class="line">│   │   ├── additionalAlertmanagerConfigs.yaml</span><br><span class="line">│   │   ├── additionalAlertRelabelConfigs.yaml</span><br><span class="line">│   │   ├── additionalPrometheusRules.yaml</span><br><span class="line">│   │   ├── additionalScrapeConfigs.yaml</span><br><span class="line">│   │   ├── clusterrolebinding.yaml</span><br><span class="line">│   │   ├── clusterrole.yaml</span><br><span class="line">│   │   ├── ingressperreplica.yaml</span><br><span class="line">│   │   ├── ingress.yaml</span><br><span class="line">│   │   ├── podDisruptionBudget.yaml</span><br><span class="line">│   │   ├── podmonitors.yaml</span><br><span class="line">│   │   ├── prometheus.yaml</span><br><span class="line">│   │   ├── psp-clusterrolebinding.yaml</span><br><span class="line">│   │   ├── psp-clusterrole.yaml</span><br><span class="line">│   │   ├── psp.yaml</span><br><span class="line">│   │   ├── rules <span class="comment"># prometheusrule</span></span><br><span class="line">│   │   │   ├── alertmanager.rules.yaml</span><br><span class="line">│   │   │   ├── etcd.yaml</span><br><span class="line">│   │   │   ├── general.rules.yaml</span><br><span class="line">│   │   │   ├── k8s.rules.yaml</span><br><span class="line">│   │   │   ├── kube-apiserver.rules.yaml</span><br><span class="line">│   │   │   ├── kube-prometheus-node-alerting.rules.yaml</span><br><span class="line">│   │   │   ├── kube-prometheus-node-recording.rules.yaml</span><br><span class="line">│   │   │   ├── kubernetes-absent.yaml</span><br><span class="line">│   │   │   ├── kubernetes-apps.yaml</span><br><span class="line">│   │   │   ├── kubernetes-resources.yaml</span><br><span class="line">│   │   │   ├── kubernetes-storage.yaml</span><br><span class="line">│   │   │   ├── kubernetes-system.yaml</span><br><span class="line">│   │   │   ├── kube-scheduler.rules.yaml</span><br><span class="line">│   │   │   ├── node-network.yaml</span><br><span class="line">│   │   │   ├── node.rules.yaml</span><br><span class="line">│   │   │   ├── node-time.yaml</span><br><span class="line">│   │   │   ├── prometheus-operator.yaml</span><br><span class="line">│   │   │   └── prometheus.rules.yaml</span><br><span class="line">│   │   ├── rules-1.14</span><br><span class="line">│   │   │   ├── alertmanager.rules.yaml</span><br><span class="line">│   │   │   ├── etcd.yaml</span><br><span class="line">│   │   │   ├── general.rules.yaml</span><br><span class="line">│   │   │   ├── k8s.rules.yaml</span><br><span class="line">│   │   │   ├── kube-apiserver.rules.yaml</span><br><span class="line">│   │   │   ├── kube-prometheus-node-recording.rules.yaml</span><br><span class="line">│   │   │   ├── kubernetes-absent.yaml</span><br><span class="line">│   │   │   ├── kubernetes-apps.yaml</span><br><span class="line">│   │   │   ├── kubernetes-resources.yaml</span><br><span class="line">│   │   │   ├── kubernetes-storage.yaml</span><br><span class="line">│   │   │   ├── kubernetes-system-apiserver.yaml</span><br><span class="line">│   │   │   ├── kubernetes-system-controller-manager.yaml</span><br><span class="line">│   │   │   ├── kubernetes-system-kubelet.yaml</span><br><span class="line">│   │   │   ├── kubernetes-system-scheduler.yaml</span><br><span class="line">│   │   │   ├── kubernetes-system.yaml</span><br><span class="line">│   │   │   ├── kube-scheduler.rules.yaml</span><br><span class="line">│   │   │   ├── node-exporter.rules.yaml</span><br><span class="line">│   │   │   ├── node-exporter.yaml</span><br><span class="line">│   │   │   ├── node-network.yaml</span><br><span class="line">│   │   │   ├── node.rules.yaml</span><br><span class="line">│   │   │   ├── node-time.yaml</span><br><span class="line">│   │   │   ├── prometheus-operator.yaml</span><br><span class="line">│   │   │   └── prometheus.yaml</span><br><span class="line">│   │   ├── serviceaccount.yaml</span><br><span class="line">│   │   ├── servicemonitors.yaml</span><br><span class="line">│   │   ├── servicemonitor.yaml</span><br><span class="line">│   │   ├── serviceperreplica.yaml</span><br><span class="line">│   │   └── service.yaml</span><br><span class="line">│   └── prometheus-operator <span class="comment"># 安装prometheus-operator</span></span><br><span class="line">│       ├── admission-webhooks</span><br><span class="line">│       │   ├── job-patch</span><br><span class="line">│       │   │   ├── clusterrolebinding.yaml</span><br><span class="line">│       │   │   ├── clusterrole.yaml</span><br><span class="line">│       │   │   ├── job-createSecret.yaml</span><br><span class="line">│       │   │   ├── job-patchWebhook.yaml</span><br><span class="line">│       │   │   ├── psp.yaml</span><br><span class="line">│       │   │   ├── rolebinding.yaml</span><br><span class="line">│       │   │   ├── role.yaml</span><br><span class="line">│       │   │   └── serviceaccount.yaml</span><br><span class="line">│       │   ├── mutatingWebhookConfiguration.yaml</span><br><span class="line">│       │   └── validatingWebhookConfiguration.yaml</span><br><span class="line">│       ├── cleanup-crds.yaml</span><br><span class="line">│       ├── clusterrolebinding.yaml</span><br><span class="line">│       ├── clusterrole.yaml</span><br><span class="line">│       ├── crds.yaml</span><br><span class="line">│       ├── deployment.yaml</span><br><span class="line">│       ├── psp-clusterrolebinding.yaml</span><br><span class="line">│       ├── psp-clusterrole.yaml</span><br><span class="line">│       ├── psp.yaml</span><br><span class="line">│       ├── serviceaccount.yaml</span><br><span class="line">│       ├── servicemonitor.yaml</span><br><span class="line">│       └── service.yaml</span><br><span class="line">├── values.yaml</span><br><span class="line">└── values.yaml.ori</span><br><span class="line"></span><br><span class="line">33 directories, 229 files</span><br></pre></td></tr></table></figure>
+
+<p>直接编辑values.yaml，下面截取更改的部分：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># alertmanger 的配置</span></span><br><span class="line"><span class="attr">alertmanager:</span></span><br><span class="line">  <span class="attr">config:</span></span><br><span class="line">    <span class="attr">global:</span></span><br><span class="line">      <span class="attr">resolve_timeout:</span> <span class="string">5m</span></span><br><span class="line">      <span class="attr">smtp_from:</span> <span class="string">alert@test.com</span></span><br><span class="line">      <span class="attr">smtp_smarthost:</span> <span class="string">smtphm.qiye.163.com:465</span></span><br><span class="line">      <span class="attr">smtp_hello:</span> <span class="string">alert@test.com</span></span><br><span class="line">      <span class="attr">smtp_auth_username:</span> <span class="string">alert@test.com</span></span><br><span class="line">      <span class="attr">smtp_auth_password:</span> <span class="string">xxxxxxx</span></span><br><span class="line">      <span class="attr">smtp_require_tls:</span> <span class="literal">false</span></span><br><span class="line">      <span class="comment"># wechat</span></span><br><span class="line">      <span class="attr">wechat_api_secret:</span> <span class="string">Pxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxc</span></span><br><span class="line">      <span class="attr">wechat_api_corp_id:</span> <span class="string">wxxxxxxxxx7</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">      <span class="attr">group_by:</span> <span class="string">['job','alertname','instance']</span></span><br><span class="line">      <span class="attr">group_wait:</span> <span class="string">30s</span></span><br><span class="line">      <span class="attr">group_interval:</span> <span class="string">5m</span></span><br><span class="line">      <span class="attr">repeat_interval:</span> <span class="string">12h</span></span><br><span class="line">      <span class="attr">receiver:</span> <span class="string">'email-receiver'</span></span><br><span class="line">      <span class="attr">routes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">match_re:</span></span><br><span class="line">          <span class="attr">job:</span> <span class="string">pushgw|grafana</span></span><br><span class="line">        <span class="attr">receiver:</span> <span class="string">'wechat-receiver'</span></span><br><span class="line">    <span class="attr">receivers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">'email-receiver'</span></span><br><span class="line">      <span class="attr">email_configs:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">to:</span> <span class="string">xxxxxxx@test.com</span></span><br><span class="line">        <span class="attr">send_resolved:</span> <span class="literal">true</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">'wechat-receiver'</span></span><br><span class="line">      <span class="attr">wechat_configs:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">send_resolved:</span> <span class="literal">true</span></span><br><span class="line">        <span class="attr">agent_id:</span> <span class="string">1xxxxxx3</span></span><br><span class="line">        <span class="attr">to_user:</span> <span class="string">'@all'</span></span><br><span class="line">  <span class="attr">ingress:</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">annotations:</span></span><br><span class="line">      <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">"nginx"</span></span><br><span class="line">    <span class="attr">hosts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">prometheus.test.aws.test.com</span></span><br><span class="line">    <span class="comment">## Paths to use for ingress rules - one path should match the alertmanagerSpec.routePrefix</span></span><br><span class="line">    <span class="comment">##</span></span><br><span class="line">    <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/alertmanager</span></span><br><span class="line">    <span class="attr">tls:</span> <span class="string">[]</span> <span class="comment"># 如果需要开启，删除[]，并取消注释西面的行，并配置好。</span></span><br><span class="line">    <span class="comment"># - secretName: alertmanager-general-tls</span></span><br><span class="line">    <span class="comment">#   hosts:</span></span><br><span class="line">    <span class="comment">#   - alertmanager.example.com</span></span><br><span class="line">  <span class="attr">alertmanagerSpec:</span></span><br><span class="line">    <span class="attr">image:</span></span><br><span class="line">      <span class="attr">repository:</span> <span class="string">quay.azk8s.cn/prometheus/alertmanager</span>  </span><br><span class="line">    <span class="attr">logFormat:</span> <span class="string">json</span></span><br><span class="line">    <span class="attr">replicas:</span> <span class="number">3</span></span><br><span class="line">    <span class="attr">retention:</span> <span class="string">24h</span></span><br><span class="line">    <span class="attr">externalUrl:</span> <span class="string">http://prometheus.test.aws.test.com/alertmanager</span></span><br><span class="line">    <span class="attr">routePrefix:</span> <span class="string">/alertmanager</span></span><br><span class="line">    <span class="attr">resources:</span></span><br><span class="line">      <span class="attr">requests:</span></span><br><span class="line">        <span class="attr">memory:</span> <span class="string">256Mi</span></span><br><span class="line">        <span class="attr">cpu:</span> <span class="string">100m</span></span><br><span class="line">      <span class="attr">limits:</span></span><br><span class="line">        <span class="attr">memory:</span> <span class="string">256Mi</span></span><br><span class="line">        <span class="attr">cpu:</span> <span class="string">100m</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># grafana 的配置</span></span><br><span class="line"><span class="attr">grafana:</span></span><br><span class="line">  <span class="attr">adminPassword:</span> <span class="string">xxxxxxx</span></span><br><span class="line">  <span class="attr">ingress:</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">annotations:</span></span><br><span class="line">      <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">nginx</span></span><br><span class="line">    <span class="attr">hosts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">grafana.test.aws.microoak.cn</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">/</span></span><br><span class="line">    <span class="attr">tls:</span> <span class="string">[]</span> <span class="comment"># 如果需要开启，删除[]，并取消注释西面的行，并配置好。</span></span><br><span class="line">    <span class="comment"># - secretName: grafana-general-tls</span></span><br><span class="line">    <span class="comment">#   hosts:</span></span><br><span class="line">    <span class="comment">#   - grafana.example.com</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 监控项配置：</span></span><br><span class="line"><span class="attr">kubeEtcd:</span></span><br><span class="line">  <span class="string">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">service:</span></span><br><span class="line">    <span class="string">port:</span> <span class="number">2381</span></span><br><span class="line">    <span class="string">targetPort:</span> <span class="number">2381</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># prometheus operator配置</span></span><br><span class="line"><span class="attr">prometheusOperator:</span></span><br><span class="line">  <span class="attr">image:</span></span><br><span class="line">    <span class="attr">repository:</span> <span class="string">quay.azk8s.cn/coreos/prometheus-operator</span></span><br><span class="line">  <span class="attr">configmapReloadImage:</span></span><br><span class="line">    <span class="attr">repository:</span> <span class="string">quay.azk8s.cn/coreos/configmap-reload</span></span><br><span class="line">  <span class="attr">prometheusConfigReloaderImage:</span></span><br><span class="line">    <span class="attr">repository:</span> <span class="string">quay.azk8s.cn/coreos/prometheus-config-reloader</span></span><br><span class="line">  <span class="attr">hyperkubeImage:</span></span><br><span class="line">    <span class="attr">repository:</span> <span class="string">gcr.azk8s.cn/google-containers/hyperkube</span></span><br><span class="line">  <span class="attr">resources:</span></span><br><span class="line">    <span class="attr">limits:</span></span><br><span class="line">      <span class="string">cpu:</span> <span class="string">500m</span></span><br><span class="line">      <span class="string">memory:</span> <span class="string">500Mi</span></span><br><span class="line">    <span class="attr">requests:</span></span><br><span class="line">      <span class="string">cpu:</span> <span class="string">100m</span></span><br><span class="line">      <span class="string">memory:</span> <span class="string">100Mi</span></span><br><span class="line">      </span><br><span class="line"><span class="comment"># prometheus 配置</span></span><br><span class="line"><span class="attr">prometheus:</span></span><br><span class="line">  <span class="attr">ingress:</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">annotations:</span></span><br><span class="line">      <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">"nginx"</span></span><br><span class="line">    <span class="attr">hosts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">prometheus.test.aws.test.com</span></span><br><span class="line">    <span class="attr">paths:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">/</span></span><br><span class="line">    <span class="attr">tls:</span> <span class="string">[]</span> <span class="comment"># 如果需要开启，删除[]，并取消注释西面的行，并配置好。</span></span><br><span class="line">      <span class="comment"># - secretName: prometheus-general-tls</span></span><br><span class="line">      <span class="comment">#   hosts:</span></span><br><span class="line">      <span class="comment">#     - prometheus.example.com</span></span><br><span class="line">  <span class="attr">prometheusSpec:</span></span><br><span class="line">    <span class="attr">image:</span></span><br><span class="line">      <span class="attr">repository:</span> <span class="string">quay.azk8s.cn/prometheus/prometheus</span></span><br><span class="line">    <span class="attr">retention:</span> <span class="string">1d</span></span><br><span class="line">    <span class="attr">logFormat:</span> <span class="string">json</span></span><br><span class="line">    <span class="attr">remoteRead:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">url:</span> <span class="string">"http://influxdb:8086/api/v1/prom/read?db=prometheus&amp;u=prometheus&amp;p=Pr0m123"</span></span><br><span class="line">    <span class="attr">remoteWrite:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">url:</span> <span class="string">"http://influxdb:8086/api/v1/prom/write?db=prometheus&amp;u=prometheus&amp;p=Pr0m123"</span></span><br><span class="line">    <span class="attr">remoteWriteDashboards:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">resources:</span></span><br><span class="line">      <span class="attr">requests:</span></span><br><span class="line">        <span class="string">memory:</span> <span class="string">400Mi</span></span><br><span class="line">        <span class="string">cpu:</span> <span class="number">0.5</span></span><br><span class="line">      <span class="attr">limits:</span></span><br><span class="line">        <span class="string">memory:</span> <span class="string">800Mi</span></span><br><span class="line">        <span class="string">cpu:</span> <span class="number">0.8</span></span><br></pre></td></tr></table></figure>
+
+<p>首先安装一下CRD，以免安装prometheus operator的时候报错：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> prometheus-operator</span><br><span class="line">$ kubectl apply -f crds/</span><br></pre></td></tr></table></figure>
+
+<p>然后再安装prometheus-operator，注意是在monitoring 空间下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> prometheus-operator</span><br><span class="line">$ helm install prometheus --namespace=monitoring ./</span><br></pre></td></tr></table></figure>
+
+<p>检查状态：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl -n monitoring get all</span><br><span class="line">NAME                                                         READY   STATUS      RESTARTS   AGE</span><br><span class="line">pod/alertmanager-prometheus-prometheus-oper-alertmanager-0   2/2     Running     0          8m18s</span><br><span class="line">pod/alertmanager-prometheus-prometheus-oper-alertmanager-1   2/2     Running     0          8m18s</span><br><span class="line">pod/alertmanager-prometheus-prometheus-oper-alertmanager-2   2/2     Running     0          8m18s</span><br><span class="line">pod/influxdb-0                                               1/1     Running     0          15h</span><br><span class="line">pod/prometheus-grafana-c89877b8c-k87pb                       2/2     Running     0          13m</span><br><span class="line">pod/prometheus-kube-state-metrics-57d6c55b56-qjpdx           1/1     Running     0          13m</span><br><span class="line">pod/prometheus-prometheus-node-exporter-frs6j                1/1     Running     0          13m</span><br><span class="line">pod/prometheus-prometheus-node-exporter-ktpzj                1/1     Running     0          13m</span><br><span class="line">pod/prometheus-prometheus-node-exporter-r2ngs                1/1     Running     0          13m</span><br><span class="line">pod/prometheus-prometheus-oper-admission-patch-9l55v         0/1     Completed   0          13m</span><br><span class="line">pod/prometheus-prometheus-oper-operator-9568b7df6-4nrhw      2/2     Running     0          13m</span><br><span class="line">pod/prometheus-prometheus-prometheus-oper-prometheus-0       3/3     Running     1          8m8s</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">NAME                                              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE</span><br><span class="line">service/alertmanager-operated                     ClusterIP   None             &lt;none&gt;        9093/TCP,9094/TCP,9094/UDP   8m18s</span><br><span class="line">service/influxdb                                  ClusterIP   10.100.50.188    &lt;none&gt;        8086/TCP,8083/TCP,8088/TCP   15h</span><br><span class="line">service/prometheus-grafana                        ClusterIP   10.100.76.213    &lt;none&gt;        80/TCP                       13m</span><br><span class="line">service/prometheus-kube-state-metrics             ClusterIP   10.100.229.32    &lt;none&gt;        8080/TCP                     13m</span><br><span class="line">service/prometheus-operated                       ClusterIP   None             &lt;none&gt;        9090/TCP                     8m8s</span><br><span class="line">service/prometheus-prometheus-node-exporter       ClusterIP   10.100.59.29     &lt;none&gt;        9100/TCP                     13m</span><br><span class="line">service/prometheus-prometheus-oper-alertmanager   ClusterIP   10.100.81.192    &lt;none&gt;        9093/TCP                     13m</span><br><span class="line">service/prometheus-prometheus-oper-operator       ClusterIP   10.100.225.101   &lt;none&gt;        8080/TCP,443/TCP             13m</span><br><span class="line">service/prometheus-prometheus-oper-prometheus     ClusterIP   10.100.200.80    &lt;none&gt;        9090/TCP                     13m</span><br><span class="line"></span><br><span class="line">NAME                                                 DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE</span><br><span class="line">daemonset.apps/prometheus-prometheus-node-exporter   3         3         3       3            3           &lt;none&gt;          13m</span><br><span class="line"></span><br><span class="line">NAME                                                  READY   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">deployment.apps/prometheus-grafana                    1/1     1            1           13m</span><br><span class="line">deployment.apps/prometheus-kube-state-metrics         1/1     1            1           13m</span><br><span class="line">deployment.apps/prometheus-prometheus-oper-operator   1/1     1            1           13m</span><br><span class="line"></span><br><span class="line">NAME                                                            DESIRED   CURRENT   READY   AGE</span><br><span class="line">replicaset.apps/prometheus-grafana-c89877b8c                    1         1         1       13m</span><br><span class="line">replicaset.apps/prometheus-kube-state-metrics-57d6c55b56        1         1         1       13m</span><br><span class="line">replicaset.apps/prometheus-prometheus-oper-operator-9568b7df6   1         1         1       13m</span><br><span class="line"></span><br><span class="line">NAME                                                                    READY   AGE</span><br><span class="line">statefulset.apps/alertmanager-prometheus-prometheus-oper-alertmanager   3/3     8m18s</span><br><span class="line">statefulset.apps/influxdb                                               1/1     15h</span><br><span class="line">statefulset.apps/prometheus-prometheus-prometheus-oper-prometheus       1/1     8m8s</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">NAME                                                   COMPLETIONS   DURATION   AGE</span><br><span class="line">job.batch/prometheus-prometheus-oper-admission-patch   1/1           5m32s      13m</span><br></pre></td></tr></table></figure>
+
+<p>通过之前设定的ingress地址，打开prometheus server的web界面查看所有的target是否正常：</p>
+<p><img src="/images/Using-Helm3-Install-InfluDB-Prometheus-Operator/prometheus-target-errors.jpg" alt="target error"></p>
+<p>有两个失败的：</p>
+<ul>
+<li><p>etcd</p>
+</li>
+<li><p>kube-proxy</p>
+</li>
+</ul>
+<p>对于etcd：</p>
+<p>默认存放在<code>/etc/kubernetes/manifests/</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /etc/kubernetes/manifests/</span><br><span class="line">$ ll</span><br><span class="line">total 16K</span><br><span class="line">-rw------- 1 root root 1.9K Nov 12 13:30 etcd.yaml</span><br><span class="line">-rw------- 1 root root 2.6K Nov 14 10:35 kube-apiserver.yaml</span><br><span class="line">-rw------- 1 root root 2.7K Nov 14 10:44 kube-controller-manager.yaml</span><br><span class="line">-rw------- 1 root root 1012 Nov 12 13:30 kube-scheduler.yaml</span><br></pre></td></tr></table></figure>
+
+<p>此kubernetes版本(1.15.5)中还<strong>没有增加</strong>–listen-metrics-urls=<a href="http://127.0.0.1:2381，但是对于kubernetes" target="_blank" rel="noopener">http://127.0.0.1:2381，但是对于kubernetes</a> 1.16.3已经增加了这个参数，因为我们在values.yaml中指定了etcd的metrics端口为2381，所以在这里增加参数如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">sudo</span> <span class="string">vim</span> <span class="string">etcd.yaml</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">command:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">etcd</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--advertise-client-urls=https://172.17.0.7:2379</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--cert-file=/etc/kubernetes/pki/etcd/server.crt</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--client-cert-auth=true</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--data-dir=/var/lib/etcd</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--initial-advertise-peer-urls=https://172.17.0.7:2380</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--initial-cluster=k8s01.test.awsbj.cn=https://172.17.0.7:2380</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--key-file=/etc/kubernetes/pki/etcd/server.key</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--listen-client-urls=https://127.0.0.1:2379,https://172.17.0.7:2379</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--listen-peer-urls=https://172.17.0.7:2380</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--listen-metrics-urls=http://0.0.0.0:2381</span> <span class="comment"># 增加这个参数然后保存，kubelet会自动已用，etcd会重新部署</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--name=k8s01.test.awsbj.cn</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--peer-cert-file=/etc/kubernetes/pki/etcd/peer.crt</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--peer-client-cert-auth=true</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--peer-key-file=/etc/kubernetes/pki/etcd/peer.key</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--snapshot-count=10000</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt</span></span><br></pre></td></tr></table></figure>
+
+<p>再次检查target etcd状态，发现已经OK了。</p>
+<p><img src="/images/Using-Helm3-Install-InfluDB-Prometheus-Operator/target-etcd-ok.jpg" alt></p>
+<p>对于kube-proxy：</p>
+<p>我们检查一下这台机器的端口：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo netstat -lnutp</span><br><span class="line">Active Internet connections (only servers)</span><br><span class="line">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name   </span><br><span class="line">tcp        0      0 127.0.0.1:10249         0.0.0.0:*               LISTEN      31604/kube-proxy</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>默认是监听在127.0.0.1的，我们进入pod容器内查看一下kube-proxy的命令帮助：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">--<span class="built_in">bind</span>-address 0.0.0.0                         The IP address <span class="keyword">for</span> the proxy server to serve on (<span class="built_in">set</span> to 0.0.0.0 <span class="keyword">for</span> all IPv4 interfaces and `::` <span class="keyword">for</span> all IPv6 interfaces) (default 0.0.0.0)</span><br><span class="line">--healthz-bind-address 0.0.0.0                 The IP address <span class="keyword">for</span> the health check server to serve on (<span class="built_in">set</span> to 0.0.0.0 <span class="keyword">for</span> all IPv4 interfaces and `::` <span class="keyword">for</span> all IPv6 interfaces) (default 0.0.0.0:10256)</span><br><span class="line">--healthz-port int32                           The port to <span class="built_in">bind</span> the health check server. Use 0 to <span class="built_in">disable</span>. (default 10256)</span><br><span class="line">--metrics-bind-address 0.0.0.0                 The IP address <span class="keyword">for</span> the metrics server to serve on (<span class="built_in">set</span> to 0.0.0.0 <span class="keyword">for</span> all IPv4 interfaces and `::` <span class="keyword">for</span> all IPv6 interfaces) (default 127.0.0.1:10249)</span><br><span class="line">--metrics-port int32                           The port to <span class="built_in">bind</span> the metrics server. Use 0 to <span class="built_in">disable</span>. (default 10249)</span><br></pre></td></tr></table></figure>
+
+<p>检查发现：–metrics-bind-address默认就是127.0.0.1，找到问题后我们更改一下kube-proxy的yaml文件：</p>
+<p>它的yaml默认是在kubernetes中kube-system命名空间中daemonset.apps/kube-proxy定义的：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">command:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/usr/local/bin/kube-proxy</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--config=/var/lib/kube-proxy/config.conf</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--hostname-override=$(NODE_NAME)</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">--metrics-bind-address=0.0.0.0</span> <span class="comment"># 增加一行</span></span><br></pre></td></tr></table></figure>
+
+<p>保存应用，稍等后再次查看prometheus target中kube-proxy是否OK，<strong>我们发现还是不行的</strong>。</p>
+<p>我们注意到kube-proxy的命令行启动时指定了个配置文件：–config=/var/lib/kube-proxy/config.conf，默认是通过configMap挂载的，我们查看一下kube-proxy的configMap：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">kubectl</span> <span class="string">-n</span> <span class="string">kube-system</span> <span class="string">get</span> <span class="string">cm</span> <span class="string">kube-proxy</span> <span class="string">-o</span> <span class="string">yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="attr">config.conf:</span> <span class="string">|-</span></span><br><span class="line">    <span class="attr">apiVersion:</span> <span class="string">kubeproxy.config.k8s.io/v1alpha1</span></span><br><span class="line">    <span class="attr">bindAddress:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line">    <span class="attr">clientConnection:</span></span><br><span class="line">      <span class="attr">acceptContentTypes:</span> <span class="string">""</span></span><br><span class="line">      <span class="attr">burst:</span> <span class="number">10</span></span><br><span class="line">      <span class="attr">contentType:</span> <span class="string">application/vnd.kubernetes.protobuf</span></span><br><span class="line">      <span class="attr">kubeconfig:</span> <span class="string">/var/lib/kube-proxy/kubeconfig.conf</span></span><br><span class="line">      <span class="attr">qps:</span> <span class="number">5</span></span><br><span class="line">    <span class="attr">clusterCIDR:</span> <span class="number">10.101</span><span class="number">.0</span><span class="number">.0</span><span class="string">/16</span></span><br><span class="line">    <span class="attr">configSyncPeriod:</span> <span class="string">15m0s</span></span><br><span class="line">    <span class="attr">conntrack:</span></span><br><span class="line">      <span class="attr">maxPerCore:</span> <span class="number">32768</span></span><br><span class="line">      <span class="attr">min:</span> <span class="number">131072</span></span><br><span class="line">      <span class="attr">tcpCloseWaitTimeout:</span> <span class="string">1h0m0s</span></span><br><span class="line">      <span class="attr">tcpEstablishedTimeout:</span> <span class="string">24h0m0s</span></span><br><span class="line">    <span class="attr">enableProfiling:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">healthzBindAddress:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span><span class="string">:10256</span></span><br><span class="line">    <span class="attr">hostnameOverride:</span> <span class="string">""</span></span><br><span class="line">    <span class="attr">iptables:</span></span><br><span class="line">      <span class="attr">masqueradeAll:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">masqueradeBit:</span> <span class="number">14</span></span><br><span class="line">      <span class="attr">minSyncPeriod:</span> <span class="string">0s</span></span><br><span class="line">      <span class="attr">syncPeriod:</span> <span class="string">30s</span></span><br><span class="line">    <span class="attr">ipvs:</span></span><br><span class="line">      <span class="attr">excludeCIDRs:</span> <span class="literal">null</span></span><br><span class="line">      <span class="attr">minSyncPeriod:</span> <span class="string">0s</span></span><br><span class="line">      <span class="attr">scheduler:</span> <span class="string">""</span></span><br><span class="line">      <span class="attr">strictARP:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">syncPeriod:</span> <span class="string">30s</span></span><br><span class="line">    <span class="attr">kind:</span> <span class="string">KubeProxyConfiguration</span></span><br><span class="line">    <span class="attr">metricsBindAddress:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:10249</span> <span class="comment"># 发现这里还是127.0.0.1，我们将这里更改成：0.0.0.0:10249</span></span><br><span class="line">    <span class="attr">mode:</span> <span class="string">ipvs</span></span><br><span class="line">    <span class="attr">nodePortAddresses:</span> <span class="literal">null</span></span><br><span class="line">    <span class="attr">oomScoreAdj:</span> <span class="number">-999</span></span><br><span class="line">    <span class="attr">portRange:</span> <span class="string">""</span></span><br><span class="line">    <span class="attr">resourceContainer:</span> <span class="string">/kube-proxy</span></span><br><span class="line">    <span class="attr">udpIdleTimeout:</span> <span class="string">250ms</span></span><br><span class="line">    <span class="attr">winkernel:</span></span><br><span class="line">      <span class="attr">enableDSR:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">networkName:</span> <span class="string">""</span></span><br><span class="line">      <span class="attr">sourceVip:</span> <span class="string">""</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl -n kube-system edit cm kube-proxy</span><br></pre></td></tr></table></figure>
+
+<p>然后删除kube-proxy的pod，重新应用新的配置。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl -n kube-system delete po -l k8s-app=kube-proxy</span><br></pre></td></tr></table></figure>
+
+<p>再次检查OK了：</p>
+<p><img src="/images/Using-Helm3-Install-InfluDB-Prometheus-Operator/target-kube-proxy-ok.jpg" alt></p>
+<div class="note danger">
+            <p>对于prometheus 中target kube-proxy无法链接的问题，直接修改kube-proxy对应的configMap即可，修改启动参数是不生效的。</p>
+          </div>
+
+<p>所有的target都正常了：</p>
+<p><img src="/images/Using-Helm3-Install-InfluDB-Prometheus-Operator/prometheus-target-ok.jpg" alt></p>
+<p>查看Grafana所有大屏列表：</p>
+<p><img src="/images/Using-Helm3-Install-InfluDB-Prometheus-Operator/grafana-dashboard-list.png" alt></p>
+<p>查看InfluxDB的资源占用：可以依据这里定义influxdb的资源占用，以免造成性能不够的问题。</p>
+<p><img src="/images/Using-Helm3-Install-InfluDB-Prometheus-Operator/grafana-influxdb-resource.jpg" alt></p>
+<p>好了，通过Helm安装InfluxDB + Prometheus-Operator已经完成了，下面我们添加一下对InfluxDB的metrics的搜集，还记得怎么定义的嘛？参考：<a href="/2019/11/20/Prometheus-Operator-test.html" title="Prometheus-Operator 手动入门实战">Prometheus-Operator 手动入门实战</a>:</p>
+<p>我们先来检查一下：Helm已经安装好了Prometheus资源定义，看看通过哪些Lables去匹配serviceMonitor和podMonitor的：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">kubectl</span> <span class="string">-n</span> <span class="string">monitoring</span> <span class="string">get</span> <span class="string">prometheuses.monitoring.coreos.com</span> <span class="string">prometheus-prometheus-oper-prometheus</span> <span class="string">-o</span> <span class="string">yaml</span> <span class="string">--export</span></span><br><span class="line"><span class="string">Flag</span> <span class="string">--export</span> <span class="string">has</span> <span class="string">been</span> <span class="string">deprecated,</span> <span class="string">This</span> <span class="string">flag</span> <span class="string">is</span> <span class="string">deprecated</span> <span class="string">and</span> <span class="string">will</span> <span class="string">be</span> <span class="string">removed</span> <span class="string">in</span> <span class="string">future.</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.coreos.com/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Prometheus</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">generation:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">prometheus-operator-prometheus</span></span><br><span class="line">    <span class="attr">chart:</span> <span class="string">prometheus-operator-8.2.2</span></span><br><span class="line">    <span class="attr">heritage:</span> <span class="string">Helm</span></span><br><span class="line">    <span class="attr">release:</span> <span class="string">prometheus</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">prometheus-prometheus-oper-prometheus</span></span><br><span class="line">  <span class="attr">selfLink:</span> <span class="string">/apis/monitoring.coreos.com/v1/namespaces/monitoring/prometheuses/prometheus-prometheus-oper-prometheus</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">alerting:</span></span><br><span class="line">    <span class="attr">alertmanagers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">prometheus-prometheus-oper-alertmanager</span></span><br><span class="line">      <span class="attr">namespace:</span> <span class="string">monitoring</span></span><br><span class="line">      <span class="attr">pathPrefix:</span> <span class="string">/alertmanager</span></span><br><span class="line">      <span class="attr">port:</span> <span class="string">web</span></span><br><span class="line">  <span class="attr">baseImage:</span> <span class="string">quay.azk8s.cn/prometheus/prometheus</span></span><br><span class="line">  <span class="attr">enableAdminAPI:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">externalUrl:</span> <span class="string">http://prometheus.test.aws.microoak.cn/</span></span><br><span class="line">  <span class="attr">listenLocal:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">logFormat:</span> <span class="string">json</span></span><br><span class="line">  <span class="attr">logLevel:</span> <span class="string">info</span></span><br><span class="line">  <span class="attr">paused:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">podMonitorNamespaceSelector:</span> <span class="string">&#123;&#125;</span></span><br><span class="line">  <span class="attr">podMonitorSelector:</span> <span class="comment"># 搜集匹配这个label的podMonitor</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">release:</span> <span class="string">prometheus</span></span><br><span class="line">  <span class="attr">portName:</span> <span class="string">web</span></span><br><span class="line">  <span class="attr">remoteRead:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">url:</span> <span class="string">http://influxdb:8086/api/v1/prom/read?db=prometheus&amp;u=prometheus&amp;p=Pr0m123</span></span><br><span class="line">  <span class="attr">remoteWrite:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">url:</span> <span class="string">http://influxdb:8086/api/v1/prom/write?db=prometheus&amp;u=prometheus&amp;p=Pr0m123</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">resources:</span></span><br><span class="line">    <span class="attr">limits:</span></span><br><span class="line">      <span class="attr">cpu:</span> <span class="number">0.5</span></span><br><span class="line">      <span class="attr">memory:</span> <span class="string">1500Mi</span></span><br><span class="line">    <span class="attr">requests:</span></span><br><span class="line">      <span class="attr">cpu:</span> <span class="number">0.5</span></span><br><span class="line">      <span class="attr">memory:</span> <span class="string">1500Mi</span></span><br><span class="line">  <span class="attr">retention:</span> <span class="string">1d</span></span><br><span class="line">  <span class="attr">routePrefix:</span> <span class="string">/</span></span><br><span class="line">  <span class="attr">ruleNamespaceSelector:</span> <span class="string">&#123;&#125;</span></span><br><span class="line">  <span class="attr">ruleSelector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">prometheus-operator</span></span><br><span class="line">      <span class="attr">release:</span> <span class="string">prometheus</span></span><br><span class="line">  <span class="attr">securityContext:</span></span><br><span class="line">    <span class="attr">fsGroup:</span> <span class="number">2000</span></span><br><span class="line">    <span class="attr">runAsNonRoot:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">runAsUser:</span> <span class="number">1000</span></span><br><span class="line">  <span class="attr">serviceAccountName:</span> <span class="string">prometheus-prometheus-oper-prometheus</span></span><br><span class="line">  <span class="attr">serviceMonitorNamespaceSelector:</span> <span class="string">&#123;&#125;</span></span><br><span class="line">  <span class="attr">serviceMonitorSelector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">release:</span> <span class="string">prometheus</span> <span class="comment"># 搜集匹配这个label的serviceMonitor</span></span><br><span class="line">  <span class="attr">version:</span> <span class="string">v2.13.1</span></span><br></pre></td></tr></table></figure>
+
+<p>我们再看一下这两个资源都有什么吧：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl -n monitoring get servicemonitors.monitoring.coreos.com </span><br><span class="line">NAME                                                 AGE</span><br><span class="line">prometheus-prometheus-oper-alertmanager              144m</span><br><span class="line">prometheus-prometheus-oper-apiserver                 144m</span><br><span class="line">prometheus-prometheus-oper-coredns                   144m</span><br><span class="line">prometheus-prometheus-oper-grafana                   144m</span><br><span class="line">prometheus-prometheus-oper-kube-controller-manager   144m</span><br><span class="line">prometheus-prometheus-oper-kube-etcd                 144m</span><br><span class="line">prometheus-prometheus-oper-kube-proxy                144m</span><br><span class="line">prometheus-prometheus-oper-kube-scheduler            144m</span><br><span class="line">prometheus-prometheus-oper-kube-state-metrics        144m</span><br><span class="line">prometheus-prometheus-oper-kubelet                   144m</span><br><span class="line">prometheus-prometheus-oper-node-exporter             144m</span><br><span class="line">prometheus-prometheus-oper-operator                  144m</span><br><span class="line">prometheus-prometheus-oper-prometheus                144m</span><br><span class="line"></span><br><span class="line">$ kubectl -n monitoring get podmonitors.monitoring.coreos.com </span><br><span class="line">No resources found.</span><br></pre></td></tr></table></figure>
+
+<p>查看一下influxdb的svc：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看influxdb svc labels</span></span><br><span class="line">$ kubectl -n monitoring get svc --show-labels </span><br><span class="line">NAME                                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE    LABELS</span><br><span class="line">influxdb                                  ClusterIP   10.100.50.188    &lt;none&gt;        8086/TCP,8083/TCP,8088/TCP   17h    app=influxdb,chart=influxdb-3.0.1,heritage=Helm,release=influxdb</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看具体的端口名称</span></span><br><span class="line">$ kubectl -n monitoring get svc influxdb -o yaml --<span class="built_in">export</span></span><br><span class="line">Flag --<span class="built_in">export</span> has been deprecated, This flag is deprecated and will be removed <span class="keyword">in</span> future.</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  creationTimestamp: null</span><br><span class="line">  labels:</span><br><span class="line">    app: influxdb</span><br><span class="line">    chart: influxdb-3.0.1</span><br><span class="line">    heritage: Helm</span><br><span class="line">    release: influxdb</span><br><span class="line">  name: influxdb</span><br><span class="line">  selfLink: /api/v1/namespaces/monitoring/services/influxdb</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">  - name: api <span class="comment"># 使用这个port</span></span><br><span class="line">    port: 8086</span><br><span class="line">    protocol: TCP</span><br><span class="line">    targetPort: 8086</span><br><span class="line">  - name: admin</span><br><span class="line">    port: 8083</span><br><span class="line">    protocol: TCP</span><br><span class="line">    targetPort: 8083</span><br><span class="line">  - name: rpc</span><br><span class="line">    port: 8088</span><br><span class="line">    protocol: TCP</span><br><span class="line">    targetPort: 8088</span><br><span class="line">  selector:</span><br><span class="line">    app: influxdb</span><br><span class="line">  sessionAffinity: None</span><br><span class="line">  <span class="built_in">type</span>: ClusterIP</span><br></pre></td></tr></table></figure>
+
+<p>测试一下influxdb的meitrics：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl 10.100.50.188:8086/metrics</span><br><span class="line"><span class="comment"># HELP go_gc_duration_seconds A summary of the GC invocation durations.</span></span><br><span class="line"><span class="comment"># TYPE go_gc_duration_seconds summary</span></span><br><span class="line">go_gc_duration_seconds&#123;quantile=<span class="string">"0"</span>&#125; 7.6328e-05</span><br><span class="line">go_gc_duration_seconds&#123;quantile=<span class="string">"0.25"</span>&#125; 0.000107326</span><br><span class="line">go_gc_duration_seconds&#123;quantile=<span class="string">"0.5"</span>&#125; 0.000118199</span><br><span class="line">go_gc_duration_seconds&#123;quantile=<span class="string">"0.75"</span>&#125; 0.000155008</span><br><span class="line">go_gc_duration_seconds&#123;quantile=<span class="string">"1"</span>&#125; 0.07417821</span><br><span class="line">go_gc_duration_seconds_sum 3.874605216</span><br><span class="line">go_gc_duration_seconds_count 2198</span><br><span class="line"><span class="comment"># HELP go_goroutines Number of goroutines that currently exist.</span></span><br><span class="line"><span class="comment"># TYPE go_goroutines gauge</span></span><br><span class="line">go_goroutines 31</span><br><span class="line"><span class="comment"># HELP go_info Information about the Go environment.</span></span><br><span class="line"><span class="comment"># TYPE go_info gauge</span></span><br><span class="line">go_info&#123;version=<span class="string">"go1.11"</span>&#125; 1</span><br><span class="line"><span class="comment"># HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.</span></span><br><span class="line"><span class="comment"># TYPE go_memstats_alloc_bytes gauge</span></span><br><span class="line">go_memstats_alloc_bytes 4.37425856e+08</span><br><span class="line"><span class="comment"># HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.</span></span><br><span class="line"><span class="comment"># TYPE go_memstats_alloc_bytes_total counter</span></span><br><span class="line">go_memstats_alloc_bytes_total 3.84833321384e+11</span><br></pre></td></tr></table></figure>
+
+<p>好了所需要的信息都已经找到，我们定义一个serviceMonitor来让prometheus搜取influxdb的metrics：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">ServiceMonitor</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">monitoring.coreos.com/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">prometheus-prometheus-oper-influxdb</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">monitoring</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">prometheus-influxdb</span></span><br><span class="line">    <span class="attr">release:</span> <span class="string">prometheus</span> <span class="comment"># 必须要指定这个label，以便让prometheus筛选到自己</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/metrics</span></span><br><span class="line">    <span class="attr">interval:</span> <span class="string">30s</span></span><br><span class="line">    <span class="attr">port:</span> <span class="string">api</span> <span class="comment"># 指定influxdb的metrics端口名称，在其svc中定义的</span></span><br><span class="line">  <span class="attr">namespaceSelector:</span></span><br><span class="line">    <span class="attr">matchNames:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">monitoring</span></span><br><span class="line">  <span class="attr">selector:</span> <span class="comment"># 指定筛选influxdb svc的标签</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">release:</span> <span class="string">influxdb</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">influxdb</span></span><br></pre></td></tr></table></figure>
+
+<p>稍等片刻，operator自动生成prometheus的配置，等到prometheus搜集到会在target中看到：</p>
+<p><img src="/images/Using-Helm3-Install-InfluDB-Prometheus-Operator/prometheus-new-target-influxdb.jpg" alt></p>
+<p>好了，我们再来看一下influxdb中数据：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl -n monitoring <span class="built_in">exec</span> -it influxdb-0 -- sh</span><br><span class="line">/ <span class="comment"># influx</span></span><br><span class="line">Connected to http://localhost:8086 version 1.7.6</span><br><span class="line">InfluxDB shell version: 1.7.6</span><br><span class="line">Enter an InfluxQL query</span><br><span class="line">&gt; auth prometheus Pr0m123</span><br><span class="line"></span><br><span class="line">&gt; use prometheus</span><br><span class="line">Using database prometheus</span><br><span class="line"></span><br><span class="line">&gt; show measurements</span><br><span class="line">name: measurements</span><br><span class="line">name</span><br><span class="line">----</span><br><span class="line">:kube_pod_info_node_count:</span><br><span class="line">:node_memory_MemAvailable_bytes:sum</span><br><span class="line">ALERTS</span><br><span class="line">ALERTS_FOR_STATE</span><br><span class="line">APIServiceOpenAPIAggregationControllerQueue1_adds</span><br><span class="line">APIServiceOpenAPIAggregationControllerQueue1_depth</span><br><span class="line">APIServiceOpenAPIAggregationControllerQueue1_longest_running_processor_microseconds</span><br><span class="line">up</span><br><span class="line">......</span><br><span class="line"></span><br><span class="line"><span class="comment"># 我们查看一下up这个measurement</span></span><br><span class="line">&gt; select * from up <span class="built_in">limit</span> 10</span><br><span class="line">name: up</span><br><span class="line">time                __name__ endpoint      instance           job                                 namespace   node                pod                                                 prometheus                                       prometheus_replica                                 service                               value</span><br><span class="line">----                -------- --------      --------           ---                                 ---------   ----                ---                                                 ----------                                       ------------------                                 -------                               -----</span><br><span class="line">1574386880730000000 up       https-metrics 172.17.0.7:10250   kubelet                             kube-system k8s01.test.awsbj.cn                                                     monitoring/prometheus-prometheus-oper-prometheus prometheus-prometheus-prometheus-oper-prometheus-0 prometheus-prometheus-oper-kubelet    1</span><br><span class="line">1574386883246000000 up       http          10.101.253.87:8080 prometheus-prometheus-oper-operator monitoring                      prometheus-prometheus-oper-operator-9568b7df6-4nrhw monitoring/prometheus-prometheus-oper-prometheus prometheus-prometheus-prometheus-oper-prometheus-0 prometheus-prometheus-oper-operator   1</span><br><span class="line">1574386884733000000 up       https-metrics 172.17.0.213:10250 kubelet                             kube-system k8s02.test.awsbj.cn                                                     monitoring/prometheus-prometheus-oper-prometheus prometheus-prometheus-prometheus-oper-prometheus-0 prometheus-prometheus-oper-kubelet    1</span><br><span class="line">1574386884871000000 up       http-metrics  172.17.0.213:10249 kube-proxy                          kube-system                     kube-proxy-9gtz5                                    monitoring/prometheus-prometheus-oper-prometheus prometheus-prometheus-prometheus-oper-prometheus-0 prometheus-prometheus-oper-kube-proxy 0</span><br><span class="line">1574386885147000000 up       https-metrics 172.17.0.7:10250   kubelet                             kube-system k8s01.test.awsbj.cn                                                     monitoring/prometheus-prometheus-oper-prometheus prometheus-prometheus-prometheus-oper-prometheus-0 kubelet                               1</span><br><span class="line">1574386886447000000 up       http-metrics  172.17.0.230:10249 kube-proxy                          kube-system                     kube-proxy-pwb7l                                    monitoring/prometheus-prometheus-oper-prometheus prometheus-prometheus-prometheus-oper-prometheus-0 prometheus-prometheus-oper-kube-proxy 0</span><br><span class="line">1574386887508000000 up       https-metrics 172.17.0.230:10250 kubelet                             kube-system k8s03.test.awsbj.cn                                                     monitoring/prometheus-prometheus-oper-prometheus prometheus-prometheus-prometheus-oper-prometheus-0 kubelet                               1</span><br><span class="line">1574386888264000000 up       https-metrics 172.17.0.230:10250 kubelet                             kube-system k8s03.test.awsbj.cn                                                     monitoring/prometheus-prometheus-oper-prometheus prometheus-prometheus-prometheus-oper-prometheus-0 kubelet                               1</span><br><span class="line">1574386889313000000 up       http-metrics  10.101.253.65:9153 coredns                             kube-system                     coredns-5c98db65d4-xn6fg                            monitoring/prometheus-prometheus-oper-prometheus prometheus-prometheus-prometheus-oper-prometheus-0 prometheus-prometheus-oper-coredns    1</span><br><span class="line">1574386889485000000 up       metrics       172.17.0.213:9100  node-exporter                       monitoring                      prometheus-prometheus-node-exporter-frs6j           monitoring/prometheus-prometheus-oper-prometheus prometheus-prometheus-prometheus-oper-prometheus-0 prometheus-prometheus-node-exporter   1</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+
+<p>再来查看一下prometheus 中的up：</p>
+<p><img src="/images/Using-Helm3-Install-InfluDB-Prometheus-Operator/prometheus-up.png" alt></p>
+<p>发现了什么，prometheus将每个metrics按照名称都存在influxdb的measurement中，这个measurement就相当于一个表。</p>
+<blockquote>
+<p>参考：</p>
+<p><a href="https://zhuanlan.zhihu.com/p/79561704" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/79561704</a></p>
+<p><a href="https://docs.influxdata.com/influxdb/v1.7/supported_protocols/prometheus/" target="_blank" rel="noopener">https://docs.influxdata.com/influxdb/v1.7/supported_protocols/prometheus/</a>  # 如何配置prometheus 使用开启了auth的influxdb。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p>如有疏忽错误欢迎在留言区评论指正，如果对您有所帮助欢迎点击下方进行打赏。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2019/11/22/Using-Helm3-Install-InfluDB-Prometheus-Operator.html" title="使用Helm3安装Prometheus-Operator + InfluxDB">https://knner.wang/2019/11/22/Using-Helm3-Install-InfluDB-Prometheus-Operator.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/prometheus/" rel="tag"># prometheus</a>
+              <a href="/tags/influxdb/" rel="tag"># influxdb</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/11/20/Prometheus-Operator-test.html" rel="next" title="Prometheus-Operator 手动入门实战">
+                  <i class="fa fa-chevron-left"></i> Prometheus-Operator 手动入门实战
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前提依赖"><span class="nav-number">1.</span> <span class="nav-text">前提依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#File-Service-Discovery"><span class="nav-number">2.</span> <span class="nav-text">File Service Discovery</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Remote-Endpoints-and-Storage"><span class="nav-number">3.</span> <span class="nav-text">Remote Endpoints and Storage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Alertmanager-Webhook-Receiver"><span class="nav-number">4.</span> <span class="nav-text">Alertmanager Webhook Receiver</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Management"><span class="nav-number">5.</span> <span class="nav-text">Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Other"><span class="nav-number">6.</span> <span class="nav-text">Other</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Helm3-安装InfluxDB"><span class="nav-number">7.</span> <span class="nav-text">Helm3 安装InfluxDB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Helm3-安装prometheus-operator"><span class="nav-number">8.</span> <span class="nav-text">Helm3 安装prometheus-operator</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+</body>
+</html>
