@@ -156,12 +156,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">8</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">9</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">10</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">11</span></a>
 
   </li>
         <li class="menu-item menu-item-about">
@@ -367,7 +367,7 @@
 <figure class="highlight"><table><tr><td class="code"><pre><span class="line">bash-4.4# cat /etc/influxdb/influxdb.conf </span><br><span class="line"><span class="attr">reporting-disabled</span> = <span class="literal">false</span></span><br><span class="line"><span class="attr">bind-address</span> = <span class="string">":8088"</span></span><br><span class="line"></span><br><span class="line"><span class="section">[meta]</span></span><br><span class="line">  dir = "/var/lib/influxdb/meta"</span><br><span class="line">  retention-autocreate = true</span><br><span class="line">  logging-enabled = true</span><br><span class="line"></span><br><span class="line"><span class="section">[data]</span></span><br><span class="line">  dir = "/var/lib/influxdb/data"</span><br><span class="line">  wal-dir = "/var/lib/influxdb/wal"</span><br><span class="line">  query-log-enabled = true</span><br><span class="line">  cache-max-memory-size = 1073741824</span><br><span class="line">  cache-snapshot-memory-size = 26214400</span><br><span class="line">  cache-snapshot-write-cold-duration = "10m0s"</span><br><span class="line">  compact-full-write-cold-duration = "4h0m0s"</span><br><span class="line">  max-series-per-database = 0</span><br><span class="line">  max-values-per-tag = 0</span><br><span class="line">  trace-logging-enabled = false</span><br><span class="line"></span><br><span class="line"><span class="section">[coordinator]</span></span><br><span class="line">  write-timeout = "10s"</span><br><span class="line">  max-concurrent-queries = 0</span><br><span class="line">  query-timeout = "0s"</span><br><span class="line">  log-queries-after = "0s"</span><br><span class="line">  max-select-point = 0</span><br><span class="line">  max-select-series = 0</span><br><span class="line">  max-select-buckets = 0</span><br><span class="line"></span><br><span class="line"><span class="section">[retention]</span></span><br><span class="line">  enabled = true</span><br><span class="line">  check-interval = "30m0s"</span><br><span class="line"></span><br><span class="line"><span class="section">[shard-precreation]</span></span><br><span class="line">  enabled = true</span><br><span class="line">  check-interval = "10m0s"</span><br><span class="line">  advance-period = "30m0s"</span><br><span class="line"></span><br><span class="line"><span class="section">[admin]</span></span><br><span class="line">  enabled = true</span><br><span class="line">  bind-address = ":8083"</span><br><span class="line">  https-enabled = false</span><br><span class="line">  https-certificate = "/etc/ssl/influxdb.pem"</span><br><span class="line"></span><br><span class="line"><span class="section">[monitor]</span></span><br><span class="line">  store-enabled = true</span><br><span class="line">  store-database = "_internal"</span><br><span class="line">  store-interval = "10s"</span><br><span class="line"></span><br><span class="line"><span class="section">[subscriber]</span></span><br><span class="line">  enabled = true</span><br><span class="line">  http-timeout = "30s"</span><br><span class="line">  insecure-skip-verify = false</span><br><span class="line">  ca-certs = ""</span><br><span class="line">  write-concurrency = 40</span><br><span class="line">  write-buffer-size = 1000</span><br><span class="line"></span><br><span class="line"><span class="section">[http]</span></span><br><span class="line">  enabled = true</span><br><span class="line">  bind-address = ":8086"</span><br><span class="line">  flux-enabled = true</span><br><span class="line">  auth-enabled = true # 已经开启auth，必须通过认证才能进行操作</span><br><span class="line">  log-enabled = true</span><br><span class="line">  write-tracing = false</span><br><span class="line">  pprof-enabled = true</span><br><span class="line">  https-enabled = false</span><br><span class="line">  https-certificate = "/etc/ssl/influxdb.pem"</span><br><span class="line">  https-private-key = ""</span><br><span class="line">  max-row-limit = 10000</span><br><span class="line">  max-connection-limit = 0</span><br><span class="line">  shared-secret = "beetlejuicebeetlejuicebeetlejuice"</span><br><span class="line">  realm = "InfluxDB"</span><br><span class="line">  unix-socket-enabled = false</span><br><span class="line">  bind-socket = "/var/run/influxdb.sock"</span><br><span class="line"></span><br><span class="line"><span class="comment"># <span class="doctag">TODO:</span> allow multiple graphite listeners</span></span><br><span class="line"></span><br><span class="line"><span class="section">[[graphite]]</span></span><br><span class="line">  enabled = false</span><br><span class="line">  bind-address = ":2003"</span><br><span class="line">  database = "graphite"</span><br><span class="line">  retention-policy = "autogen"</span><br><span class="line">  protocol = "tcp"</span><br><span class="line">  batch-size = 5000</span><br><span class="line">  batch-pending = 10</span><br><span class="line">  batch-timeout = "1s"</span><br><span class="line">  consistency-level = "one"</span><br><span class="line">  separator = "."</span><br><span class="line">  udp-read-buffer = 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># <span class="doctag">TODO:</span> allow multiple collectd listeners with templates</span></span><br><span class="line"></span><br><span class="line"><span class="section">[[collectd]]</span></span><br><span class="line">  enabled = false</span><br><span class="line">  bind-address = ":25826"</span><br><span class="line">  database = "collectd"</span><br><span class="line">  retention-policy = "autogen"</span><br><span class="line">  batch-size = 5000</span><br><span class="line">  batch-pending = 10</span><br><span class="line">  batch-timeout = "10s"</span><br><span class="line">  read-buffer = 0</span><br><span class="line">  typesdb = "/usr/share/collectd/types.db"</span><br><span class="line">  security-level = "none"</span><br><span class="line">  auth-file = "/etc/collectd/auth_file"</span><br><span class="line"></span><br><span class="line"><span class="comment"># <span class="doctag">TODO:</span> allow multiple opentsdb listeners with templates</span></span><br><span class="line"></span><br><span class="line"><span class="section">[[opentsdb]]</span></span><br><span class="line">  enabled = false</span><br><span class="line">  bind-address = ":4242"</span><br><span class="line">  database = "opentsdb"</span><br><span class="line">  retention-policy = "autogen"</span><br><span class="line">  consistency-level = "one"</span><br><span class="line">  tls-enabled = false</span><br><span class="line">  certificate = "/etc/ssl/influxdb.pem"</span><br><span class="line">  batch-size = 1000</span><br><span class="line">  batch-pending = 5</span><br><span class="line">  batch-timeout = "1s"</span><br><span class="line">  log-point-errors = true</span><br><span class="line"></span><br><span class="line"><span class="comment"># <span class="doctag">TODO:</span> allow multiple udp listeners with templates</span></span><br><span class="line"></span><br><span class="line"><span class="section">[[udp]]</span></span><br><span class="line">  enabled = false</span><br><span class="line">  bind-address = ":8089"</span><br><span class="line">  database = "udp"</span><br><span class="line">  retention-policy = "autogen"</span><br><span class="line">  batch-size = 5000</span><br><span class="line">  batch-pending = 10</span><br><span class="line">  read-buffer = 0</span><br><span class="line">  batch-timeout = "1s"</span><br><span class="line">  precision = "ns"</span><br><span class="line"></span><br><span class="line"><span class="section">[continuous_queries]</span></span><br><span class="line">  log-enabled = true</span><br><span class="line">  enabled = true</span><br><span class="line">  run-interval = "1s"</span><br><span class="line"></span><br><span class="line"><span class="section">[logging]</span></span><br><span class="line">  format =  "auto"</span><br><span class="line">  level =  "info"</span><br><span class="line">  supress-logo = false</span><br></pre></td></tr></table></figure>
 
 <div class="note danger">
-            <p>注意：开源版本的InfluxDB不支持集群模式，生产要记得备份：<a href="https://docs.influxdata.com/influxdb/v1.7/administration/backup_and_restore/" target="_blank" rel="noopener">备份参考官网</a></p>
+            <p>注意：开源版本的InfluxDB（InfluxDB OSS）不支持集群模式，生产要记得备份：<a href="https://docs.influxdata.com/influxdb/v1.7/administration/backup_and_restore/" target="_blank" rel="noopener">备份参考官网</a></p>
           </div>
 
 <p>InfluxDB 已经安装完毕，下面开始安装prometheus-operator。</p>
@@ -536,6 +536,9 @@
             <span class="post-nav-divider"></span>
 
             <div class="post-nav-prev post-nav-item">
+                <a href="/2019/11/26/install-elasticsearch-cluster-7-4.html" rel="prev" title="install-elasticsearch-cluster-7.4">
+                  install-elasticsearch-cluster-7.4 <i class="fa fa-chevron-right"></i>
+                </a>
             </div>
           </div>
       </footer>
@@ -590,19 +593,19 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-count">11</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -645,6 +648,7 @@
   <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="https://knner.wang/images/logos/upyun_logo5.png"></a>提供CDN服务
   </div>
   <span class="post-meta-divider">|</span>
   <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0

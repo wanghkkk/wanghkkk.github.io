@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="因为最近要测试Kubernetes日志收集这块，所以先要了解一下Elasticsearch 集群的手动搭建方式，这里记录一下在虚拟机上安装Elasticsearch Cluster 7.4的方式，并开启Auth认证以及Transport SSL。官网    下载    Docs本文采用的环境以及版本： 一台EC2主机Amazon Linux 2 AMI，本身是基于Red Hat Enterpris">
+<meta name="keywords" content="elasticsearch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="install-elasticsearch-cluster-7.4">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;11&#x2F;26&#x2F;install-elasticsearch-cluster-7-4.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="因为最近要测试Kubernetes日志收集这块，所以先要了解一下Elasticsearch 集群的手动搭建方式，这里记录一下在虚拟机上安装Elasticsearch Cluster 7.4的方式，并开启Auth认证以及Transport SSL。官网    下载    Docs本文采用的环境以及版本： 一台EC2主机Amazon Linux 2 AMI，本身是基于Red Hat Enterpris">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;elastic-logo.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;elastic-stack-license.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;kibana-login.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;es-basic-license.jpg">
+<meta property="og:updated_time" content="2019-11-26T05:20:55.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;elastic-logo.jpg">
+
+<link rel="canonical" href="https://knner.wang/2019/11/26/install-elasticsearch-cluster-7-4.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>install-elasticsearch-cluster-7.4 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">9</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/26/install-elasticsearch-cluster-7-4.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          install-elasticsearch-cluster-7.4
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-26 13:20:55" itemprop="dateCreated datePublished" datetime="2019-11-26T13:20:55+08:00">2019-11-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/elasticsearch/" itemprop="url" rel="index">
+                    <span itemprop="name">elasticsearch</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>因为最近要测试Kubernetes日志收集这块，所以先要了解一下Elasticsearch 集群的手动搭建方式，这里记录一下在虚拟机上安装Elasticsearch Cluster 7.4的方式，并开启Auth认证以及Transport SSL。</p><p><img src="/images/logos/elastic-logo.jpg" alt></p><p><a href="https://www.elastic.co/cn/" target="_blank" rel="noopener">官网</a>    <a href="https://www.elastic.co/cn/downloads/" target="_blank" rel="noopener">下载</a>    <a href="https://www.elastic.co/cn/guide" target="_blank" rel="noopener">Docs</a></p><p>本文采用的环境以及版本：</p><ul>
+<li>一台EC2主机Amazon Linux 2 AMI，本身是基于Red Hat Enterprise的。</li>
+<li>通过tar包安装</li>
+<li>Elasticsearch 7.4.2，默认集成JDK（Openjdk 13.0.1）；这里简称ES</li>
+<li>Kibana 7.4.2</li>
+</ul><h2 id="Elastic-Stack-License"><a href="#Elastic-Stack-License" class="headerlink" title="Elastic Stack License"></a>Elastic Stack License</h2><p>在新版的Elastic中，基础版（免费）的已经提供了基础的核心安全功能，可以在生产中部署，不再需要Nginx + Basic Auth代理了。</p><a id="more"></a>
+
+
+
+
+
+<p><a href="https://www.elastic.co/cn/subscriptions" target="_blank" rel="noopener">参考官网</a>，如下图：</p>
+<p><img src="/images/install-elasticsearch-cluster-7-4/elastic-stack-license.png" alt></p>
+<p>默认情况下Elastic中的安全功能是被禁用的，那么在本文中，就是采用基础版，自动申请Basic License的，然后分别开启Auth认证，以及Nodes间加密通信SSL。</p>
+<h2 id="安装Elasticsearch"><a href="#安装Elasticsearch" class="headerlink" title="安装Elasticsearch"></a>安装Elasticsearch</h2><p>我这里只有一台EC2主机，需要安装由三台Elasticsearch 组成的集群，所以采用使用不同端口的方式。</p>
+<table>
+<thead>
+<tr>
+<th>IP</th>
+<th>Http Port（ES HTTP API）</th>
+<th>Transport Port（ES集群内部通信使用）</th>
+<th>名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>172.17.0.87</td>
+<td>9200</td>
+<td>9331</td>
+<td>es01</td>
+</tr>
+<tr>
+<td>172.17.0.87</td>
+<td>9201</td>
+<td>9332</td>
+<td>es02</td>
+</tr>
+<tr>
+<td>172.17.0.87</td>
+<td>9202</td>
+<td>9333</td>
+<td>es03</td>
+</tr>
+</tbody></table>
+<h3 id="下载Elasticsearch"><a href="#下载Elasticsearch" class="headerlink" title="下载Elasticsearch"></a>下载Elasticsearch</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.4.2-linux-x86_64.tar.gz</span><br><span class="line">$ tar xf elasticsearch-7.4.2-linux-x86_64.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>如果你只是想快速的搭建单台ES，用于测试，可以直接启动：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$  <span class="built_in">cd</span> elasticsearch-7.4.2</span><br><span class="line">$ ./bin/elasticsearch</span><br></pre></td></tr></table></figure>
+
+<p>此时默认是以development 方式启动的，一些前提条件如果不符合其要求只会提示，但并不会无法启动，此时只会监听在<code>127.0.0.1:9200</code>上，只能用于测试；当你更改了``elasticsearch.yml<code>配置文件中的</code>network.host`参数时，就会以生产的方式启动。</p>
+<p>我们这采用生产的方式，也就是说他的前提依赖都必须满足，否则无法启动。</p>
+<h3 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h3><p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/targz.html#targz-layout" target="_blank" rel="noopener">官网参考</a></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+<th>Default Location</th>
+<th>Setting</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>home</strong></td>
+<td>Elasticsearch home directory or <code>$ES_HOME</code></td>
+<td>Directory created by unpacking the archive</td>
+<td><code>ES_ HOME</code></td>
+</tr>
+<tr>
+<td><strong>bin</strong></td>
+<td>Binary scripts including <code>elasticsearch</code> to start a node and <code>elasticsearch-plugin</code> to install plugins</td>
+<td><code>$ES_HOME/bin</code></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>conf</strong></td>
+<td>Configuration files including <code>elasticsearch.yml</code></td>
+<td><code>$ES_HOME/config</code></td>
+<td><code>ES_PATH_CONF</code></td>
+</tr>
+<tr>
+<td><strong>data</strong></td>
+<td>The location of the data files of each index / shard allocated on the node. Can hold multiple locations.</td>
+<td><code>$ES_HOME/data</code></td>
+<td><code>path.data</code></td>
+</tr>
+<tr>
+<td><strong>logs</strong></td>
+<td>Log files location.</td>
+<td><code>$ES_HOME/logs</code></td>
+<td><code>path.logs</code></td>
+</tr>
+<tr>
+<td><strong>plugins</strong></td>
+<td>Plugin files location. Each plugin will be contained in a subdirectory.</td>
+<td><code>$ES_HOME/plugins</code></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>repo</strong></td>
+<td>Shared file system repository locations. Can hold multiple locations. A file system repository can be placed in to any subdirectory of any directory specified here.</td>
+<td>Not configured</td>
+<td><code>path.repo</code></td>
+</tr>
+<tr>
+<td><strong>script</strong></td>
+<td>Location of script files.</td>
+<td><code>$ES_HOME/scripts</code></td>
+<td><code>path.scripts</code></td>
+</tr>
+</tbody></table>
+<h3 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h3><p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config.html" target="_blank" rel="noopener">系统依赖参考</a></p>
+<h4 id="ulimits"><a href="#ulimits" class="headerlink" title="ulimits"></a>ulimits</h4><p>编辑配置文件<code>/etc/security/limits.conf</code>，因为我这里使用默认的用户<code>ec2-user</code>来运行ES，所以这里的账号填<code>ec2-user</code>，你可以根据自己的情况填写，或者写成星号；</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># - nofile - max number of open file descriptors 最大打开的文件描述符数</span></span><br><span class="line"><span class="comment"># - memlock - max locked-in-memory address space (KB) 最大内存锁定</span></span><br><span class="line"><span class="comment"># - nproc - max number of processes 最大进程数</span></span><br><span class="line">$ vim /etc/security/limits.conf</span><br><span class="line">ec2-user  -  nofile  65535</span><br><span class="line">ec2-user  -  memlock  unlimited</span><br><span class="line">ec2-user  -  nproc  4096</span><br><span class="line"></span><br><span class="line"><span class="comment"># 然后退出重新登陆</span></span><br></pre></td></tr></table></figure>
+
+<p>检查：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">ulimit</span> -a</span><br><span class="line">core file size          (blocks, -c) 0</span><br><span class="line">data seg size           (kbytes, -d) unlimited</span><br><span class="line">scheduling priority             (-e) 0</span><br><span class="line">file size               (blocks, -f) unlimited</span><br><span class="line">pending signals                 (-i) 63465</span><br><span class="line">max locked memory       (kbytes, -l) unlimited <span class="comment">## 这里已经生效</span></span><br><span class="line">max memory size         (kbytes, -m) unlimited</span><br><span class="line">open files                      (-n) 65535 <span class="comment">## 这里已经生效</span></span><br><span class="line">pipe size            (512 bytes, -p) 8</span><br><span class="line">POSIX message queues     (bytes, -q) 819200</span><br><span class="line">real-time priority              (-r) 0</span><br><span class="line">stack size              (kbytes, -s) 8192</span><br><span class="line">cpu time               (seconds, -t) unlimited</span><br><span class="line">max user processes              (-u) 4096 <span class="comment">## 这里已经生效</span></span><br><span class="line">virtual memory          (kbytes, -v) unlimited</span><br><span class="line">file locks                      (-x) unlimited</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="禁用交换分区-swap"><a href="#禁用交换分区-swap" class="headerlink" title="禁用交换分区 swap"></a>禁用交换分区 swap</h4><p>执行命令以立刻禁用swap：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo swapoff -a</span><br></pre></td></tr></table></figure>
+
+<p>这里只是临时的禁用了，系统重启后还是会启动的，编辑以下配置文件将swap的挂载去掉：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo vim /etc/fstab</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="配置swappiness-以及虚拟内存"><a href="#配置swappiness-以及虚拟内存" class="headerlink" title="配置swappiness 以及虚拟内存"></a>配置swappiness 以及虚拟内存</h4><p>这是减少了内核的交换趋势，并且在正常情况下不应该导致交换，同时仍然允许整个系统在紧急情况下交换。 </p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 增加如下两行</span></span><br><span class="line">$ sudo vim /etc/sysctl.conf</span><br><span class="line">vm.swappiness=1</span><br><span class="line">vm.max_map_count=262144</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使之生效</span></span><br><span class="line">$ sudo sysctl -p</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="开启ES的内存锁定："><a href="#开启ES的内存锁定：" class="headerlink" title="开启ES的内存锁定："></a>开启ES的内存锁定：</h4><p>在ES的配置文件中<code>config/elasticsearch.yml</code>增加如下行：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bootstrap.memory_lock: true</span><br></pre></td></tr></table></figure>
+
+<p>ES集群的前提依赖已经配置完毕了，在真正的配置ES以及启动集群前，我们需要先明白一些概念，如下：</p>
+<p>[Elasticsearch 基础概念](#Elasticsearch 基础概念)，[Elasticsearch Note说明](#Elasticsearch Note说明)，以便我们能更好的配置ES集群：</p>
+<h2 id="Elasticsearch-基础概念"><a href="#Elasticsearch-基础概念" class="headerlink" title="Elasticsearch 基础概念"></a>Elasticsearch 基础概念</h2><h3 id="Cluster"><a href="#Cluster" class="headerlink" title="Cluster"></a>Cluster</h3><p>Elasticsearch 集群，由一台或多台的Elasticsearch 节点(Node)组成。</p>
+<h3 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h3><p>Elasticsearch 节点，可以认为是Elasticsearch的服务进程，在同一台机器上启动两个Elasticsearch实例(进程)，就是两个node节点。</p>
+<h3 id="Index"><a href="#Index" class="headerlink" title="Index"></a>Index</h3><p>索引，具有相同结构的文档的集合，类似于关系型数据库的数据库实例（6.0.0版本type废弃后，索引的概念下降到等同于数据库表的级别）。一个集群中可以有多个索引。</p>
+<h3 id="Type"><a href="#Type" class="headerlink" title="Type"></a>Type</h3><p>类型，在索引中内进行逻辑细分，在新版的Elasticsearch中已经废弃。</p>
+<h3 id="Document"><a href="#Document" class="headerlink" title="Document"></a>Document</h3><p>文档，Elasticsearch中的最小的数据存储单元，JSON数据格式，很多相同结构的文档组成索引。文档类似于关系型数据库中表内的一行记录。</p>
+<h3 id="Shard"><a href="#Shard" class="headerlink" title="Shard"></a>Shard</h3><p>分片，单个索引切分成多个shard，分布在多台Node节点上存储。可以利用shard很好的横向扩展，以存储更多的数据，同时shard分布在多台node上，可以提升集群整体的吞吐量和性能。在创建索引的时候可以直接指定分片的数量即可，一旦指定就不能再修改了。</p>
+<h3 id="Replica"><a href="#Replica" class="headerlink" title="Replica"></a>Replica</h3><p>索引副本，完全拷贝shard的内容，一个shard可以有一个或者多个replica，replica就是shard的数据拷贝，以提高冗余。</p>
+<p>replica承担三个任务：</p>
+<ul>
+<li>shard故障或者node宕机时，其中的一个replica可以升级成shard</li>
+<li>replica保证数据不丢失，保证高可用</li>
+<li>replica可以分担搜索请求，提高集群的吞吐和性能</li>
+</ul>
+<p>shard的全称叫primary shard，replica全称叫replica shard，primary shard数量在创建索引时指定，后期不能修改，replica shard后期可以修改。默认每个索引的primary shard值为5，replica shard值为1，含义是5个primary shard，5个replica shard，共10个shard。因此Elasticsearch最小的高可用配置是2台服务器。</p>
+<h2 id="Elasticsearch-Note-说明："><a href="#Elasticsearch-Note-说明：" class="headerlink" title="Elasticsearch Note 说明："></a>Elasticsearch Note 说明：</h2><p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html" target="_blank" rel="noopener">参考官方</a></p>
+<p>在ES集群中的Note有如下几种类型：</p>
+<ul>
+<li><p><code>Master-eligible</code>: <code>node.master:true</code>的节点，使其有资格呗选举为控制集群的主节点。主节点负责集群范围内的轻量级操作，例如创建或删除索引，跟踪哪些节点是集群的一部分以及确定将哪些碎片分配给哪些节点</p>
+</li>
+<li><p><code>data</code>: <code>node.data:true</code>的节点，数据节点，保存数据并执行与数据有关的操作，例如CRUD（增删改查），搜索和聚合。</p>
+</li>
+<li><p><code>ingest</code>: <code>node.ingest:true</code>的节点，能够将管道（Pipeline）应用于文档，以便在建立所以之前转换和丰富文档。</p>
+</li>
+<li><p><code>machine-learning</code>:  <code>xpack.ml.enabled</code> and <code>node.ml</code> set to <code>true</code> ，适用于x-pack版本，OSS版本不能增加，否则无法启动。</p>
+</li>
+<li><p><code>coordinating node</code>: 协调节点，诸如搜索请求或批量索引请求之类的请求可能涉及保存在不同数据节点上的数据。例如，搜索请求在两个阶段中执行，由接收客户端请求的<em>节点（协调节点）</em>进行<em>协调</em>。</p>
+<p>在<em>分散<em>阶段，协调节点将请求转发到保存数据的数据节点。每个数据节点在本地执行该请求，并将其结果返回给协调节点。在</em>收集</em> 阶段，协调节点将每个数据节点的结果缩减为单个全局结果集。</p>
+<p>每个节点都隐式地是一个协调节点。这意味着，有三个节点<code>node.master</code>，<code>node.data</code>并<code>node.ingest</code>都设置为<code>false</code>只充当一个协调节点，不能被禁用。结果，这样的节点需要具有足够的内存和CPU才能处理收集阶段。</p>
+</li>
+</ul>
+<blockquote>
+<p>ingest<br>英 /ɪnˈdʒest/  美 /ɪnˈdʒest/  全球(美国)<br>vt. 摄取；咽下；吸收；接待<br>过去式 ingested过去分词 ingested现在分词 ingesting第三人称单数 ingests</p>
+<p>coordinating<br>英 /kəʊˈɔːdɪneɪtɪŋ/  美 /koˈɔrdɪnetɪŋ/  全球(英国)<br>v. （使）协调；协同动作；（衣服等）搭配；调节，协调；配合；与……形成共价键（coordinate 的现在分词）<br>adj. 协调的；并列的；同位的；对等的</p>
+</blockquote>
+<p>默认值：</p>
+<ul>
+<li><code>node.master: ture</code></li>
+<li><code>node.voting_only: false</code></li>
+<li><code>node.data: true</code></li>
+<li><code>node.ml: true</code></li>
+<li><code>xpack.ml.enabled: true</code></li>
+<li><code>cluster.remote.connect: false</code></li>
+</ul>
+<h3 id="Master-eligible，合格主节点，主合格节点"><a href="#Master-eligible，合格主节点，主合格节点" class="headerlink" title="Master-eligible，合格主节点，主合格节点"></a>Master-eligible，合格主节点，主合格节点</h3><p>主节点负责集群范围内的轻量级操作，例如创建或删除索引，跟踪哪些节点是集群的一部分以及确定将哪些碎片分配给哪些节点。拥有稳定的主节点对于群集健康非常重要。</p>
+<p>可以通过<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-discovery.html" target="_blank" rel="noopener">主选举过程</a>来选举不是<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#voting-only-node" target="_blank" rel="noopener">仅投票</a>节点的任何符合主资格的节点成为主节点。</p>
+<p>索引和搜索数据是占用大量CPU，内存和I / O的工作，这可能会对节点的资源造成压力。为确保您的主节点稳定且不受压力，在较大的群集中，最好将符合角色的专用主节点和专用数据节点分开。</p>
+<p>虽然主节点也可以充当<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#coordinating-node" target="_blank" rel="noopener">协调节点，</a> 并将搜索和索引请求从客户端路由到数据节点，但最好<em>不要</em>为此目的使用专用的主节点。对于符合主机要求的节点，其工作量应尽可能少，这对于群集的稳定性很重要。</p>
+<p>设置节点成为主合格节点：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">node.voting_only:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ml:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">xpack.ml.enabled:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>对于OSS版本：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="仅投票节点"><a href="#仅投票节点" class="headerlink" title="仅投票节点"></a>仅投票节点</h4><p>是参与投票过程，但是不能成为主节点的节点，只投票节点在选举中充当决胜局。</p>
+<p>设置节点成为仅投票节点：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">node.voting_only:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ml:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">xpack.ml.enabled:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<div class="note danger">
+            <p>注意：</p><ul><li><p>OSS版本不支持这个参数，如果设置了，将无法启动。</p></li><li><p>只有符合主机资格的节点才能标记为仅投票。</p></li></ul><p>高可用性（HA）群集至少需要三个主节点，其中至少两个不是仅投票节点，可以将另一个节点设置成仅投票节点。这样，即使其中一个节点发生故障，这样的群集也将能够选举一个主节点。 </p>
+          </div>
+
+
+
+<h3 id="数据节点"><a href="#数据节点" class="headerlink" title="数据节点"></a>数据节点</h3><p>数据节点包含包含您已建立索引的文档的分片。数据节点处理与数据相关的操作，例如CRUD，搜索和聚合。这些操作是I / O，内存和CPU密集型的。监视这些资源并在过载时添加更多数据节点非常重要。</p>
+<p>具有专用数据节点的主要好处是将主角色和数据角色分开。</p>
+<p>要在默认分发中创建专用数据节点，请设置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.voting_only:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ml:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>对于OSS版本的设置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Ingest-节点"><a href="#Ingest-节点" class="headerlink" title="Ingest 节点"></a>Ingest 节点</h3><p>接收节点可以执行由一个或多个接收处理器组成的预处理管道。根据摄取处理器执行的操作类型和所需的资源，拥有专用的摄取节点可能有意义，该节点仅执行此特定任务。</p>
+<p> 要在默认分发中创建专用的摄取节点，请设置： </p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.voting_only:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">node.ml:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>在OSS上设置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="仅协调节点"><a href="#仅协调节点" class="headerlink" title="仅协调节点"></a>仅协调节点</h3><p>如果您不具备处理主要职责，保存数据和预处理文档的能力，那么您将拥有一个仅可路由请求，处理搜索缩减阶段并分配批量索引的<em>协调</em>节点。本质上，仅协调节点充当智能负载平衡器。 </p>
+<p>仅协调节点可以通过从数据和符合资格的主节点上卸载协调节点角色来使大型集群受益。他们像其他节点一样加入集群并接收完整的<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-state.html" target="_blank" rel="noopener">集群状态</a>，并且使用集群状态将请求直接路由到适当的位置。 </p>
+<p>在集群中添加过多的仅协调节点会增加整个集群的负担，因为选择的主节点必须等待每个节点的集群状态更新确认！仅协调节点的好处不应被夸大-数据节点也可以很好地达到相同的目的。 </p>
+<p>设置仅协调节点：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.voting_only:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ml:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>在OSS上设置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="机器学习节点"><a href="#机器学习节点" class="headerlink" title="机器学习节点"></a>机器学习节点</h3><p>机器学习功能提供了机器学习节点，该节点运行作业并处理机器学习API请求。如果<code>xpack.ml.enabled</code>设置为true且<code>node.ml</code>设置为<code>false</code>，则该节点可以处理API请求，但不能运行作业。</p>
+<p>如果要在群集中使用机器学习功能，则必须在所有符合主机资格的节点上启用机器学习（设置<code>xpack.ml.enabled</code>为<code>true</code>）。如果您只有OSS发行版，请不要使用这些设置。</p>
+<p>有关这些设置的更多信息，请参阅<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-settings.html" target="_blank" rel="noopener">机器学习设置</a>。</p>
+<p>要在默认分发中创建专用的机器学习节点，请设置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.voting_only:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ml:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">xpack.ml.enabled:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="配置Elasticsearch"><a href="#配置Elasticsearch" class="headerlink" title="配置Elasticsearch"></a>配置Elasticsearch</h2><p>拷贝三台ES目录：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ls</span><br><span class="line">elasticsearch-7.4.2</span><br><span class="line">$ mv elasticsearch-7.4.2&#123;,-01&#125;</span><br><span class="line">$ ls</span><br><span class="line">elasticsearch-7.4.2-01</span><br><span class="line">$ cp -a elasticsearch-7.4.2-01 elasticsearch-7.4.2-02</span><br><span class="line">$ cp -a elasticsearch-7.4.2-01 elasticsearch-7.4.2-03</span><br><span class="line">$ ln -s elasticsearch-7.4.2-01 es01</span><br><span class="line">$ ln -s elasticsearch-7.4.2-02 es02</span><br><span class="line">$ ln -s elasticsearch-7.4.2-03 es03</span><br><span class="line">$ ll</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x 10 ec2-user ec2-user 166 Nov 26 14:24 elasticsearch-7.4.2-01</span><br><span class="line">drwxr-xr-x 10 ec2-user ec2-user 166 Nov 26 14:24 elasticsearch-7.4.2-02</span><br><span class="line">drwxr-xr-x 10 ec2-user ec2-user 166 Nov 26 14:24 elasticsearch-7.4.2-03</span><br><span class="line">lrwxrwxrwx  1 ec2-user ec2-user  22 Nov 26 15:00 es01 -&gt; elasticsearch-7.4.2-01</span><br><span class="line">lrwxrwxrwx  1 ec2-user ec2-user  22 Nov 26 15:00 es02 -&gt; elasticsearch-7.4.2-02</span><br><span class="line">lrwxrwxrwx  1 ec2-user ec2-user  22 Nov 26 15:00 es03 -&gt; elasticsearch-7.4.2-03</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="配置Elasticsearch-名称解析"><a href="#配置Elasticsearch-名称解析" class="headerlink" title="配置Elasticsearch 名称解析"></a>配置Elasticsearch 名称解析</h3><p>我这里直接使用<code>hosts</code>文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat &gt;&gt; /etc/hosts &lt;&lt;EOF</span><br><span class="line">172.17.0.87 es01 es02 es03</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="编辑ES配置文件config-elasticsearch-yml"><a href="#编辑ES配置文件config-elasticsearch-yml" class="headerlink" title="编辑ES配置文件config/elasticsearch.yml"></a>编辑ES配置文件<code>config/elasticsearch.yml</code></h3><p>默认的配置文件在<code>$ES_HOME/config/elasticsearch.yml</code> 中，配置文件是以yaml的格式配置，其中有三种配置方式：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">path:</span></span><br><span class="line">    <span class="attr">data:</span> <span class="string">/var/lib/elasticsearch</span></span><br><span class="line">    <span class="attr">logs:</span> <span class="string">/var/log/elasticsearch</span></span><br></pre></td></tr></table></figure>
+
+<p>或者写成单行的格式：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">path.data:</span> <span class="string">/var/lib/elasticsearch</span></span><br><span class="line"><span class="attr">path.logs:</span> <span class="string">/var/log/elasticsearch</span></span><br></pre></td></tr></table></figure>
+
+<p>再或者通过环境变量的方式：这种方式在Docker，Kubernetes环境中很有用。</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.name:</span>    <span class="string">$&#123;HOSTNAME&#125;</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="string">$&#123;ES_NETWORK_HOST&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>下面详解一下各个配置的信息，然后提供各个ES的elasticsearch.yml的配置文件：</p>
+<h4 id="Elasticsearch-配置详解"><a href="#Elasticsearch-配置详解" class="headerlink" title="Elasticsearch 配置详解"></a>Elasticsearch 配置详解</h4><h5 id="配置ES-的PATH路径，path-data-amp-path-logs"><a href="#配置ES-的PATH路径，path-data-amp-path-logs" class="headerlink" title="配置ES 的PATH路径，path.data &amp; path.logs"></a>配置ES 的PATH路径，<code>path.data</code> &amp; <code>path.logs</code></h5><p>如果不配置默认是<code>$ES_HOME</code>中的子目录<code>data</code>，<code>logs</code>。</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">path:</span></span><br><span class="line">  <span class="attr">logs:</span> <span class="string">/var/log/elasticsearch</span></span><br><span class="line">  <span class="attr">data:</span> <span class="string">/var/data/elasticsearch</span></span><br></pre></td></tr></table></figure>
+
+<p><code>path.data</code>，可以设置多个目录：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">path:</span></span><br><span class="line">  <span class="attr">logs:</span> <span class="string">/data/ES01/logs</span></span><br><span class="line">  <span class="attr">data:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/data/ES01-A</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/data/ES01-B</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/data/ES01-C</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="配置ES集群名称：cluster-name"><a href="#配置ES集群名称：cluster-name" class="headerlink" title="配置ES集群名称：cluster.name"></a>配置ES集群名称：<code>cluster.name</code></h5><p>一个node节点只能加入一个集群当中，不同的节点配置同一个<code>cluster.name</code>可以组成ES集群。请确保不同的cluster集群中使用不同的<code>cluster.name</code>：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">cluster.name:</span> <span class="string">logging-prod</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="配置ES节点名称：node-name"><a href="#配置ES节点名称：node-name" class="headerlink" title="配置ES节点名称：node.name"></a>配置ES节点名称：<code>node.name</code></h5><p><code>node.name</code>代表节点名称，是人类可读用于区分node节点；如果不配置，默认是主机名</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">node.name:</span> <span class="string">prod-data-002</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="配置ES节点监听地址：network-host"><a href="#配置ES节点监听地址：network-host" class="headerlink" title="配置ES节点监听地址：network.host"></a>配置ES节点监听地址：<code>network.host</code></h5><p>如果不配置，默认是监听在<code>127.0.0.1</code> 和 <code>[::1]</code>，同时以development的方式启动。</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 监听在指定IP上</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 监听在所有的IP上</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="配置ES节点的发现和集群组成设置"><a href="#配置ES节点的发现和集群组成设置" class="headerlink" title="配置ES节点的发现和集群组成设置"></a>配置ES节点的发现和集群组成设置</h5><p>这里主要有两个主要的配置：发现和集群组成设置，集群间的node节点可以实现彼此发现、选举主节点，从而组成ES集群。</p>
+<h6 id="discovery-seed-hosts"><a href="#discovery-seed-hosts" class="headerlink" title="discovery.seed_hosts"></a><code>discovery.seed_hosts</code></h6><p>如果不配置，默认ES在启动的时候会监听本地回环地址，同时会扫描本地端口：<code>9300-9305</code>，用于发现在本机启动的其他节点。</p>
+<p>所以如果不进行的任何配置，将$ES_HOME目录拷贝三份，然后全部启动，默认也是可以组成ES集群的，用于测试使用。 如果你需要在多台机器上启动ES节点，以便组成集群，那么这个参数必须配置，以便nodes之间能够发现彼此。</p>
+<p><code>discovery.seed_hosts</code>是一个列表，多个元素用逗号隔开，元素可以写成：</p>
+<ul>
+<li>host:port，指定自定义的transport集群间通信端口</li>
+<li>host，使用默认的transport集群间通信端口：9300-9400；<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.4/modules-transport.html" target="_blank" rel="noopener">参考</a></li>
+<li>域名，可以解析成多个IP，会自动的与每个解析到的IP去连接测试</li>
+<li>其他自定义可以解析的名称</li>
+</ul>
+<h6 id="cluster-initial-master-nodes"><a href="#cluster-initial-master-nodes" class="headerlink" title="cluster.initial_master_nodes"></a><code>cluster.initial_master_nodes</code></h6><p>在deveplopment模式中是一台主机上自动发现的nodes彼此之间自动配置的。但是在生产的模式中必须要配置。</p>
+<p>这个参数用于在新的集群第一次启动的时使用，以指定可以参与选的合格主节点列表。在集群重启或者增加新节点的时候这个参数不起作用，因为在每个node节点上都已经保存有集群的状态信息。</p>
+<p><code>cluster.initial_master_nodes</code>也是一个列表，多个元素用逗号隔开，元素可以写成：<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-discovery-bootstrap-cluster.html" target="_blank" rel="noopener">参考</a></p>
+<ul>
+<li>配置的node.name名称。</li>
+<li>如果没有配置node.name，那么使用完整主机名</li>
+<li>FQDN</li>
+<li>host，如果没有配置node.name，使用<code>network.host</code>配置的公开地址</li>
+<li>host:port 如果没有配置node.name，这里的端口是transport端口</li>
+</ul>
+<h5 id="ES节点http和transport的配置"><a href="#ES节点http和transport的配置" class="headerlink" title="ES节点http和transport的配置"></a>ES节点http和transport的配置</h5><p><code>http</code> 和 <code>transport</code>。</p>
+<p>配置参考：<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.4/modules-http.html" target="_blank" rel="noopener">http</a>，<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.4/modules-transport.html" target="_blank" rel="noopener">transport</a></p>
+<p>http用于暴露Elasticsearch的API，便于client端与ES通信；transport用于ES集群间节点通信使用。</p>
+<p>http 配置参考：</p>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>http.port</code> http端口配置</td>
+<td>A bind port range. Defaults to <code>9200-9300</code>.</td>
+</tr>
+<tr>
+<td><code>http.publish_port</code></td>
+<td>The port that HTTP clients should use when communicating with this node. Useful when a cluster node is behind a proxy or firewall and the <code>http.port</code> is not directly addressable from the outside. Defaults to the actual port assigned via <code>http.port</code>.</td>
+</tr>
+<tr>
+<td><code>http.bind_host</code> http监听的IP</td>
+<td>The host address to bind the HTTP service to. Defaults to <code>http.host</code> (if set) or <code>network.bind_host</code>.</td>
+</tr>
+<tr>
+<td><code>http.publish_host</code></td>
+<td>The host address to publish for HTTP clients to connect to. Defaults to <code>http.host</code> (if set) or <code>network.publish_host</code>.</td>
+</tr>
+<tr>
+<td><code>http.host</code></td>
+<td>Used to set the <code>http.bind_host</code> and the <code>http.publish_host</code>.</td>
+</tr>
+<tr>
+<td><code>http.max_content_length</code></td>
+<td>The max content of an HTTP request. Defaults to <code>100mb</code>.</td>
+</tr>
+<tr>
+<td><code>http.max_initial_line_length</code></td>
+<td>The max length of an HTTP URL. Defaults to <code>4kb</code></td>
+</tr>
+<tr>
+<td><code>http.max_header_size</code></td>
+<td>The max size of allowed headers. Defaults to <code>8kB</code></td>
+</tr>
+<tr>
+<td><code>http.compression</code> 压缩</td>
+<td>Support for compression when possible (with Accept-Encoding). Defaults to <code>true</code>.</td>
+</tr>
+<tr>
+<td><code>http.compression_level</code> 压缩级别</td>
+<td>Defines the compression level to use for HTTP responses. Valid values are in the range of 1 (minimum compression) and 9 (maximum compression). Defaults to <code>3</code>.</td>
+</tr>
+<tr>
+<td><code>http.cors.enabled</code> 跨域配置</td>
+<td>Enable or disable cross-origin resource sharing, i.e. whether a browser on another origin can execute requests against Elasticsearch. Set to <code>true</code> to enable Elasticsearch to process pre-flight <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing" target="_blank" rel="noopener">CORS</a> requests. Elasticsearch will respond to those requests with the <code>Access-Control-Allow-Origin</code> header if the <code>Origin</code> sent in the request is permitted by the <code>http.cors.allow-origin</code> list. Set to <code>false</code> (the default) to make Elasticsearch ignore the <code>Origin</code> request header, effectively disabling CORS requests because Elasticsearch will never respond with the <code>Access-Control-Allow-Origin</code> response header. Note that if the client does not send a pre-flight request with an <code>Origin</code> header or it does not check the response headers from the server to validate the <code>Access-Control-Allow-Origin</code> response header, then cross-origin security is compromised. If CORS is not enabled on Elasticsearch, the only way for the client to know is to send a pre-flight request and realize the required response headers are missing.</td>
+</tr>
+<tr>
+<td><code>http.cors.allow-origin</code></td>
+<td>Which origins to allow. Defaults to no origins allowed. If you prepend and append a <code>/</code> to the value, this will be treated as a regular expression, allowing you to support HTTP and HTTPs. for example using <code>/https?:\/\/localhost(:[0-9]+)?/</code> would return the request header appropriately in both cases. <code>*</code> is a valid value but is considered a <strong>security risk</strong> as your Elasticsearch instance is open to cross origin requests from <strong>anywhere</strong>.</td>
+</tr>
+<tr>
+<td><code>http.cors.max-age</code></td>
+<td>Browsers send a “preflight” OPTIONS-request to determine CORS settings. <code>max-age</code> defines how long the result should be cached for. Defaults to <code>1728000</code> (20 days)</td>
+</tr>
+<tr>
+<td><code>http.cors.allow-methods</code></td>
+<td>Which methods to allow. Defaults to <code>OPTIONS, HEAD, GET, POST, PUT, DELETE</code>.</td>
+</tr>
+<tr>
+<td><code>http.cors.allow-headers</code></td>
+<td>Which headers to allow. Defaults to <code>X-Requested-With, Content-Type, Content-Length</code>.</td>
+</tr>
+<tr>
+<td><code>http.cors.allow-credentials</code></td>
+<td>Whether the <code>Access-Control-Allow-Credentials</code> header should be returned. Note: This header is only returned, when the setting is set to <code>true</code>. Defaults to <code>false</code></td>
+</tr>
+<tr>
+<td><code>http.detailed_errors.enabled</code></td>
+<td>Enables or disables the output of detailed error messages and stack traces in response output. Note: When set to <code>false</code> and the <code>error_trace</code> request parameter is specified, an error will be returned; when <code>error_trace</code> is not specified, a simple message will be returned. Defaults to <code>true</code></td>
+</tr>
+<tr>
+<td><code>http.pipelining.max_events</code></td>
+<td>The maximum number of events to be queued up in memory before an HTTP connection is closed, defaults to <code>10000</code>.</td>
+</tr>
+<tr>
+<td><code>http.max_warning_header_count</code></td>
+<td>The maximum number of warning headers in client HTTP responses, defaults to unbounded.</td>
+</tr>
+<tr>
+<td><code>http.max_warning_header_size</code></td>
+<td>The maximum total size of warning headers in client HTTP responses, defaults to unbounded.</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>transport 配置参考：</p>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>transport.port</code> transport端口</td>
+<td>A bind port range. Defaults to <code>9300-9400</code>.</td>
+</tr>
+<tr>
+<td><code>transport.publish_port</code></td>
+<td>The port that other nodes in the cluster should use when communicating with this node. Useful when a cluster node is behind a proxy or firewall and the <code>transport.port</code> is not directly addressable from the outside. Defaults to the actual port assigned via <code>transport.port</code>.</td>
+</tr>
+<tr>
+<td><code>transport.bind_host</code> transport监听的IP</td>
+<td>The host address to bind the transport service to. Defaults to <code>transport.host</code> (if set) or <code>network.bind_host</code>.</td>
+</tr>
+<tr>
+<td><code>transport.publish_host</code></td>
+<td>The host address to publish for nodes in the cluster to connect to. Defaults to <code>transport.host</code> (if set) or <code>network.publish_host</code>.</td>
+</tr>
+<tr>
+<td><code>transport.host</code></td>
+<td>Used to set the <code>transport.bind_host</code> and the <code>transport.publish_host</code>.</td>
+</tr>
+<tr>
+<td><code>transport.connect_timeout</code></td>
+<td>The connect timeout for initiating a new connection (in time setting format). Defaults to <code>30s</code>.</td>
+</tr>
+<tr>
+<td><code>transport.compress</code></td>
+<td>Set to <code>true</code> to enable compression (<code>DEFLATE</code>) between all nodes. Defaults to <code>false</code>.</td>
+</tr>
+<tr>
+<td><code>transport.ping_schedule</code></td>
+<td>Schedule a regular application-level ping message to ensure that transport connections between nodes are kept alive. Defaults to <code>5s</code> in the transport client and <code>-1</code> (disabled) elsewhere. It is preferable to correctly configure TCP keep-alives instead of using this feature, because TCP keep-alives apply to all kinds of long-lived connections and not just to transport connections.</td>
+</tr>
+</tbody></table>
+</blockquote>
+<h5 id="配置ES节点的JVM设置"><a href="#配置ES节点的JVM设置" class="headerlink" title="配置ES节点的JVM设置"></a>配置ES节点的JVM设置</h5><p>默认的JVM配置文件是：<code>$ES_HOME/config/jvm.options</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 配置内存占用最大最小都为1G。</span></span><br><span class="line">$ vim jvm.options</span><br><span class="line">-Xms1g</span><br><span class="line">-Xmx1g</span><br></pre></td></tr></table></figure>
+
+<p>注意：</p>
+<p>生产环境，请根据实际情况进行设置。同时不同的角色需要设置不同的资源大小。</p>
+<p>建议不要超过32GB，如果有足够的内存建议配置在26G-30G。<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html" target="_blank" rel="noopener">参考</a></p>
+<p>此时的JVM也可以通过环境变量的方式设置：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">export</span> ES_JAVA_OPTS=<span class="string">"-Xms1g -Xmx1g <span class="variable">$ES_JAVA_OPTS</span>"</span> ./bin/elasticsearch</span><br></pre></td></tr></table></figure>
+
+
+
+<p>了解了ES的配置，下面给出本次使用的配置样例：</p>
+<div class="note sucess">
+            <p>说明：</p><ul><li><code>node.attr.xxx: yyy</code> 用于设定这台node节点的属性，比如机架，可用区，或者以后可以设置冷热数据的分别存储都是基于这个。</li><li>因为我的环境中只用了一台主机，所以采用了区分端口的方式。分别配置了<code>http.port</code>，<code>transport.tcp.port</code></li><li>我这里的服务发现使用的是自定义可解析名称，通过在<code>/etc/hosts</code> 指定解析完成的，方便后期更换IP地址。</li><li>我这里的三台node节点，在初次启动时都可以竞选主节点，生产环境要注意选择合格主节点``node.master: true`</li></ul>
+          </div>
+
+<h4 id="es01"><a href="#es01" class="headerlink" title="es01"></a>es01</h4><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">cat</span> <span class="string">es01/config/elasticsearch.yml</span> <span class="string">|grep</span> <span class="string">-Ev</span> <span class="string">"^$|^#"</span></span><br><span class="line"><span class="attr">cluster.name:</span> <span class="string">es-cluster01</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">es01</span></span><br><span class="line"><span class="attr">node.attr.rack:</span> <span class="string">r1</span></span><br><span class="line"><span class="attr">node.attr.zone:</span> <span class="string">A</span></span><br><span class="line"><span class="attr">bootstrap.memory_lock:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9200</span></span><br><span class="line"><span class="attr">transport.tcp.port:</span> <span class="number">9331</span></span><br><span class="line"><span class="attr">discovery.seed_hosts:</span> <span class="string">["es02:9332",</span> <span class="string">"es03:9333"</span><span class="string">]</span></span><br><span class="line"><span class="attr">cluster.initial_master_nodes:</span> <span class="string">["es01",</span> <span class="string">"es02"</span><span class="string">,</span> <span class="string">"es03"</span><span class="string">]</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="es02"><a href="#es02" class="headerlink" title="es02"></a>es02</h4><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">cat</span> <span class="string">es02/config/elasticsearch.yml</span> <span class="string">|grep</span> <span class="string">-Ev</span> <span class="string">"^$|^#"</span></span><br><span class="line"><span class="attr">cluster.name:</span> <span class="string">es-cluster01</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">es02</span></span><br><span class="line"><span class="attr">node.attr.rack:</span> <span class="string">r1</span></span><br><span class="line"><span class="attr">node.attr.zone:</span> <span class="string">B</span></span><br><span class="line"><span class="attr">bootstrap.memory_lock:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9201</span></span><br><span class="line"><span class="attr">transport.tcp.port:</span> <span class="number">9332</span></span><br><span class="line"><span class="attr">discovery.seed_hosts:</span> <span class="string">["es01:9331",</span> <span class="string">"es03:9333"</span><span class="string">]</span></span><br><span class="line"><span class="attr">cluster.initial_master_nodes:</span> <span class="string">["es01",</span> <span class="string">"es02"</span><span class="string">,</span> <span class="string">"es03"</span><span class="string">]</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="es03"><a href="#es03" class="headerlink" title="es03"></a>es03</h4><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">cat</span> <span class="string">es03/config/elasticsearch.yml</span> <span class="string">|grep</span> <span class="string">-Ev</span> <span class="string">"^$|^#"</span></span><br><span class="line"><span class="attr">cluster.name:</span> <span class="string">es-cluster01</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">es03</span></span><br><span class="line"><span class="attr">node.attr.rack:</span> <span class="string">r1</span></span><br><span class="line"><span class="attr">node.attr.zone:</span> <span class="string">C</span></span><br><span class="line"><span class="attr">bootstrap.memory_lock:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9202</span></span><br><span class="line"><span class="attr">transport.tcp.port:</span> <span class="number">9333</span></span><br><span class="line"><span class="attr">discovery.seed_hosts:</span> <span class="string">["es02:9332",</span> <span class="string">"es01:9331"</span><span class="string">]</span></span><br><span class="line"><span class="attr">cluster.initial_master_nodes:</span> <span class="string">["es01",</span> <span class="string">"es02"</span><span class="string">,</span> <span class="string">"es03"</span><span class="string">]</span></span><br></pre></td></tr></table></figure>
+
+<p>配置完Elasticsearch后，下面就是启动测试了。</p>
+<h2 id="启动Elasticsearch"><a href="#启动Elasticsearch" class="headerlink" title="启动Elasticsearch"></a>启动Elasticsearch</h2><p>首先查看一下Elasticsearch的命令帮助：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./es01/bin/elasticsearch --<span class="built_in">help</span></span><br><span class="line">OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated <span class="keyword">in</span> version 9.0 and will likely be removed <span class="keyword">in</span> a future release.</span><br><span class="line">starts elasticsearch</span><br><span class="line"></span><br><span class="line">Option                Description                                               </span><br><span class="line">------                -----------                                               </span><br><span class="line">-E &lt;KeyValuePair&gt;     Configure a setting                                       </span><br><span class="line">-V, --version         Prints elasticsearch version information and exits        </span><br><span class="line">-d, --daemonize       Starts Elasticsearch <span class="keyword">in</span> the background     <span class="comment"># 后台启动                </span></span><br><span class="line">-h, --<span class="built_in">help</span>            show <span class="built_in">help</span>                                                 </span><br><span class="line">-p, --pidfile &lt;Path&gt;  Creates a pid file <span class="keyword">in</span> the specified path on start     <span class="comment"># 指定pid文件</span></span><br><span class="line">-q, --quiet           Turns off standard output/error streams logging <span class="keyword">in</span> console  <span class="comment"># 安静的方式</span></span><br><span class="line">-s, --silent          show minimal output                                       </span><br><span class="line">-v, --verbose         show verbose output</span><br></pre></td></tr></table></figure>
+
+
+
+<p>分别启动三台ES：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ll</span><br><span class="line">total 0</span><br><span class="line">drwxr-xr-x 10 ec2-user ec2-user 166 Nov 26 14:24 elasticsearch-7.4.2-01</span><br><span class="line">drwxr-xr-x 10 ec2-user ec2-user 166 Nov 26 14:24 elasticsearch-7.4.2-02</span><br><span class="line">drwxr-xr-x 10 ec2-user ec2-user 166 Nov 26 14:24 elasticsearch-7.4.2-03</span><br><span class="line">lrwxrwxrwx  1 ec2-user ec2-user  22 Nov 26 15:00 es01 -&gt; elasticsearch-7.4.2-01</span><br><span class="line">lrwxrwxrwx  1 ec2-user ec2-user  22 Nov 26 15:00 es02 -&gt; elasticsearch-7.4.2-02</span><br><span class="line">lrwxrwxrwx  1 ec2-user ec2-user  22 Nov 26 15:00 es03 -&gt; elasticsearch-7.4.2-03</span><br><span class="line"></span><br><span class="line">$ ./es01/bin/elasticsearch &amp;</span><br><span class="line">$ ./es02/bin/elasticsearch &amp;</span><br><span class="line">$ ./es03/bin/elasticsearch &amp;</span><br></pre></td></tr></table></figure>
+
+<p>可以通过在<code>$ES_HOME/logs/\&lt;CLUSTER_NAME\&gt;.log</code> 查看日志。</p>
+<p>测试，我们来查看一下集群中的节点：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl localhost:9200/_cat/nodes?v</span><br><span class="line">ip          heap.percent ram.percent cpu load_1m load_5m load_15m node.role master name</span><br><span class="line">172.17.0.87           32          92  15    0.01    0.04     0.17 dilm      -      es03</span><br><span class="line">172.17.0.87           17          92  15    0.01    0.04     0.17 dilm      *      es02</span><br><span class="line">172.17.0.87           20          92  15    0.01    0.04     0.17 dilm      -      es01</span><br></pre></td></tr></table></figure>
+
+<p>查看集群的健康状况：</p>
+<p>分为三种状态：</p>
+<ul>
+<li>green，绿色，代表所有数据都健康。</li>
+<li>yellow，黄色，代表数据部分正常，但是没有数据丢失，可以恢复到green。</li>
+<li>red，红色，代表有数据丢失，且无法恢复了。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl localhost:9200</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"name"</span> : <span class="string">"es01"</span>, <span class="comment"># 当前节点名称</span></span><br><span class="line">  <span class="string">"cluster_name"</span> : <span class="string">"es-cluster01"</span>, <span class="comment"># 集群名称</span></span><br><span class="line">  <span class="string">"cluster_uuid"</span> : <span class="string">"n7DDNexcTDik5mU9Y_qrcA"</span>,</span><br><span class="line">  <span class="string">"version"</span> : &#123; <span class="comment"># 版本</span></span><br><span class="line">    <span class="string">"number"</span> : <span class="string">"7.4.2"</span>,</span><br><span class="line">    <span class="string">"build_flavor"</span> : <span class="string">"default"</span>,</span><br><span class="line">    <span class="string">"build_type"</span> : <span class="string">"tar"</span>,</span><br><span class="line">    <span class="string">"build_hash"</span> : <span class="string">"2f90bbf7b93631e52bafb59b3b049cb44ec25e96"</span>,</span><br><span class="line">    <span class="string">"build_date"</span> : <span class="string">"2019-10-28T20:40:44.881551Z"</span>,</span><br><span class="line">    <span class="string">"build_snapshot"</span> : <span class="literal">false</span>,</span><br><span class="line">    <span class="string">"lucene_version"</span> : <span class="string">"8.2.0"</span>,</span><br><span class="line">    <span class="string">"minimum_wire_compatibility_version"</span> : <span class="string">"6.8.0"</span>,</span><br><span class="line">    <span class="string">"minimum_index_compatibility_version"</span> : <span class="string">"6.0.0-beta1"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"tagline"</span> : <span class="string">"You Know, for Search"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$ curl localhost:9200/_cat/health</span><br><span class="line">1574835925 06:25:25 es-cluster01 green 3 3 0 0 0 0 0 0 - 100.0%</span><br><span class="line"></span><br><span class="line">$ curl localhost:9200/_cat/health?v</span><br><span class="line">epoch      timestamp cluster      status node.total node.data shards pri relo init unassign pending_tasks max_task_wait_time active_shards_percent</span><br><span class="line">1574835928 06:25:28  es-cluster01 green           3         3      0   0    0    0        0             0                  -                100.0%</span><br></pre></td></tr></table></figure>
+
+<p>查看所有<code>/_cat</code>接口：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl localhost:9200/_cat</span><br><span class="line">=^.^=</span><br><span class="line">/_cat/allocation</span><br><span class="line">/_cat/shards</span><br><span class="line">/_cat/shards/&#123;index&#125;</span><br><span class="line">/_cat/master</span><br><span class="line">/_cat/nodes</span><br><span class="line">/_cat/tasks</span><br><span class="line">/_cat/indices</span><br><span class="line">/_cat/indices/&#123;index&#125;</span><br><span class="line">/_cat/segments</span><br><span class="line">/_cat/segments/&#123;index&#125;</span><br><span class="line">/_cat/count</span><br><span class="line">/_cat/count/&#123;index&#125;</span><br><span class="line">/_cat/recovery</span><br><span class="line">/_cat/recovery/&#123;index&#125;</span><br><span class="line">/_cat/health</span><br><span class="line">/_cat/pending_tasks</span><br><span class="line">/_cat/aliases</span><br><span class="line">/_cat/aliases/&#123;<span class="built_in">alias</span>&#125;</span><br><span class="line">/_cat/thread_pool</span><br><span class="line">/_cat/thread_pool/&#123;thread_pools&#125;</span><br><span class="line">/_cat/plugins</span><br><span class="line">/_cat/fielddata</span><br><span class="line">/_cat/fielddata/&#123;fields&#125;</span><br><span class="line">/_cat/nodeattrs</span><br><span class="line">/_cat/repositories</span><br><span class="line">/_cat/snapshots/&#123;repository&#125;</span><br><span class="line">/_cat/templates</span><br></pre></td></tr></table></figure>
+
+<p>查看我们之前给每台机器定义的属性：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl localhost:9200/_cat/nodeattrs</span><br><span class="line">es03 172.17.0.87 172.17.0.87 ml.machine_memory 16673112064</span><br><span class="line">es03 172.17.0.87 172.17.0.87 rack              r1 <span class="comment"># 自定义的</span></span><br><span class="line">es03 172.17.0.87 172.17.0.87 ml.max_open_jobs  20</span><br><span class="line">es03 172.17.0.87 172.17.0.87 xpack.installed   <span class="literal">true</span></span><br><span class="line">es03 172.17.0.87 172.17.0.87 zone              C <span class="comment"># 自定义的</span></span><br><span class="line">es02 172.17.0.87 172.17.0.87 ml.machine_memory 16673112064</span><br><span class="line">es02 172.17.0.87 172.17.0.87 rack              r1 <span class="comment"># 自定义的</span></span><br><span class="line">es02 172.17.0.87 172.17.0.87 ml.max_open_jobs  20</span><br><span class="line">es02 172.17.0.87 172.17.0.87 xpack.installed   <span class="literal">true</span></span><br><span class="line">es02 172.17.0.87 172.17.0.87 zone              B <span class="comment"># 自定义的</span></span><br><span class="line">es01 172.17.0.87 172.17.0.87 ml.machine_memory 16673112064</span><br><span class="line">es01 172.17.0.87 172.17.0.87 rack              r1 <span class="comment"># 自定义的</span></span><br><span class="line">es01 172.17.0.87 172.17.0.87 ml.max_open_jobs  20</span><br><span class="line">es01 172.17.0.87 172.17.0.87 xpack.installed   <span class="literal">true</span></span><br><span class="line">es01 172.17.0.87 172.17.0.87 zone              A <span class="comment"># 自定义的</span></span><br></pre></td></tr></table></figure>
+
+<p>我们发现，所有的这些API接口都是能够直接访问的，不需要任何的认证的，对于生产来说非常的不安全，同时任一台node节点都可以加入到集群中，这些都非常的不安全；下面介绍如果开启auth以及node间的ssl认证。</p>
+<h2 id="开启ES集群的Auth认证和Node间SSL"><a href="#开启ES集群的Auth认证和Node间SSL" class="headerlink" title="开启ES集群的Auth认证和Node间SSL"></a>开启ES集群的Auth认证和Node间SSL</h2><h3 id="开启ES集群的Auth认证"><a href="#开启ES集群的Auth认证" class="headerlink" title="开启ES集群的Auth认证"></a>开启ES集群的Auth认证</h3><p>在最新版的ES中，已经开源了X-pack组件，但是开源 != 免费，但是一些基础的安全是免费的，例如本例中的Auth以及Node间SSL就是免费的。</p>
+<p>首先我们尝试生成密码：命令是<code>$ES_HOME/bin/elasticsearch-setup-passwords</code>，查看一下帮助：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./es01/bin/elasticsearch-setup-passwords --<span class="built_in">help</span></span><br><span class="line">Sets the passwords <span class="keyword">for</span> reserved users</span><br><span class="line"></span><br><span class="line">Commands</span><br><span class="line">--------</span><br><span class="line">auto - Uses randomly generated passwords</span><br><span class="line">interactive - Uses passwords entered by a user</span><br><span class="line"></span><br><span class="line">Non-option arguments:</span><br><span class="line"><span class="built_in">command</span>              </span><br><span class="line"></span><br><span class="line">Option         Description        </span><br><span class="line">------         -----------        </span><br><span class="line">-h, --<span class="built_in">help</span>     show <span class="built_in">help</span>          </span><br><span class="line">-s, --silent   show minimal output</span><br><span class="line">-v, --verbose  show verbose output</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自动生成密码，发现失败</span></span><br><span class="line">$ ./es01/bin/elasticsearch-setup-passwords auto</span><br><span class="line"></span><br><span class="line">Unexpected response code [500] from calling GET http://172.17.0.87:9200/_security/_authenticate?pretty</span><br><span class="line">It doesn<span class="string">'t look like the X-Pack security feature is enabled on this Elasticsearch node.</span></span><br><span class="line"><span class="string">Please check if you have enabled X-Pack security in your elasticsearch.yml configuration file.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">ERROR: X-Pack Security is disabled by configuration.</span></span><br></pre></td></tr></table></figure>
+
+<p>我们查看一些ES01的日志，发现有报错：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[2019-11-27T14:35:13,391][WARN ][r.suppressed             ] [es01] path: /_security/_authenticate, params: &#123;pretty=&#125;</span><br><span class="line">org.elasticsearch.ElasticsearchException: Security must be explicitly enabled when using a [basic] license. Enable security by setting [xpack.security.enabled] to [true] in the elasticsearch.yml file and restart the node.</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>提示说需要先开启安全：</p>
+<p>我们按照提示分别的三台ES节点上添加如下信息：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> <span class="string">"xpack.security.enabled: true"</span> &gt;&gt; es01/config/elasticsearch.yml</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"xpack.security.enabled: true"</span> &gt;&gt; es02/config/elasticsearch.yml</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"xpack.security.enabled: true"</span> &gt;&gt; es03/config/elasticsearch.yml</span><br></pre></td></tr></table></figure>
+
+<p>然后重启：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ps -ef|grep elasticsearch</span><br><span class="line"><span class="comment"># 获取到es节点的pid分别kill即可，注意不要用-9</span></span><br></pre></td></tr></table></figure>
+
+<p>发现无法启动，错误提示：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ERROR: [1] bootstrap checks failed</span><br><span class="line">[1]: Transport SSL must be enabled if security is enabled on a [basic] license. Please set [xpack.security.transport.ssl.enabled] to [true] or disable security by setting [xpack.security.enabled] to [false]</span><br></pre></td></tr></table></figure>
+
+<p>好吧我们再添加这条配置：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> <span class="string">"xpack.security.transport.ssl.enabled: true"</span> &gt;&gt; es01/config/elasticsearch.yml</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"xpack.security.transport.ssl.enabled: true"</span> &gt;&gt; es02/config/elasticsearch.yml</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"xpack.security.transport.ssl.enabled: true"</span> &gt;&gt; es03/config/elasticsearch.yml</span><br></pre></td></tr></table></figure>
+
+<p>然后再次启动，我们又发现，在启动第二台的时候，两个es节点都一直报错，如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[2019-11-27T14:50:58,643][WARN ][o.e.t.TcpTransport       ] [es01] exception caught on transport layer [Netty4TcpChannel&#123;localAddress=/172.17.0.87:9331, remoteAddress=/172.17.0.87:56654&#125;], closing connection</span><br><span class="line">io.netty.handler.codec.DecoderException: javax.net.ssl.SSLHandshakeException: No available authentication scheme</span><br><span class="line">4at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:475) ~[netty-codec-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:283) ~[netty-codec-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:374) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:360) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:352) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1421) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:374) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:360) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:930) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:163) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:697) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.nio.NioEventLoop.processSelectedKeysPlain(NioEventLoop.java:597) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:551) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:511) [netty-transport-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:918) [netty-common-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-common-4.1.38.Final.jar:4.1.38.Final]</span><br><span class="line">4at java.lang.Thread.run(Thread.java:830) [?:?]</span><br><span class="line">Caused by: javax.net.ssl.SSLHandshakeException: No available authentication scheme</span><br><span class="line">4at sun.security.ssl.Alert.createSSLException(Alert.java:131) ~[?:?]</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>发现没有配置认证的方式。好吧，我们先往下继续配置：</p>
+<h3 id="配置Node间SSL"><a href="#配置Node间SSL" class="headerlink" title="配置Node间SSL"></a>配置Node间SSL</h3><p>注意：这里是指配置ES集群节点间transport的SSL认证，对于ES节点的HTTP API接口并没有配置，所以通过API访问ES时不需要提供证书。</p>
+<p>参考官网:</p>
+<p> <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/ssl-tls.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/reference/current/ssl-tls.html</a></p>
+<p> <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.4/configuring-tls.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/reference/7.4/configuring-tls.html</a></p>
+<p>创建SSL/TLS证书：通过命令<code>$ES_HOME/bin/elasticsearch-certutil</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看命令帮助</span></span><br><span class="line">$ ./es01/bin/elasticsearch-certutil --<span class="built_in">help</span></span><br><span class="line">WARNING: An illegal reflective access operation has occurred</span><br><span class="line">WARNING: Illegal reflective access by org.bouncycastle.jcajce.provider.drbg.DRBG (file:/opt/elk74/elasticsearch-7.4.2-01/lib/tools/security-cli/bcprov-jdk15on-1.61.jar) to constructor sun.security.provider.Sun()</span><br><span class="line">WARNING: Please consider reporting this to the maintainers of org.bouncycastle.jcajce.provider.drbg.DRBG</span><br><span class="line">WARNING: Use --illegal-access=warn to <span class="built_in">enable</span> warnings of further illegal reflective access operations</span><br><span class="line">WARNING: All illegal access operations will be denied <span class="keyword">in</span> a future release</span><br><span class="line">Simplifies certificate creation <span class="keyword">for</span> use with the Elastic Stack</span><br><span class="line"></span><br><span class="line">Commands</span><br><span class="line">--------</span><br><span class="line">csr - generate certificate signing requests</span><br><span class="line">cert - generate X.509 certificates and keys</span><br><span class="line">ca - generate a new <span class="built_in">local</span> certificate authority</span><br><span class="line"></span><br><span class="line">Non-option arguments:</span><br><span class="line"><span class="built_in">command</span>              </span><br><span class="line"></span><br><span class="line">Option         Description        </span><br><span class="line">------         -----------        </span><br><span class="line">-h, --<span class="built_in">help</span>     show <span class="built_in">help</span>          </span><br><span class="line">-s, --silent   show minimal output</span><br><span class="line">-v, --verbose  show verbose output</span><br></pre></td></tr></table></figure>
+
+<p>创建CA证书：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./es01/bin/elasticsearch-certutil ca -v</span><br><span class="line">This tool assists you <span class="keyword">in</span> the generation of X.509 certificates and certificate</span><br><span class="line">signing requests <span class="keyword">for</span> use with SSL/TLS <span class="keyword">in</span> the Elastic stack.</span><br><span class="line"></span><br><span class="line">The <span class="string">'ca'</span> mode generates a new <span class="string">'certificate authority'</span></span><br><span class="line">This will create a new X.509 certificate and private key that can be used</span><br><span class="line">to sign certificate when running <span class="keyword">in</span> <span class="string">'cert'</span> mode.</span><br><span class="line"></span><br><span class="line">Use the <span class="string">'ca-dn'</span> option <span class="keyword">if</span> you wish to configure the <span class="string">'distinguished name'</span></span><br><span class="line">of the certificate authority</span><br><span class="line"></span><br><span class="line">By default the <span class="string">'ca'</span> mode produces a single PKCS<span class="comment">#12 output file which holds:</span></span><br><span class="line">    * The CA certificate</span><br><span class="line">    * The CA<span class="string">'s private key</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">If you elect to generate PEM format certificates (the -pem option), then the output will</span></span><br><span class="line"><span class="string">be a zip file containing individual files for the CA certificate and private key</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Please enter the desired output file [elastic-stack-ca.p12]:  # 输入保存的ca文件名称</span></span><br><span class="line"><span class="string">Enter password for elastic-stack-ca.p12 : # 输入证书密码，我们这里留空</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 默认的CA证书存放在$ES_HOME 目录中</span></span><br><span class="line"><span class="string">$ ll es01/</span></span><br><span class="line"><span class="string">total 560</span></span><br><span class="line"><span class="string">drwxr-xr-x  2 ec2-user ec2-user   4096 Oct 29 04:45 bin</span></span><br><span class="line"><span class="string">drwxr-xr-x  2 ec2-user ec2-user    178 Nov 27 13:45 config</span></span><br><span class="line"><span class="string">drwxrwxr-x  3 ec2-user ec2-user     19 Nov 27 13:46 data</span></span><br><span class="line"><span class="string">-rw-------  1 ec2-user ec2-user   2527 Nov 27 15:05 elastic-stack-ca.p12 # 这里呢</span></span><br><span class="line"><span class="string">drwxr-xr-x  9 ec2-user ec2-user    107 Oct 29 04:45 jdk</span></span><br><span class="line"><span class="string">drwxr-xr-x  3 ec2-user ec2-user   4096 Oct 29 04:45 lib</span></span><br><span class="line"><span class="string">-rw-r--r--  1 ec2-user ec2-user  13675 Oct 29 04:38 LICENSE.txt</span></span><br><span class="line"><span class="string">drwxr-xr-x  2 ec2-user ec2-user   4096 Nov 27 14:48 logs</span></span><br><span class="line"><span class="string">drwxr-xr-x 37 ec2-user ec2-user   4096 Oct 29 04:45 modules</span></span><br><span class="line"><span class="string">-rw-r--r--  1 ec2-user ec2-user 523209 Oct 29 04:45 NOTICE.txt</span></span><br><span class="line"><span class="string">drwxr-xr-x  2 ec2-user ec2-user      6 Oct 29 04:45 plugins</span></span><br><span class="line"><span class="string">-rw-r--r--  1 ec2-user ec2-user   8500 Oct 29 04:38 README.textile</span></span><br></pre></td></tr></table></figure>
+
+<p>创建节点间认证用的证书：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> es01</span><br><span class="line">$ ./bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12 </span><br><span class="line">This tool assists you <span class="keyword">in</span> the generation of X.509 certificates and certificate</span><br><span class="line">signing requests <span class="keyword">for</span> use with SSL/TLS <span class="keyword">in</span> the Elastic stack.</span><br><span class="line"></span><br><span class="line">The <span class="string">'cert'</span> mode generates X.509 certificate and private keys.</span><br><span class="line">    * By default, this generates a single certificate and key <span class="keyword">for</span> use</span><br><span class="line">       on a single instance.</span><br><span class="line">    * The <span class="string">'-multiple'</span> option will prompt you to enter details <span class="keyword">for</span> multiple</span><br><span class="line">       instances and will generate a certificate and key <span class="keyword">for</span> each one</span><br><span class="line">    * The <span class="string">'-in'</span> option allows <span class="keyword">for</span> the certificate generation to be automated by describing</span><br><span class="line">       the details of each instance <span class="keyword">in</span> a YAML file</span><br><span class="line"></span><br><span class="line">    * An instance is any piece of the Elastic Stack that requires an SSL certificate.</span><br><span class="line">      Depending on your configuration, Elasticsearch, Logstash, Kibana, and Beats</span><br><span class="line">      may all require a certificate and private key.</span><br><span class="line">    * The minimum required value <span class="keyword">for</span> each instance is a name. This can simply be the</span><br><span class="line">      hostname, <span class="built_in">which</span> will be used as the Common Name of the certificate. A full</span><br><span class="line">      distinguished name may also be used.</span><br><span class="line">    * A filename value may be required <span class="keyword">for</span> each instance. This is necessary when the</span><br><span class="line">      name would result <span class="keyword">in</span> an invalid file or directory name. The name provided here</span><br><span class="line">      is used as the directory name (within the zip) and the prefix <span class="keyword">for</span> the key and</span><br><span class="line">      certificate files. The filename is required <span class="keyword">if</span> you are prompted and the name</span><br><span class="line">      is not displayed <span class="keyword">in</span> the prompt.</span><br><span class="line">    * IP addresses and DNS names are optional. Multiple values can be specified as a</span><br><span class="line">      comma separated string. If no IP addresses or DNS names are provided, you may</span><br><span class="line">      <span class="built_in">disable</span> hostname verification <span class="keyword">in</span> your SSL configuration.</span><br><span class="line"></span><br><span class="line">    * All certificates generated by this tool will be signed by a certificate authority (CA).</span><br><span class="line">    * The tool can automatically generate a new CA <span class="keyword">for</span> you, or you can provide your own with the</span><br><span class="line">         -ca or -ca-cert <span class="built_in">command</span> line options.</span><br><span class="line"></span><br><span class="line">By default the <span class="string">'cert'</span> mode produces a single PKCS<span class="comment">#12 output file which holds:</span></span><br><span class="line">    * The instance certificate</span><br><span class="line">    * The private key <span class="keyword">for</span> the instance certificate</span><br><span class="line">    * The CA certificate</span><br><span class="line"></span><br><span class="line">If you specify any of the following options:</span><br><span class="line">    * -pem (PEM formatted output)</span><br><span class="line">    * -keep-ca-key (retain generated CA key)</span><br><span class="line">    * -multiple (generate multiple certificates)</span><br><span class="line">    * -<span class="keyword">in</span> (generate certificates from an input file)</span><br><span class="line"><span class="keyword">then</span> the output will be be a zip file containing individual certificate/key files</span><br><span class="line"></span><br><span class="line">Enter password <span class="keyword">for</span> CA (elastic-stack-ca.p12) :  <span class="comment"># 输入CA证书的密码，我们这里没有设置，直接回车</span></span><br><span class="line">Please enter the desired output file [elastic-certificates.p12]:  <span class="comment"># 输入证书保存名称，保值默认直接回车</span></span><br><span class="line">Enter password <span class="keyword">for</span> elastic-certificates.p12 :  <span class="comment"># 输入证书的密码，留空，直接回车</span></span><br><span class="line"></span><br><span class="line">Certificates written to /opt/elk74/elasticsearch-7.4.2-01/elastic-certificates.p12 <span class="comment"># 存放位置</span></span><br><span class="line"></span><br><span class="line">This file should be properly secured as it contains the private key <span class="keyword">for</span> </span><br><span class="line">your instance.</span><br><span class="line"></span><br><span class="line">This file is a self contained file and can be copied and used <span class="string">'as is'</span></span><br><span class="line">For each Elastic product that you wish to configure, you should copy</span><br><span class="line">this <span class="string">'.p12'</span> file to the relevant configuration directory</span><br><span class="line">and <span class="keyword">then</span> follow the SSL configuration instructions <span class="keyword">in</span> the product guide.</span><br><span class="line"></span><br><span class="line">For client applications, you may only need to copy the CA certificate and</span><br><span class="line">configure the client to trust this certificate.</span><br><span class="line">$ ll</span><br><span class="line">total 564</span><br><span class="line">drwxr-xr-x  2 ec2-user ec2-user   4096 Oct 29 04:45 bin</span><br><span class="line">drwxr-xr-x  2 ec2-user ec2-user    178 Nov 27 13:45 config</span><br><span class="line">drwxrwxr-x  3 ec2-user ec2-user     19 Nov 27 13:46 data</span><br><span class="line">-rw-------  1 ec2-user ec2-user   3451 Nov 27 15:10 elastic-certificates.p12 <span class="comment"># 这里</span></span><br><span class="line">-rw-------  1 ec2-user ec2-user   2527 Nov 27 15:05 elastic-stack-ca.p12 <span class="comment"># 还有这里</span></span><br><span class="line">drwxr-xr-x  9 ec2-user ec2-user    107 Oct 29 04:45 jdk</span><br><span class="line">drwxr-xr-x  3 ec2-user ec2-user   4096 Oct 29 04:45 lib</span><br><span class="line">-rw-r--r--  1 ec2-user ec2-user  13675 Oct 29 04:38 LICENSE.txt</span><br><span class="line">drwxr-xr-x  2 ec2-user ec2-user   4096 Nov 27 14:48 logs</span><br><span class="line">drwxr-xr-x 37 ec2-user ec2-user   4096 Oct 29 04:45 modules</span><br><span class="line">-rw-r--r--  1 ec2-user ec2-user 523209 Oct 29 04:45 NOTICE.txt</span><br><span class="line">drwxr-xr-x  2 ec2-user ec2-user      6 Oct 29 04:45 plugins</span><br><span class="line">-rw-r--r--  1 ec2-user ec2-user   8500 Oct 29 04:38 README.textile</span><br></pre></td></tr></table></figure>
+
+<p>配置ES节点使用这个证书：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mkdir config/certs</span><br><span class="line">$ mv elastic-* config/certs/</span><br><span class="line">$ ll config/certs/</span><br><span class="line">total 8</span><br><span class="line">-rw------- 1 ec2-user ec2-user 3451 Nov 27 15:10 elastic-certificates.p12</span><br><span class="line">-rw------- 1 ec2-user ec2-user 2527 Nov 27 15:05 elastic-stack-ca.p12</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拷贝这个目录到所有的ES节点中</span></span><br><span class="line">$ cp -a config/certs /opt/elk74/es02/config/</span><br><span class="line">$ cp -a config/certs /opt/elk74/es03/config/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置elasticsearch.yml配置文件，注意所有的node节点都需要配置</span></span><br><span class="line">$ vim es01/config/elasticsearch.yml</span><br><span class="line">xpack.security.enabled: <span class="literal">true</span></span><br><span class="line">xpack.security.transport.ssl.enabled: <span class="literal">true</span></span><br><span class="line">xpack.security.transport.ssl.verification_mode: certificate <span class="comment">#认证方式使用证书</span></span><br><span class="line">xpack.security.transport.ssl.keystore.path: certs/elastic-certificates.p12</span><br><span class="line">xpack.security.transport.ssl.truststore.path: certs/elastic-certificates.p12</span><br></pre></td></tr></table></figure>
+
+<div class="note danger">
+            <p>注意：config/certs 目录中不需要拷贝CA证书文件，只拷贝cert文件即可。我这里是图方便。</p><p>同时要注意把CA证书保存好，如果设置了CA证书密钥也要保护放，方便后期增加ES节点使用。</p>
+          </div>
+
+<div class="note sucess">
+            <p>xpack.security.transport.ssl.verification_mode 这里配置认证方式：<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.4/security-settings.html#ssl-tls-settings" target="_blank" rel="noopener">参考官网</a></p><ul><li><code>full</code>，认证证书是否通过信任的CA证书签发的，同时认证server的hostname or IP address是否匹配证书中配置的。</li><li><code>certificate</code>，我们这里采用的方式，只认证证书是否通过信任的CA证书签发的</li><li><code>none</code>，什么也不认证，相当于关闭了SSL/TLS 认证，仅用于你非常相信安全的环境。</li></ul>
+          </div>
+
+<p>配置了，然后再次启动ES节点测试：</p>
+<p>测试能够正常启动了。好了，我们再来继续之前的生成密码：在随意一台节点即可。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./es01/bin/elasticsearch-setup-passwords auto</span><br><span class="line">Initiating the setup of passwords <span class="keyword">for</span> reserved users elastic,apm_system,kibana,logstash_system,beats_system,remote_monitoring_user.</span><br><span class="line">The passwords will be randomly generated and printed to the console.</span><br><span class="line">Please confirm that you would like to <span class="built_in">continue</span> [y/N]y <span class="comment">#输入y，确认继续</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Changed password <span class="keyword">for</span> user apm_system</span><br><span class="line">PASSWORD apm_system = yc0GJ9QS4AP69pVzFKiX</span><br><span class="line"></span><br><span class="line">Changed password <span class="keyword">for</span> user kibana</span><br><span class="line">PASSWORD kibana = UKuHceHWudloJk9NvHlX</span><br><span class="line"></span><br><span class="line">Changed password <span class="keyword">for</span> user logstash_system</span><br><span class="line">PASSWORD logstash_system = N6pLSkNSNhT0UR6radrZ</span><br><span class="line"></span><br><span class="line">Changed password <span class="keyword">for</span> user beats_system</span><br><span class="line">PASSWORD beats_system = BmsiDzgx1RzqHIWTri48</span><br><span class="line"></span><br><span class="line">Changed password <span class="keyword">for</span> user remote_monitoring_user</span><br><span class="line">PASSWORD remote_monitoring_user = dflPnqGAQneqjhU1XQiZ</span><br><span class="line"></span><br><span class="line">Changed password <span class="keyword">for</span> user elastic</span><br><span class="line">PASSWORD elastic = Tu8RPllSZz6KXkgZWFHv</span><br></pre></td></tr></table></figure>
+
+<p>查看集群节点数量：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl -u elastic localhost:9200/_cat/nodes</span><br><span class="line">Enter host password <span class="keyword">for</span> user <span class="string">'elastic'</span>: <span class="comment"># 输入elastic用户的密码：Tu8RPllSZz6KXkgZWFHv</span></span><br><span class="line">172.17.0.87 14 92 18 0.16 0.11 0.37 dilm - es02</span><br><span class="line">172.17.0.87  6 92 17 0.16 0.11 0.37 dilm - es03</span><br><span class="line">172.17.0.87  8 92 19 0.16 0.11 0.37 dilm * es01</span><br></pre></td></tr></table></figure>
+
+<p>好了，一个比较安全的Elasticsearch的集群就已经创建完毕了，下面开始安装kibana，方便通过浏览器访问。</p>
+<h2 id="kibana的安装配置"><a href="#kibana的安装配置" class="headerlink" title="kibana的安装配置"></a>kibana的安装配置</h2><p><a href="https://www.elastic.co/cn/downloads/" target="_blank" rel="noopener">下载地址</a></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ wget -c <span class="string">"https://artifacts.elastic.co/downloads/kibana/kibana-7.4.2-linux-x86_64.tar.gz"</span></span><br><span class="line">$ tar xf /opt/softs/elk7.4/kibana-7.4.2-linux-x86_64.tar.gz </span><br><span class="line">$ ln -s kibana-7.4.2-linux-x86_64 kibana</span><br></pre></td></tr></table></figure>
+
+<p>配置kibana：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">cat</span> <span class="string">kibana/config/kibana.yml</span> <span class="string">|grep</span> <span class="string">-Ev</span> <span class="string">"^$|^#"</span></span><br><span class="line"><span class="attr">server.port:</span> <span class="number">5601</span></span><br><span class="line"><span class="attr">server.host:</span> <span class="string">"0.0.0.0"</span></span><br><span class="line"><span class="attr">server.name:</span> <span class="string">"mykibana"</span></span><br><span class="line"><span class="attr">elasticsearch.hosts:</span> <span class="string">["http://localhost:9200"]</span></span><br><span class="line"><span class="attr">kibana.index:</span> <span class="string">".kibana"</span></span><br><span class="line"><span class="attr">elasticsearch.username:</span> <span class="string">"kibana"</span></span><br><span class="line"><span class="attr">elasticsearch.password:</span> <span class="string">"UKuHceHWudloJk9NvHlX"</span></span><br><span class="line"><span class="comment"># i18n.locale: "en"</span></span><br><span class="line"><span class="attr">i18n.locale:</span> <span class="string">"zh-CN"</span></span><br><span class="line"><span class="attr">xpack.security.encryptionKey:</span> <span class="string">Hz*9yFFaPejHvCkhT*ddNx%WsBgxVSCQ</span> <span class="comment"># 自己随意生成的32位加密key</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>kibana 命令帮助：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ ./kibana/bin/kibana --help</span><br><span class="line"></span><br><span class="line">  Usage: bin/kibana [command=serve] [options]</span><br><span class="line">  </span><br><span class="line">  Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch.</span><br><span class="line">  </span><br><span class="line">  Commands:</span><br><span class="line">    serve  [options]  Run the kibana server</span><br><span class="line">    help  &lt;command&gt;   Get the help for a specific command</span><br><span class="line">  </span><br><span class="line">  &quot;serve&quot; Options:</span><br><span class="line">  </span><br><span class="line">    -e, --elasticsearch &lt;uri1,uri2&gt;  Elasticsearch instances</span><br><span class="line">    -c, --config &lt;path&gt;              Path to the config file, use multiple --config args to include multiple config files (default: [&quot;/opt/elk74/kibana-7.4.2-linux-x86_64/config/kibana.yml&quot;])</span><br><span class="line">    -p, --port &lt;port&gt;                The port to bind to</span><br><span class="line">    -q, --quiet                      Prevent all logging except errors</span><br><span class="line">    -Q, --silent                     Prevent all logging</span><br><span class="line">    --verbose                        Turns on verbose logging</span><br><span class="line">    -H, --host &lt;host&gt;                The host to bind to</span><br><span class="line">    -l, --log-file &lt;path&gt;            The file to log to</span><br><span class="line">    --plugin-dir &lt;path&gt;              A path to scan for plugins, this can be specified multiple times to specify multiple directories (default: [&quot;/opt/elk74/kibana-7.4.2-linux-x86_64/plugins&quot;,&quot;/opt/elk74/kibana-7.4.2-linux-x86_64/src/legacy/core_plugins&quot;])</span><br><span class="line">    --plugin-path &lt;path&gt;             A path to a plugin which should be included by the server, this can be specified multiple times to specify multiple paths (default: [])</span><br><span class="line">    --plugins &lt;path&gt;                 an alias for --plugin-dir</span><br><span class="line">    --optimize                       Optimize and then stop the server</span><br><span class="line">    -h, --help                       output usage information</span><br></pre></td></tr></table></figure>
+
+<p>访问kibana的IP:5601即可，可以看到登陆界面：</p>
+<p><img src="/images/install-elasticsearch-cluster-7-4/kibana-login.jpg" alt></p>
+<p>输入上面生成的管理员elastic的用户和密码，就可以登陆了，我们查看一下license许可吧：</p>
+<p><img src="/images/install-elasticsearch-cluster-7-4/es-basic-license.jpg" alt></p>
+<p>一个使用永不过期的Basic许可的免费License，开启了基本的Auth认证和集群间SSL/TLS 认证的Elasticsearch集群就创建完毕了。</p>
+<p>等等，你有没有想过Kibana的配置文件中使用着明文的用户名密码，这里只能通过LInux的权限进行控制了，有没有更安全的方式呢，有的，就是keystore。</p>
+<h3 id="kibana-keystore-安全配置"><a href="#kibana-keystore-安全配置" class="headerlink" title="kibana keystore 安全配置"></a>kibana keystore 安全配置</h3><p><a href="https://www.elastic.co/guide/en/kibana/7.4/secure-settings.html" target="_blank" rel="noopener">参考官网</a></p>
+<p>查看``kibana-keystore`命令帮助：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./bin/kibana-keystore --<span class="built_in">help</span></span><br><span class="line">Usage: bin/kibana-keystore [options] [<span class="built_in">command</span>]</span><br><span class="line"></span><br><span class="line">A tool <span class="keyword">for</span> managing settings stored <span class="keyword">in</span> the Kibana keystore</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -V, --version           output the version number</span><br><span class="line">  -h, --<span class="built_in">help</span>              output usage information</span><br><span class="line"></span><br><span class="line">Commands:</span><br><span class="line">  create [options]        Creates a new Kibana keystore</span><br><span class="line">  list [options]          List entries <span class="keyword">in</span> the keystore</span><br><span class="line">  add [options] &lt;key&gt;     Add a string setting to the keystore</span><br><span class="line">  remove [options] &lt;key&gt;  Remove a setting from the keystore</span><br></pre></td></tr></table></figure>
+
+<p>首先我们创建keystore：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ bin/kibana-keystore create</span><br><span class="line">Created Kibana keystore <span class="keyword">in</span> /opt/elk74/kibana-7.4.2-linux-x86_64/data/kibana.keystore <span class="comment"># 默认存放位置</span></span><br></pre></td></tr></table></figure>
+
+<p>增加配置：</p>
+<p>我们要吧kibana.yml 配置文件中的敏感信息，比如：<code>elasticsearch.username</code> 和 <code>elasticsearch.password</code>，给隐藏掉，或者直接去掉；</p>
+<p>所以这里我们增加两个配置：分别是<code>elasticsearch.password</code>  和 <code>elasticsearch.username</code>:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看add的命令帮助：</span></span><br><span class="line">$ ./bin/kibana-keystore add --<span class="built_in">help</span></span><br><span class="line">Usage: add [options] &lt;key&gt;</span><br><span class="line"></span><br><span class="line">Add a string setting to the keystore</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -f, --force   overwrite existing setting without prompting</span><br><span class="line">  -x, --stdin   <span class="built_in">read</span> setting value from stdin</span><br><span class="line">  -s, --silent  prevent all logging</span><br><span class="line">  -h, --<span class="built_in">help</span>    output usage information</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建elasticsearch.username这个key：注意名字必须是kibana.yml中的key</span></span><br><span class="line">$ ./bin/kibana-keystore add elasticsearch.username</span><br><span class="line">Enter value <span class="keyword">for</span> elasticsearch.username: ******  <span class="comment"># 输入key对应的value，这里是kibana连接es的账号：kibana</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建elasticsearch.password这个key</span></span><br><span class="line">$ ./bin/kibana-keystore add elasticsearch.password</span><br><span class="line">Enter value <span class="keyword">for</span> elasticsearch.password: ******************** <span class="comment"># 输入对应的密码：UKuHceHWudloJk9NvHlX</span></span><br></pre></td></tr></table></figure>
+
+<p>好了，我们把kibana.yml配置文件中的这两项配置删除即可，然后直接启动kibana，kibana会自动已用这两个配置的。</p>
+<p>最终的kibana.yml配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">server.port:</span> <span class="number">5601</span></span><br><span class="line"><span class="attr">server.host:</span> <span class="string">"0.0.0.0"</span></span><br><span class="line"><span class="attr">server.name:</span> <span class="string">"mykibana"</span></span><br><span class="line"><span class="attr">elasticsearch.hosts:</span> <span class="string">["http://localhost:9200"]</span></span><br><span class="line"><span class="attr">kibana.index:</span> <span class="string">".kibana"</span></span><br><span class="line"><span class="comment"># i18n.locale: "en"</span></span><br><span class="line"><span class="attr">i18n.locale:</span> <span class="string">"zh-CN"</span></span><br><span class="line"><span class="attr">xpack.security.encryptionKey:</span> <span class="string">Hz*9yFFaPejHvCkhT*ddNx%WsBgxVSCQ</span> <span class="comment"># 自己随意生成的32位加密key</span></span><br></pre></td></tr></table></figure>
+
+<p>这样配置文件中就不会出现敏感信息了，达到了更高的安全性。</p>
+<p>类似的Keystore方式不只是Kibana支持，ELK的产品都是支持的。</p>
+<hr>
+<blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p>如有疏忽错误欢迎在留言区评论指正，如果对您有所帮助欢迎点击下方进行打赏。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2019/11/26/install-elasticsearch-cluster-7-4.html" title="install-elasticsearch-cluster-7.4">https://knner.wang/2019/11/26/install-elasticsearch-cluster-7-4.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/elasticsearch/" rel="tag"># elasticsearch</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/11/22/Using-Helm3-Install-InfluDB-Prometheus-Operator.html" rel="next" title="使用Helm3安装Prometheus-Operator + InfluxDB">
+                  <i class="fa fa-chevron-left"></i> 使用Helm3安装Prometheus-Operator + InfluxDB
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Elastic-Stack-License"><span class="nav-number">1.</span> <span class="nav-text">Elastic Stack License</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Elasticsearch"><span class="nav-number">2.</span> <span class="nav-text">安装Elasticsearch</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#下载Elasticsearch"><span class="nav-number">2.1.</span> <span class="nav-text">下载Elasticsearch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#目录结构"><span class="nav-number">2.2.</span> <span class="nav-text">目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统设置"><span class="nav-number">2.3.</span> <span class="nav-text">系统设置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ulimits"><span class="nav-number">2.3.1.</span> <span class="nav-text">ulimits</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#禁用交换分区-swap"><span class="nav-number">2.3.2.</span> <span class="nav-text">禁用交换分区 swap</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置swappiness-以及虚拟内存"><span class="nav-number">2.3.3.</span> <span class="nav-text">配置swappiness 以及虚拟内存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#开启ES的内存锁定："><span class="nav-number">2.3.4.</span> <span class="nav-text">开启ES的内存锁定：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elasticsearch-基础概念"><span class="nav-number">3.</span> <span class="nav-text">Elasticsearch 基础概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Cluster"><span class="nav-number">3.1.</span> <span class="nav-text">Cluster</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node"><span class="nav-number">3.2.</span> <span class="nav-text">Node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Index"><span class="nav-number">3.3.</span> <span class="nav-text">Index</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Type"><span class="nav-number">3.4.</span> <span class="nav-text">Type</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Document"><span class="nav-number">3.5.</span> <span class="nav-text">Document</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Shard"><span class="nav-number">3.6.</span> <span class="nav-text">Shard</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Replica"><span class="nav-number">3.7.</span> <span class="nav-text">Replica</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elasticsearch-Note-说明："><span class="nav-number">4.</span> <span class="nav-text">Elasticsearch Note 说明：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Master-eligible，合格主节点，主合格节点"><span class="nav-number">4.1.</span> <span class="nav-text">Master-eligible，合格主节点，主合格节点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#仅投票节点"><span class="nav-number">4.1.1.</span> <span class="nav-text">仅投票节点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据节点"><span class="nav-number">4.2.</span> <span class="nav-text">数据节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ingest-节点"><span class="nav-number">4.3.</span> <span class="nav-text">Ingest 节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#仅协调节点"><span class="nav-number">4.4.</span> <span class="nav-text">仅协调节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#机器学习节点"><span class="nav-number">4.5.</span> <span class="nav-text">机器学习节点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置Elasticsearch"><span class="nav-number">5.</span> <span class="nav-text">配置Elasticsearch</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Elasticsearch-名称解析"><span class="nav-number">5.1.</span> <span class="nav-text">配置Elasticsearch 名称解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编辑ES配置文件config-elasticsearch-yml"><span class="nav-number">5.2.</span> <span class="nav-text">编辑ES配置文件config/elasticsearch.yml</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Elasticsearch-配置详解"><span class="nav-number">5.2.1.</span> <span class="nav-text">Elasticsearch 配置详解</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#配置ES-的PATH路径，path-data-amp-path-logs"><span class="nav-number">5.2.1.1.</span> <span class="nav-text">配置ES 的PATH路径，path.data &amp; path.logs</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置ES集群名称：cluster-name"><span class="nav-number">5.2.1.2.</span> <span class="nav-text">配置ES集群名称：cluster.name</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置ES节点名称：node-name"><span class="nav-number">5.2.1.3.</span> <span class="nav-text">配置ES节点名称：node.name</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置ES节点监听地址：network-host"><span class="nav-number">5.2.1.4.</span> <span class="nav-text">配置ES节点监听地址：network.host</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置ES节点的发现和集群组成设置"><span class="nav-number">5.2.1.5.</span> <span class="nav-text">配置ES节点的发现和集群组成设置</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#discovery-seed-hosts"><span class="nav-number">5.2.1.5.1.</span> <span class="nav-text">discovery.seed_hosts</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#cluster-initial-master-nodes"><span class="nav-number">5.2.1.5.2.</span> <span class="nav-text">cluster.initial_master_nodes</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ES节点http和transport的配置"><span class="nav-number">5.2.1.6.</span> <span class="nav-text">ES节点http和transport的配置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置ES节点的JVM设置"><span class="nav-number">5.2.1.7.</span> <span class="nav-text">配置ES节点的JVM设置</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#es01"><span class="nav-number">5.2.2.</span> <span class="nav-text">es01</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#es02"><span class="nav-number">5.2.3.</span> <span class="nav-text">es02</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#es03"><span class="nav-number">5.2.4.</span> <span class="nav-text">es03</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动Elasticsearch"><span class="nav-number">6.</span> <span class="nav-text">启动Elasticsearch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开启ES集群的Auth认证和Node间SSL"><span class="nav-number">7.</span> <span class="nav-text">开启ES集群的Auth认证和Node间SSL</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#开启ES集群的Auth认证"><span class="nav-number">7.1.</span> <span class="nav-text">开启ES集群的Auth认证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Node间SSL"><span class="nav-number">7.2.</span> <span class="nav-text">配置Node间SSL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kibana的安装配置"><span class="nav-number">8.</span> <span class="nav-text">kibana的安装配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kibana-keystore-安全配置"><span class="nav-number">8.1.</span> <span class="nav-text">kibana keystore 安全配置</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="https://knner.wang/images/logos/upyun_logo5.png"></a>提供CDN服务
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+</body>
+</html>
