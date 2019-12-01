@@ -60,10 +60,18 @@
 <meta property="og:site_name" content="Knner.Wang&#39;s Blog">
 <meta property="og:description" content="前面记录的我的Hexo建站过程，Hexo+ThemeNext的优化配置，这里来到博客网站中最重要的部分：写作。其实写作很简单，只需要三步即可：# 步骤1，创建post文章：$ hexo new mypost# 步骤2，使用Markdown的方式写文章$ vim mypost.mdtypora mypost.md# 步骤3，检查并发布文章$ hexo clean &amp;amp;&amp;amp; hexo se">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;TX.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;TX.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;11&#x2F;03&#x2F;Hexo-ThemeNext-Writing&#x2F;TX.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;11&#x2F;03&#x2F;Hexo-ThemeNext-Writing&#x2F;TX.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;TX.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;TX.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Hexo-ThemeNext-Writing&#x2F;typora-img-set.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Hexo-ThemeNext-Writing&#x2F;typora-img.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
 <meta property="og:updated_time" content="2019-11-18T06:27:55.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;TX.jpg">
 
 <link rel="canonical" href="https://knner.wang/2019/11/03/Hexo-ThemeNext-Writing.html">
 
@@ -303,7 +311,7 @@
 
 
 
-<h4 id="新建post文件名"><a href="#新建post文件名" class="headerlink" title="新建post文件名"></a>新建post文件名</h4><p>Hexo 在新建文章的时候默认使用<code>post title</code>作为其文件名，你可以在 Hexo 的<code>_config.yml</code>中的<code>new_post_name</code>指定：</p>
+<h4 id="设置新建post文件名"><a href="#设置新建post文件名" class="headerlink" title="设置新建post文件名"></a>设置新建post文件名</h4><p>Hexo 在新建文章的时候默认使用<code>post title</code>作为其文件名，你可以在 Hexo 的<code>_config.yml</code>中的<code>new_post_name</code>指定：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 默认值</span></span><br><span class="line"><span class="attr">new_post_name:</span> <span class="string">:title.md</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 例如：</span></span><br><span class="line"><span class="string">$</span> <span class="string">hexo</span> <span class="string">new</span> <span class="string">mypost</span></span><br><span class="line"><span class="attr">INFO  Created:</span> <span class="string">/home/Knner/myblog/source/_posts/mypost.md</span></span><br></pre></td></tr></table></figure>
 
 <p>这里的<code>mypost.md</code>就是以mypost这个title作为文件的名称存放在source/_posts中的。</p>
@@ -439,12 +447,18 @@
 
 <p>是不是就是scaffolds/post.md中的内容呢？只不过scaffold中使用了模板语言，双大括号的格式。</p>
 <p>所以呢，我们可以在scaffolds/post.md中定义我们需要的格式了：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim scaffolds/post.md </span><br><span class="line">---</span><br><span class="line">title: &#123;&#123; title &#125;&#125;</span><br><span class="line">date: &#123;&#123; date &#125;&#125;</span><br><span class="line">categories:</span><br><span class="line">- null</span><br><span class="line">tags:</span><br><span class="line">- null</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim scaffolds/post.md </span><br><span class="line">---</span><br><span class="line">title: &#123;&#123; title &#125;&#125;</span><br><span class="line">date: &#123;&#123; date &#125;&#125;</span><br><span class="line">typora-root-url: ..</span><br><span class="line">categories:</span><br><span class="line">- null</span><br><span class="line">tags:</span><br><span class="line">- null</span><br></pre></td></tr></table></figure>
 
 <p>我们再次创建新的post：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new myscffoldpost</span><br><span class="line">INFO  Created: /home/Knner/myblog/<span class="built_in">source</span>/_posts/myscffoldpost.md</span><br><span class="line"></span><br><span class="line">$ cat <span class="built_in">source</span>/_posts/myscffoldpost.md </span><br><span class="line">---</span><br><span class="line">title: myscffoldpost</span><br><span class="line">categories:</span><br><span class="line">  - null</span><br><span class="line">tags:</span><br><span class="line">  - null</span><br><span class="line">date: 2019-11-17 20:51:58</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new myscffoldpost</span><br><span class="line">INFO  Created: /home/Knner/myblog/<span class="built_in">source</span>/_posts/myscffoldpost.md</span><br><span class="line"></span><br><span class="line">$ cat <span class="built_in">source</span>/_posts/myscffoldpost.md </span><br><span class="line">---</span><br><span class="line">title: myscffoldpost</span><br><span class="line">typora-root-url: ..</span><br><span class="line">categories:</span><br><span class="line">  - null</span><br><span class="line">tags:</span><br><span class="line">  - null</span><br><span class="line">date: 2019-11-17 20:51:58</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
 
 <p>我们看到新创建的post文件已经使用了我们在scaffolds/post.md中配置的模板了。</p>
+<div class="note ">
+            <p>typora-root-url: ..</p><p>这个参数很有用哦，是设置Typora软件的图像根目录为该文章的上级目录(在linux中，两个..代表上级目录)，后面会讲解。</p>
+          </div>
+
+
+
 <h4 id="Categories-amp-Tags：分类和标签"><a href="#Categories-amp-Tags：分类和标签" class="headerlink" title="Categories &amp; Tags：分类和标签"></a>Categories &amp; Tags：分类和标签</h4><p>只有文章支持分类和标签。分类用于生成有层次的分类和子分类。标签也用于定义层次感的，这样标签的位置就不重要了。</p>
 <p>例如：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">categories:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">Sports</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">Baseball</span></span><br><span class="line"><span class="attr">tags:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">Injury</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">Fight</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">Shocking</span></span><br></pre></td></tr></table></figure>
@@ -514,7 +528,7 @@
 <p>显示效果如下：</p>
 <figure class="highlight plain"><figcaption><span>_.compact</span><a href="http://underscorejs.org/#compact" target="_blank" rel="noopener">Underscore.js</a></figcaption><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">_.compact([0, 1, false, 2, &apos;&apos;, 3]);</span><br><span class="line">=&gt; [1, 2, 3]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<h4 id="反引号代码块"><a href="#反引号代码块" class="headerlink" title="反引号代码块"></a>反引号代码块</h4><p>Markdown内置格式，跟上面的一样，只是使用三个反引号代替，格式如下：</p>
+<h4 id="反引号代码块-常用"><a href="#反引号代码块-常用" class="headerlink" title="反引号代码块 - 常用"></a>反引号代码块 - 常用</h4><p>Markdown内置格式，跟上面的一样，只是使用三个反引号代替，格式如下：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">​``` [language] [title] [url] [link text] code snippet</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">例如：</span><br><span class="line"></span><br><span class="line">``` bash for.sh https://www.baidu.com/ 百度</span><br><span class="line">#!/bin/sh</span><br><span class="line">for i in &#123;1..10&#125;</span><br><span class="line">do</span><br><span class="line">  echo $i</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
 
@@ -550,21 +564,205 @@
 <h4 id="嵌入视频流媒体-Vimeo"><a href="#嵌入视频流媒体-Vimeo" class="headerlink" title="嵌入视频流媒体 Vimeo"></a>嵌入视频流媒体 Vimeo</h4><p>可以指定大小：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% vimeo video_id [width] [height] %&#125;</span><br></pre></td></tr></table></figure>
 
+<h4 id="插入文章链接-常用"><a href="#插入文章链接-常用" class="headerlink" title="插入文章链接 - 常用"></a>插入文章链接 - 常用</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% post_path filename %&#125;</span><br><span class="line">&#123;% post_link filename [title] [escape] %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>例如，在文章中使用  时，只需有一个名为 how-to-bake-a-cake.md 的文章文件即可。即使这个文件位于站点文件夹的 source/posts/2015-02-my-family-holiday 目录下、或者文章的永久链接是 2018/en/how-to-bake-a-cake，都没有影响。</p>
+<p>默认链接文字是文章的标题，你也可以自定义要显示的文本。此时 Markdown 语法 <a href></a>不受支持。</p>
+<p>默认对文章的标题和自定义标题里的特殊字符进行转义。可以使用escape选项，禁止对特殊字符进行转义。</p>
+<p>例如：我之前写的一篇文章：文件名为：my-first-blog.md 位于source/_posts/，那么我要加入该文章的链接如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% post_link my-first-blog %&#125;</span><br><span class="line">&#123;% post_link my-first-blog &apos;使用hexo + github pages 创建博客&apos; %&#125;</span><br><span class="line">&#123;% post_link my-first-blog &apos;使用&lt;b&gt;hexo + github pages&lt;/b&gt; 创建博客&apos; %&#125;</span><br><span class="line">&#123;% post_link my-first-blog &apos;使用&lt;b&gt;hexo + github pages&lt;/b&gt; 创建博客&apos; false %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果如下：</p>
+<a href="/2019/11/01/my-first-blog.html" title="使用hexo + github pages 创建博客">使用hexo + github pages 创建博客</a>    
+
+<a href="/2019/11/01/my-first-blog.html" title="使用hexo + github pages 创建博客">使用hexo + github pages 创建博客</a>    
+
+<a href="/2019/11/01/my-first-blog.html" title="使用&lt;b&gt;hexo + github pages&lt;&#x2F;b&gt; 创建博客">使用&lt;b&gt;hexo + github pages&lt;&#x2F;b&gt; 创建博客</a>    
+
+<a href="/2019/11/01/my-first-blog.html" title="使用&lt;b&gt;hexo + github pages&lt;&#x2F;b&gt; 创建博客">使用<b>hexo + github pages</b> 创建博客</a>    
+
+<h4 id="引用资源"><a href="#引用资源" class="headerlink" title="引用资源"></a>引用资源</h4><p>引用文章资源</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% asset_path filename %&#125;</span><br><span class="line">&#123;% asset_img filename [title] %&#125;</span><br><span class="line">&#123;% asset_link filename [title] [escape] %&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Raw"><a href="#Raw" class="headerlink" title="Raw"></a>Raw</h4><p>如果您想在文章中插入 Swig 标签，可以尝试使用 Raw 标签，以免发生解析异常。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% raw %&#125;</span><br><span class="line">content</span><br><span class="line">&#123;% endraw %&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="文章摘要和截断"><a href="#文章摘要和截断" class="headerlink" title="文章摘要和截断"></a>文章摘要和截断</h4><p>在文章中使用 <code>，那么</code> 之前的文字将会被视为摘要。首页中将只出现这部分文字，同时这部分文字也会出现在正文之中。</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</span><br><span class="line">&lt;!-- more --&gt; # 多了这里</span><br><span class="line">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</span><br></pre></td></tr></table></figure>
+
+<p>首页中将只会出现</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</span><br></pre></td></tr></table></figure>
+
+<p>正文中则会出现</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</span><br><span class="line"></span><br><span class="line">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</span><br></pre></td></tr></table></figure>
+
+<p>注意，摘要可能会被 Front Matter 中的 <code>excerpt</code> 覆盖。</p>
+<p>在使用Next主题的时候，默认会在首页显示文章全部内容，效果不太好：可以设置<code>theme/next/_config.yml</code> 设置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Automatically excerpt (Not recommend).</span></span><br><span class="line"><span class="comment"># Use &lt;!-- more --&gt; in the post to control excerpt accurately.</span></span><br><span class="line"><span class="attr">auto_excerpt:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span>  <span class="comment">## 打开自动截断</span></span><br><span class="line">  <span class="attr">length:</span> <span class="number">300</span>   <span class="comment">## 显示文章多长的内容</span></span><br></pre></td></tr></table></figure>
 
 
 
+<h3 id="文章中插入图片的方法汇总"><a href="#文章中插入图片的方法汇总" class="headerlink" title="文章中插入图片的方法汇总"></a>文章中插入图片的方法汇总</h3><h4 id="1-使用Markdown语法："><a href="#1-使用Markdown语法：" class="headerlink" title="1.使用Markdown语法："></a>1.使用Markdown语法：</h4><p>格式：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">![Alt text](图片链接 &quot;optional title&quot;)</span><br><span class="line">Alt text：图片的Alt标签，用来描述图片的关键词，可以不写。最初的本意是当图片因为某种原因不能被显示时而出现的替代文字，后来又被用于SEO，可以方便搜索引擎根据Alt text里面的关键词搜索到图片。 </span><br><span class="line">图片链接：可以是图片的本地地址或者是网址。</span><br><span class="line">&quot;optional title&quot;：鼠标悬置于图片上会出现的标题文字，可以不写。</span><br><span class="line">摘自：https://www.jianshu.com/p/280c6a6f2594</span><br></pre></td></tr></table></figure>
 
+<p>例如：</p>
+<p>把图像放到hexo/source/images 目录下，名为TX.jpg</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">![mardown](/images/TX.jpg &quot;TX img markdown&quot;)</span><br></pre></td></tr></table></figure>
 
-
-<p>图片：</p>
-<p>在文章中插入指定大小的图片：</p>
+<p>显示如下：</p>
+<p><img src="/images/TX.jpg" alt="mardown" title="TX img markdown"></p>
+<h4 id="2-通过Hexo语法："><a href="#2-通过Hexo语法：" class="headerlink" title="2.通过Hexo语法："></a>2.通过Hexo语法：</h4><p>这种方式可以在文章中插入指定大小的图片：</p>
+<p>格式如下：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% img [class names] /path/to/image [width] [height] &quot;title text &apos;alt text&apos;&quot; %&#125;</span><br></pre></td></tr></table></figure>
 
+<p>例如：</p>
+<p>把图像放到hexo/source/images 目录下，名为TX.jpg</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% img /images/TX.jpg 25 25 &quot;TX img hexo&quot; %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果如下：</p>
+<img src="/images/TX.jpg" class width="25" height="25" title="TX img hexo">
+
+<p>此时markdown不会显示的，需要通过Hexo server看到。</p>
+<h4 id="3-通过hexo-资源文件夹方式"><a href="#3-通过hexo-资源文件夹方式" class="headerlink" title="3.通过hexo 资源文件夹方式:"></a>3.通过hexo 资源文件夹方式:</h4><p>在hexo _config.yml 中开启：<code>post_asset_folder: true</code></p>
+<p>创建名称为<code>Hexo-ThemeNext-Writing</code>的文章，也就是本篇文章：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ hexo new Hexo-ThemeNext-Writing</span><br></pre></td></tr></table></figure>
+
+<p>此时Hexo会创建Hexo-ThemeNext-Writing.md文件以及Hexo-ThemeNext-Writing文件夹，都位于<code>hexo/source/_post/</code> 目录下。</p>
+<p>我们把图像放到hexo/source/_post/Hexo-ThemeNext-Writing 目录下，名为TX.jpg</p>
+<p>那么我们可以在文章中引用：也有两种方式：</p>
+<p>方式1：标签方式</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% asset_img TX.jpg &quot;TX img asset&quot; %&#125;</span><br><span class="line"># 直接指定图片的文件名即可，Hexo会自动的去Hexo-ThemeNext-Writing找的。</span><br></pre></td></tr></table></figure>
+
+<p>显示效果：</p>
+<img src="/2019/11/03/Hexo-ThemeNext-Writing/TX.jpg" class title="TX img asset">
+
+<p>方式2：markdown方式</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">![TX](Hexo-ThemeNext-Writing/TX.jpg &quot;TX img asset markdown&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>显示效果：</p>
+<p><img src="Hexo-ThemeNext-Writing/TX.jpg" alt="TX" title="TX img asset markdown"></p>
+<p>注意此时markdown也不会显示图片的。</p>
+<h4 id="4-通过typora软件的文档，也就是html方式："><a href="#4-通过typora软件的文档，也就是html方式：" class="headerlink" title="4.通过typora软件的文档，也就是html方式："></a>4.通过typora软件的文档，也就是html方式：</h4><blockquote>
+<p>Typora allows to use <img> tag for displaying images, which can also be used to adjust the size of images.</p>
+<p>For example, you could specify the width or height attribute of an <img> tag, or set the width/height in its style attribute:</p>
+<p>&lt;img src=”<a href="https://www.google.com/doodles/kamma-rahbeks-241st-birthday&quot;" target="_blank" rel="noopener">https://www.google.com/doodles/kamma-rahbeks-241st-birthday&quot;</a> width=”200px” /&gt;</p>
+<p>**</p>
+<p>&lt;img src=”<a href="https://www.google.com/doodles/kamma-rahbeks-241st-birthday&quot;" target="_blank" rel="noopener">https://www.google.com/doodles/kamma-rahbeks-241st-birthday&quot;</a> style=”height:200px” /&gt;</p>
+<p>Another common use case is that when you try to insert a retina image, and want to scale it to a “correct” size according, then you could specify a zoom factor in its style attribute.</p>
+<p>&lt;img src=”<a href="https://www.google.com/doodles/kamma-rahbeks-241st-birthday&quot;" target="_blank" rel="noopener">https://www.google.com/doodles/kamma-rahbeks-241st-birthday&quot;</a> style=”zoom:50%” /&gt;</p>
+<p>Above syntax can be understood and displayed by Typora. Although you could set other css properties in its style attribute, they will be ignored when you edit or preview by Typora, but could affect the exported HTML or PDF.</p>
+</blockquote>
+<p>把图像放到hexo/source/images 目录下，名为TX.jpg</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;img src=&quot;/images/TX.jpg&quot; width=&quot;35px&quot; height=&quot;35px&quot;&gt;</span><br><span class="line"></span><br><span class="line">&lt;img src=&quot;/images/TX.jpg&quot; alt=&quot;tmpimage-w35&quot; style=&quot;zoom:50%;&quot; /&gt;</span><br></pre></td></tr></table></figure>
+
+<p>显示效果：</p>
+<img src="/images/TX.jpg" width="35px" height="35px">
 
 
 
+<img src="/images/TX.jpg" alt="tmpimage-w35" style="zoom:50%;">
 
-<h2 id="接着来到主题Next这里"><a href="#接着来到主题Next这里" class="headerlink" title="接着来到主题Next这里"></a>接着来到主题Next这里</h2><blockquote>
+<p>因为是typora支持的，所以在typora内是能够显示的。</p>
+<blockquote>
+<p>参考：</p>
+<p><a href="https://www.runoob.com/tags/tag-img.html" target="_blank" rel="noopener">https://www.runoob.com/tags/tag-img.html</a></p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/img" target="_blank" rel="noopener">https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/img</a></p>
+</blockquote>
+<p>格式说明：</p>
+<blockquote>
+<p><img> 标签定义 HTML 页面中的图像。</p>
+<p><img> 标签有两个必需的属性：src 和 alt。</p>
+<p><strong>属性</strong></p>
+<p><strong>New</strong> ：HTML5 中的新属性。</p>
+<table>
+<thead>
+<tr>
+<th><strong>属性</strong></th>
+<th><strong>值</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://www.runoob.com/tags/att-img-align.html" target="_blank" rel="noopener">align</a></td>
+<td>top  bottom  middle  left  right</td>
+<td>HTML5 不支持。HTML 4.01 已废弃。 规定如何根据周围的文本来排列图像。</td>
+</tr>
+<tr>
+<td><a href="https://www.runoob.com/tags/att-img-alt.html" target="_blank" rel="noopener">alt</a></td>
+<td><em>text</em></td>
+<td>规定图像的替代文本。</td>
+</tr>
+<tr>
+<td><a href="https://www.runoob.com/tags/att-img-border.html" target="_blank" rel="noopener">border</a></td>
+<td><em>pixels</em></td>
+<td>HTML5 不支持。HTML 4.01 已废弃。 规定图像周围的边框。</td>
+</tr>
+<tr>
+<td>crossorigin<strong>New</strong></td>
+<td>anonymous   use-credentials</td>
+<td>设置图像的跨域属性</td>
+</tr>
+<tr>
+<td><a href="https://www.runoob.com/tags/att-img-height.html" target="_blank" rel="noopener">height</a></td>
+<td><em>pixels</em></td>
+<td>规定图像的高度。</td>
+</tr>
+<tr>
+<td><a href="https://www.runoob.com/tags/att-img-hspace.html" target="_blank" rel="noopener">hspace</a></td>
+<td><em>pixels</em></td>
+<td>HTML5 不支持。HTML 4.01 已废弃。 规定图像左侧和右侧的空白。</td>
+</tr>
+<tr>
+<td><a href="https://www.runoob.com/tags/att-img-ismap.html" target="_blank" rel="noopener">ismap</a></td>
+<td>ismap</td>
+<td>将图像规定为服务器端图像映射。</td>
+</tr>
+<tr>
+<td><a href="https://www.runoob.com/tags/att-img-longdesc.html" target="_blank" rel="noopener">longdesc</a></td>
+<td><em>URL</em></td>
+<td>HTML5 不支持。HTML 4.01 已废弃。 指向包含长的图像描述文档的  URL。</td>
+</tr>
+<tr>
+<td><a href="https://www.runoob.com/tags/att-img-src.html" target="_blank" rel="noopener">src</a></td>
+<td><em>URL</em></td>
+<td>规定显示图像的 URL。</td>
+</tr>
+<tr>
+<td><a href="https://www.runoob.com/tags/att-img-usemap.html" target="_blank" rel="noopener">usemap</a></td>
+<td><em>#mapname</em></td>
+<td>将图像定义为客户器端图像映射。</td>
+</tr>
+<tr>
+<td><a href="https://www.runoob.com/tags/att-img-vspace.html" target="_blank" rel="noopener">vspace</a></td>
+<td><em>pixels</em></td>
+<td>HTML5 不支持。HTML 4.01 已废弃。 规定图像顶部和底部的空白。</td>
+</tr>
+<tr>
+<td><a href="https://www.runoob.com/tags/att-img-width.html" target="_blank" rel="noopener">width</a></td>
+<td><em>pixels</em></td>
+<td>规定图像的宽度。</td>
+</tr>
+</tbody></table>
+</blockquote>
+<h4 id="文章中插入图片的方法总结"><a href="#文章中插入图片的方法总结" class="headerlink" title="文章中插入图片的方法总结"></a>文章中插入图片的方法总结</h4><p>方法1,4能够在typora中显示</p>
+<p>方法2,4能够设置图片大小</p>
+<p>总体下来4比较好，但是不能使用asset folder了，只能在<code>hexo/source/images</code> 下自行新建和文章同名的目录用于存放该文章的所有图片了。</p>
+<p>但是由于不是Markdown语法，可以在通过Markdown Here把Markdown语法转换成微信文章的时候会有问题，所以综合下来，我采用的方式还是1和3的结合：</p>
+<p>过程如下：</p>
+<p>在hexo _config.yml 中开启：<code>post_asset_folder: true</code></p>
+<p>那么在新建文章的时候会自动创建与文章同名的目录，位于<code>hexo/source/_post/</code>目录下，此时我们把这个目录移动到<code>hexo/source/images</code>目录下，然后将本文所有用到的图片都放到这里，然后设置Typora–格式–图像–设置图片根目录，</p>
+<p>然后我们选择<code>hexo/source</code>即可，此时typora会自动的在该文章的Front Matter中添加：<code>typora-root-url: ..</code>的字段。</p>
+<p><img src="/images/Hexo-ThemeNext-Writing/typora-img-set.png" alt></p>
+<p>所以呢我们直接把这个字段添加到<code>hexo/scaffolds/post.md</code>这个文章模板文件中，这样下次在新建文章的时候就自动设置了图片根目录为改文章的上级目录，也就是<code>hexo/source</code>，那么在typora中插入图片只需要按typora快捷方式：Ctrl + Shift + i，他会自动插入markdown语法，然后点击文件夹图标选择``hexo/source/images/&lt;文章名目录&gt;`即可。</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">![typora快捷键](/images/Hexo-ThemeNext-Writing/typora-img.jpg)</span><br></pre></td></tr></table></figure>
+
+<p>显示如下：</p>
+<p><img src="/images/Hexo-ThemeNext-Writing/typora-img.jpg" alt="typora快捷键"></p>
+<p>好了，这样既用到了Hexo asset资源管理的方式，也用到了Markdown语法，同时呢Typora内也会显示图片。但是唯一的一点是此时的图片我们不能设置了大小或者缩放，不过经过测试就是你插入了很大的图片，在文章中也是会显示缩略图的。</p>
+<h2 id="接着来到主题Next这里"><a href="#接着来到主题Next这里" class="headerlink" title="接着来到主题Next这里"></a>接着来到主题Next这里</h2><p>之所以选择Next主题，是因为主题足够简介，很适合做IT的人使用，同时呢Next可配置项很多很全，完全不需要在二次的开发，很适合我这种前端小白了 。</p>
+<blockquote>
 <p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
 <p><img src="/images/knner/wx.jpg" alt="公众号"></p>
 </blockquote>
@@ -672,7 +870,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#首先来到Hexo这里"><span class="nav-number">1.</span> <span class="nav-text">首先来到Hexo这里</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#名词解释"><span class="nav-number">1.1.</span> <span class="nav-text">名词解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hexo目录结构"><span class="nav-number">1.2.</span> <span class="nav-text">hexo目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#写作"><span class="nav-number">1.3.</span> <span class="nav-text">写作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Layout-布局："><span class="nav-number">1.3.1.</span> <span class="nav-text">Layout 布局：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#新建post文件名"><span class="nav-number">1.3.2.</span> <span class="nav-text">新建post文件名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#草稿-Drafts"><span class="nav-number">1.3.3.</span> <span class="nav-text">草稿 Drafts</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Front-matter"><span class="nav-number">1.4.</span> <span class="nav-text">Front-matter</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#脚手架Scaffolds"><span class="nav-number">1.4.1.</span> <span class="nav-text">脚手架Scaffolds</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Categories-amp-Tags：分类和标签"><span class="nav-number">1.4.2.</span> <span class="nav-text">Categories &amp; Tags：分类和标签</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tag-Plugin"><span class="nav-number">1.5.</span> <span class="nav-text">Tag Plugin</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#块引用-Block-Quote"><span class="nav-number">1.5.1.</span> <span class="nav-text">块引用 Block Quote</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#没有参数，普通引用："><span class="nav-number">1.5.1.1.</span> <span class="nav-text">没有参数，普通引用：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#从书中引用"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">从书中引用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#从Twritter中引用"><span class="nav-number">1.5.1.3.</span> <span class="nav-text">从Twritter中引用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#从网络上的文章引用"><span class="nav-number">1.5.1.4.</span> <span class="nav-text">从网络上的文章引用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码块-Code-Block"><span class="nav-number">1.5.2.</span> <span class="nav-text">代码块 Code Block</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#普通的代码引用"><span class="nav-number">1.5.2.1.</span> <span class="nav-text">普通的代码引用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#指定语言"><span class="nav-number">1.5.2.2.</span> <span class="nav-text">指定语言</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#为代码块增加标题"><span class="nav-number">1.5.2.3.</span> <span class="nav-text">为代码块增加标题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#为代码块增加标题和链接"><span class="nav-number">1.5.2.4.</span> <span class="nav-text">为代码块增加标题和链接</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#反引号代码块"><span class="nav-number">1.5.3.</span> <span class="nav-text">反引号代码块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#拉取引用-Pull-Quote"><span class="nav-number">1.5.4.</span> <span class="nav-text">拉取引用 Pull Quote</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#jsFiddle"><span class="nav-number">1.5.5.</span> <span class="nav-text">jsFiddle</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Gist"><span class="nav-number">1.5.6.</span> <span class="nav-text">Gist</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iframe"><span class="nav-number">1.5.7.</span> <span class="nav-text">iframe</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#链接-Link"><span class="nav-number">1.5.8.</span> <span class="nav-text">链接 Link</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Include-Code"><span class="nav-number">1.5.9.</span> <span class="nav-text">Include Code</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#嵌入整个text-js"><span class="nav-number">1.5.9.1.</span> <span class="nav-text">嵌入整个text.js</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#只嵌入第三行"><span class="nav-number">1.5.9.2.</span> <span class="nav-text">只嵌入第三行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#嵌入第5-8行"><span class="nav-number">1.5.9.3.</span> <span class="nav-text">嵌入第5-8行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#嵌入从第5行到最后"><span class="nav-number">1.5.9.4.</span> <span class="nav-text">嵌入从第5行到最后</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#嵌入从第1行到第8行"><span class="nav-number">1.5.9.5.</span> <span class="nav-text">嵌入从第1行到第8行</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#嵌入视频流媒体-Vimeo"><span class="nav-number">1.5.10.</span> <span class="nav-text">嵌入视频流媒体 Vimeo</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接着来到主题Next这里"><span class="nav-number">2.</span> <span class="nav-text">接着来到主题Next这里</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#首先来到Hexo这里"><span class="nav-number">1.</span> <span class="nav-text">首先来到Hexo这里</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#名词解释"><span class="nav-number">1.1.</span> <span class="nav-text">名词解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hexo目录结构"><span class="nav-number">1.2.</span> <span class="nav-text">hexo目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#写作"><span class="nav-number">1.3.</span> <span class="nav-text">写作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Layout-布局："><span class="nav-number">1.3.1.</span> <span class="nav-text">Layout 布局：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#设置新建post文件名"><span class="nav-number">1.3.2.</span> <span class="nav-text">设置新建post文件名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#草稿-Drafts"><span class="nav-number">1.3.3.</span> <span class="nav-text">草稿 Drafts</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Front-matter"><span class="nav-number">1.4.</span> <span class="nav-text">Front-matter</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#脚手架Scaffolds"><span class="nav-number">1.4.1.</span> <span class="nav-text">脚手架Scaffolds</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Categories-amp-Tags：分类和标签"><span class="nav-number">1.4.2.</span> <span class="nav-text">Categories &amp; Tags：分类和标签</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tag-Plugin"><span class="nav-number">1.5.</span> <span class="nav-text">Tag Plugin</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#块引用-Block-Quote"><span class="nav-number">1.5.1.</span> <span class="nav-text">块引用 Block Quote</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#没有参数，普通引用："><span class="nav-number">1.5.1.1.</span> <span class="nav-text">没有参数，普通引用：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#从书中引用"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">从书中引用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#从Twritter中引用"><span class="nav-number">1.5.1.3.</span> <span class="nav-text">从Twritter中引用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#从网络上的文章引用"><span class="nav-number">1.5.1.4.</span> <span class="nav-text">从网络上的文章引用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码块-Code-Block"><span class="nav-number">1.5.2.</span> <span class="nav-text">代码块 Code Block</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#普通的代码引用"><span class="nav-number">1.5.2.1.</span> <span class="nav-text">普通的代码引用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#指定语言"><span class="nav-number">1.5.2.2.</span> <span class="nav-text">指定语言</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#为代码块增加标题"><span class="nav-number">1.5.2.3.</span> <span class="nav-text">为代码块增加标题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#为代码块增加标题和链接"><span class="nav-number">1.5.2.4.</span> <span class="nav-text">为代码块增加标题和链接</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#反引号代码块-常用"><span class="nav-number">1.5.3.</span> <span class="nav-text">反引号代码块 - 常用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#拉取引用-Pull-Quote"><span class="nav-number">1.5.4.</span> <span class="nav-text">拉取引用 Pull Quote</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#jsFiddle"><span class="nav-number">1.5.5.</span> <span class="nav-text">jsFiddle</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Gist"><span class="nav-number">1.5.6.</span> <span class="nav-text">Gist</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iframe"><span class="nav-number">1.5.7.</span> <span class="nav-text">iframe</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#链接-Link"><span class="nav-number">1.5.8.</span> <span class="nav-text">链接 Link</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Include-Code"><span class="nav-number">1.5.9.</span> <span class="nav-text">Include Code</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#嵌入整个text-js"><span class="nav-number">1.5.9.1.</span> <span class="nav-text">嵌入整个text.js</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#只嵌入第三行"><span class="nav-number">1.5.9.2.</span> <span class="nav-text">只嵌入第三行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#嵌入第5-8行"><span class="nav-number">1.5.9.3.</span> <span class="nav-text">嵌入第5-8行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#嵌入从第5行到最后"><span class="nav-number">1.5.9.4.</span> <span class="nav-text">嵌入从第5行到最后</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#嵌入从第1行到第8行"><span class="nav-number">1.5.9.5.</span> <span class="nav-text">嵌入从第1行到第8行</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#嵌入视频流媒体-Vimeo"><span class="nav-number">1.5.10.</span> <span class="nav-text">嵌入视频流媒体 Vimeo</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#插入文章链接-常用"><span class="nav-number">1.5.11.</span> <span class="nav-text">插入文章链接 - 常用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#引用资源"><span class="nav-number">1.5.12.</span> <span class="nav-text">引用资源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Raw"><span class="nav-number">1.5.13.</span> <span class="nav-text">Raw</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文章摘要和截断"><span class="nav-number">1.5.14.</span> <span class="nav-text">文章摘要和截断</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章中插入图片的方法汇总"><span class="nav-number">1.6.</span> <span class="nav-text">文章中插入图片的方法汇总</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-使用Markdown语法："><span class="nav-number">1.6.1.</span> <span class="nav-text">1.使用Markdown语法：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-通过Hexo语法："><span class="nav-number">1.6.2.</span> <span class="nav-text">2.通过Hexo语法：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-通过hexo-资源文件夹方式"><span class="nav-number">1.6.3.</span> <span class="nav-text">3.通过hexo 资源文件夹方式:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-通过typora软件的文档，也就是html方式："><span class="nav-number">1.6.4.</span> <span class="nav-text">4.通过typora软件的文档，也就是html方式：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文章中插入图片的方法总结"><span class="nav-number">1.6.5.</span> <span class="nav-text">文章中插入图片的方法总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接着来到主题Next这里"><span class="nav-number">2.</span> <span class="nav-text">接着来到主题Next这里</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
