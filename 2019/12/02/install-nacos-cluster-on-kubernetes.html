@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="如果想要在K8S环境上部署某软件的话，那么首先先要了解的是该软件在Bare Metal裸金属环境下的手动安装方式、如何配置，启动等等；然后再考虑如何将软件Docker化，怎么编写Dockerfile，Docker环境下如何配置、启动等。最后根据之前Docker的方式选用K8S的YAML资源来创建该服务，例如：Deployment、DaemonSet、Service，ConfigMap，Secret">
+<meta name="keywords" content="nacos">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在Kubernetes上安装Nacos集群">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;12&#x2F;02&#x2F;install-nacos-cluster-on-kubernetes.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="如果想要在K8S环境上部署某软件的话，那么首先先要了解的是该软件在Bare Metal裸金属环境下的手动安装方式、如何配置，启动等等；然后再考虑如何将软件Docker化，怎么编写Dockerfile，Docker环境下如何配置、启动等。最后根据之前Docker的方式选用K8S的YAML资源来创建该服务，例如：Deployment、DaemonSet、Service，ConfigMap，Secret">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;nacos.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-nacos-cluster-on-kubernetes&#x2F;nacos-cluster-list.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:updated_time" content="2019-12-09T13:03:36.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;nacos.jpg">
+
+<link rel="canonical" href="https://knner.wang/2019/12/02/install-nacos-cluster-on-kubernetes.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>在Kubernetes上安装Nacos集群 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">16</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/12/02/install-nacos-cluster-on-kubernetes.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在Kubernetes上安装Nacos集群
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-02 21:03:36" itemprop="dateCreated datePublished" datetime="2019-12-02T21:03:36+08:00">2019-12-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-09 21:03:36" itemprop="dateModified" datetime="2019-12-09T21:03:36+08:00">2019-12-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kubernetes/nacos/" itemprop="url" rel="index">
+                    <span itemprop="name">nacos</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/12/02/install-nacos-cluster-on-kubernetes.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/02/install-nacos-cluster-on-kubernetes.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="/images/logos/nacos.jpg" alt></p><p>如果想要在K8S环境上部署某软件的话，那么首先先要了解的是该软件在Bare Metal裸金属环境下的手动安装方式、如何配置，启动等等；然后再考虑如何将软件Docker化，怎么编写Dockerfile，Docker环境下如何配置、启动等。最后根据之前Docker的方式选用K8S的YAML资源来创建该服务，例如：Deployment、DaemonSet、Service，ConfigMap，Secret。最后，建议做成Helm Chart的方式，来发布，部署，管理。</p><p>按照这个步骤，我们之前已经了解了手动安装Nacos集群的方式，参考：<a href="/2019/12/02/install-nacos-cluster-manually.html" title="手动安装Nacos集群">手动安装Nacos集群</a>，那么这里我们先了解一下Docker化的Nacos，以及如何部署在K8S环境中。</p><a id="more"></a>
+
+
+<p>官网：<a href="https://nacos.io/" target="_blank" rel="noopener">https://nacos.io/</a></p>
+<p>GitHub：<a href="https://github.com/alibaba/nacos" target="_blank" rel="noopener">https://github.com/alibaba/nacos</a></p>
+<p>DockerHub：<a href="https://hub.docker.com/r/nacos/nacos-server" target="_blank" rel="noopener">https://hub.docker.com/r/nacos/nacos-server</a></p>
+<p>Docker：<a href="https://github.com/nacos-group/nacos-docker" target="_blank" rel="noopener">https://github.com/nacos-group/nacos-docker</a></p>
+<p>Nacos On Kubernetes：<a href="https://github.com/nacos-group/nacos-k8s" target="_blank" rel="noopener">https://github.com/nacos-group/nacos-k8s</a></p>
+<p>环境说明：</p>
+<ul>
+<li>Kubernetes 1.15.5</li>
+<li>Nacos 1.1.4</li>
+</ul>
+<h2 id="了解Nacos-Docker化"><a href="#了解Nacos-Docker化" class="headerlink" title="了解Nacos Docker化"></a>了解Nacos Docker化</h2><blockquote>
+<p>参考：</p>
+<p><a href="https://nacos.io/zh-cn/docs/quick-start-docker.html" target="_blank" rel="noopener">https://nacos.io/zh-cn/docs/quick-start-docker.html</a></p>
+<p><a href="https://github.com/nacos-group/nacos-docker" target="_blank" rel="noopener">https://github.com/nacos-group/nacos-docker</a></p>
+</blockquote>
+<p>首先拿到Nacos的镜像为：<code>nacos/nacos-server</code>，然后到<a href="https://hub.docker.com/r/nacos/nacos-server" target="_blank" rel="noopener">Dockerhub</a> 中找到对应的镜像，一般里面包含了使用配置说明，以及Dockerfile的GitHub。</p>
+<p>这里我们拿到了Nacos Dockerfile的GitHub：<a href="https://www.github.com/nacos-group/nacos-docker，经查看大部分的配置都能通过环境变量的方式配置，这也是Docker化的推荐方式，下面是具体的配置项：" target="_blank" rel="noopener">https://www.github.com/nacos-group/nacos-docker，经查看大部分的配置都能通过环境变量的方式配置，这也是Docker化的推荐方式，下面是具体的配置项：</a></p>
+<h3 id="环境变量配置项"><a href="#环境变量配置项" class="headerlink" title="环境变量配置项"></a>环境变量配置项</h3><table>
+<thead>
+<tr>
+<th>name</th>
+<th>description</th>
+<th>option</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MODE</td>
+<td>cluster模式/standalone模式</td>
+<td>cluster/standalone default <strong>cluster</strong></td>
+</tr>
+<tr>
+<td>NACOS_SERVERS</td>
+<td>nacos cluster地址</td>
+<td>eg. ip1,ip2,ip3</td>
+</tr>
+<tr>
+<td>PREFER_HOST_MODE</td>
+<td>是否支持hostname</td>
+<td>hostname/ip default <strong>ip</strong></td>
+</tr>
+<tr>
+<td>NACOS_SERVER_PORT</td>
+<td>nacos服务器端口</td>
+<td>default <strong>8848</strong></td>
+</tr>
+<tr>
+<td>NACOS_SERVER_IP</td>
+<td>多网卡下的自定义nacos服务器IP</td>
+<td></td>
+</tr>
+<tr>
+<td>SPRING_DATASOURCE_PLATFORM</td>
+<td>standalone 支持 mysql</td>
+<td>mysql / empty default empty</td>
+</tr>
+<tr>
+<td>MYSQL_MASTER_SERVICE_HOST</td>
+<td>mysql 主节点host地址</td>
+<td></td>
+</tr>
+<tr>
+<td>MYSQL_MASTER_SERVICE_PORT</td>
+<td>mysql 主节点端口</td>
+<td>default : <strong>3306</strong></td>
+</tr>
+<tr>
+<td>MYSQL_MASTER_SERVICE_DB_NAME</td>
+<td>mysql 主节点数据库名称</td>
+<td></td>
+</tr>
+<tr>
+<td>MYSQL_MASTER_SERVICE_USER</td>
+<td>数据库用户名</td>
+<td></td>
+</tr>
+<tr>
+<td>MYSQL_MASTER_SERVICE_PASSWORD</td>
+<td>数据库密码</td>
+<td></td>
+</tr>
+<tr>
+<td>MYSQL_SLAVE_SERVICE_HOST</td>
+<td>mysql从节点host地址</td>
+<td></td>
+</tr>
+<tr>
+<td>MYSQL_SLAVE_SERVICE_PORT</td>
+<td>mysql从节点端口</td>
+<td>default :3306</td>
+</tr>
+<tr>
+<td>MYSQL_DATABASE_NUM</td>
+<td>数据库数量</td>
+<td>default :2</td>
+</tr>
+<tr>
+<td>JVM_XMS</td>
+<td>-Xms</td>
+<td>default :2g</td>
+</tr>
+<tr>
+<td>JVM_XMX</td>
+<td>-Xmx</td>
+<td>default :2g</td>
+</tr>
+<tr>
+<td>JVM_XMN</td>
+<td>-Xmn</td>
+<td>default :1g</td>
+</tr>
+<tr>
+<td>JVM_MS</td>
+<td>-XX:MetaspaceSize</td>
+<td>default :128m</td>
+</tr>
+<tr>
+<td>JVM_MMS</td>
+<td>-XX:MaxMetaspaceSize</td>
+<td>default :320m</td>
+</tr>
+<tr>
+<td>NACOS_DEBUG</td>
+<td>开启远程调试</td>
+<td>y/n default :n</td>
+</tr>
+<tr>
+<td>TOMCAT_ACCESSLOG_ENABLED</td>
+<td>server.tomcat.accesslog.enabled</td>
+<td>default :false</td>
+</tr>
+</tbody></table>
+<p>知道了Nacos 在docker中的配置方式是使用环境变量，以及具体的环境变量对应的配置，但是我们不了解是如何使用环境变量配置Nacos的，接着往下看：</p>
+<p>找到具体的Dockerfile 文件：</p>
+<p><a href="https://github.com/nacos-group/nacos-docker/tree/master/build" target="_blank" rel="noopener">https://github.com/nacos-group/nacos-docker/tree/master/build</a></p>
+<p>位置：</p>
+<p><a href="https://github.com/nacos-group/nacos-docker/blob/master/build/Dockerfile" target="_blank" rel="noopener">https://github.com/nacos-group/nacos-docker/blob/master/build/Dockerfile</a></p>
+<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line"><span class="keyword">FROM</span> centos:<span class="number">7.5</span>.<span class="number">1804</span></span><br><span class="line"><span class="keyword">MAINTAINER</span> pader <span class="string">"huangmnlove@163.com"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置环境变量默认值，以及需要的工作目录（/home/nacos），java目录等。</span></span><br><span class="line"><span class="keyword">ENV</span> MODE=<span class="string">"cluster"</span> \</span><br><span class="line">    PREFER_HOST_MODE=<span class="string">"ip"</span>\</span><br><span class="line">    BASE_DIR=<span class="string">"/home/nacos"</span> \</span><br><span class="line">    CLASSPATH=<span class="string">".:/home/nacos/conf:$CLASSPATH"</span> \</span><br><span class="line">    CLUSTER_CONF=<span class="string">"/home/nacos/conf/cluster.conf"</span> \</span><br><span class="line">    FUNCTION_MODE=<span class="string">"all"</span> \</span><br><span class="line">    JAVA_HOME=<span class="string">"/usr/lib/jvm/java-1.8.0-openjdk"</span> \</span><br><span class="line">    NACOS_USER=<span class="string">"nacos"</span> \</span><br><span class="line">    JAVA=<span class="string">"/usr/lib/jvm/java-1.8.0-openjdk/bin/java"</span> \</span><br><span class="line">    JVM_XMS=<span class="string">"2g"</span> \</span><br><span class="line">    JVM_XMX=<span class="string">"2g"</span> \</span><br><span class="line">    JVM_XMN=<span class="string">"1g"</span> \</span><br><span class="line">    JVM_MS=<span class="string">"128m"</span> \</span><br><span class="line">    JVM_MMS=<span class="string">"320m"</span> \</span><br><span class="line">    NACOS_DEBUG=<span class="string">"n"</span> \</span><br><span class="line">    TOMCAT_ACCESSLOG_ENABLED=<span class="string">"false"</span> \</span><br><span class="line">    TIME_ZONE=<span class="string">"Asia/Shanghai"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ARG</span> NACOS_VERSION=<span class="number">1.1</span>.<span class="number">4</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /<span class="variable">$BASE_DIR</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从GitHub Release上下载nacos-server，并做一些清理工作</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> <span class="built_in">set</span> -x \</span></span><br><span class="line"><span class="bash">    &amp;&amp; yum update -y \</span></span><br><span class="line"><span class="bash">    &amp;&amp; yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel wget iputils nc  vim libcurl\</span></span><br><span class="line"><span class="bash">    &amp;&amp; wget  https://github.com/alibaba/nacos/releases/download/<span class="variable">$&#123;NACOS_VERSION&#125;</span>/nacos-server-<span class="variable">$&#123;NACOS_VERSION&#125;</span>.tar.gz -P /home \</span></span><br><span class="line"><span class="bash">    &amp;&amp; tar -xzvf /home/nacos-server-<span class="variable">$&#123;NACOS_VERSION&#125;</span>.tar.gz -C /home \</span></span><br><span class="line"><span class="bash">    &amp;&amp; rm -rf /home/nacos-server-<span class="variable">$&#123;NACOS_VERSION&#125;</span>.tar.gz /home/nacos/bin/* /home/nacos/conf/*.properties /home/nacos/conf/*.example /home/nacos/conf/nacos-mysql.sql \</span></span><br><span class="line"><span class="bash">    &amp;&amp; yum autoremove -y wget \</span></span><br><span class="line"><span class="bash">    &amp;&amp; ln -snf /usr/share/zoneinfo/<span class="variable">$TIME_ZONE</span> /etc/localtime &amp;&amp; <span class="built_in">echo</span> <span class="string">'$TIME_ZONE'</span> &gt; /etc/timezone \</span></span><br><span class="line"><span class="bash">    &amp;&amp; yum clean all</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 拷贝docker下启动脚本以及配置文件</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> bin/docker-startup.sh bin/docker-startup.sh</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> conf/application.properties conf/application.properties</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> init.d/custom.properties init.d/custom.properties</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置log目录</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> mkdir -p logs \</span></span><br><span class="line"><span class="bash">	&amp;&amp; <span class="built_in">cd</span> logs \</span></span><br><span class="line"><span class="bash">	&amp;&amp; touch start.out \</span></span><br><span class="line"><span class="bash">	&amp;&amp; ln -sf /dev/stdout start.out \</span></span><br><span class="line"><span class="bash">	&amp;&amp; ln -sf /dev/stderr start.out</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> chmod +x bin/docker-startup.sh</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 暴露端口，并启动</span></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">8848</span></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="bash"> [<span class="string">"bin/docker-startup.sh"</span>]</span></span><br></pre></td></tr></table></figure>
+
+<p>其次查看<code>bin/docker-startup.sh</code> 启动脚本：</p>
+<p>位置：<a href="https://github.com/nacos-group/nacos-docker/blob/master/build/bin/docker-startup.sh" target="_blank" rel="noopener">https://github.com/nacos-group/nacos-docker/blob/master/build/bin/docker-startup.sh</a></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -x</span><br><span class="line"><span class="built_in">export</span> DEFAULT_SEARCH_LOCATIONS=<span class="string">"classpath:/,classpath:/config/,file:./,file:./config/"</span></span><br><span class="line"><span class="built_in">export</span> CUSTOM_SEARCH_LOCATIONS=<span class="variable">$&#123;DEFAULT_SEARCH_LOCATIONS&#125;</span>,file:<span class="variable">$&#123;BASE_DIR&#125;</span>/conf/,<span class="variable">$&#123;BASE_DIR&#125;</span>/init.d/</span><br><span class="line"><span class="built_in">export</span> CUSTOM_SEARCH_NAMES=<span class="string">"application,custom"</span></span><br><span class="line">PLUGINS_DIR=<span class="string">"/home/nacos/plugins/peer-finder"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 设置nacos配置文件cluster.conf</span></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">print_servers</span></span>()&#123;</span><br><span class="line">   <span class="keyword">if</span> [[ ! -d <span class="string">"<span class="variable">$&#123;PLUGINS_DIR&#125;</span>"</span> ]]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">""</span> &gt; <span class="string">"<span class="variable">$CLUSTER_CONF</span>"</span></span><br><span class="line">    <span class="keyword">for</span> server <span class="keyword">in</span> <span class="variable">$&#123;NACOS_SERVERS&#125;</span>; <span class="keyword">do</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"<span class="variable">$server</span>"</span> &gt;&gt; <span class="string">"<span class="variable">$CLUSTER_CONF</span>"</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line">   <span class="keyword">else</span></span><br><span class="line">    bash <span class="variable">$PLUGINS_DIR</span>/plugin.sh</span><br><span class="line">   sleep 30</span><br><span class="line">4<span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">#===========================================================================================</span></span><br><span class="line"><span class="comment"># JVM Configuration # JVM设置</span></span><br><span class="line"><span class="comment">#===========================================================================================</span></span><br><span class="line"><span class="keyword">if</span> [[ <span class="string">"<span class="variable">$&#123;MODE&#125;</span>"</span> == <span class="string">"standalone"</span> ]]; <span class="keyword">then</span></span><br><span class="line"></span><br><span class="line">    JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Xms512m -Xmx512m -Xmn256m"</span> <span class="comment"># standalone方式已经定死是512M了。</span></span><br><span class="line">    JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Dnacos.standalone=true"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line"></span><br><span class="line">  JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -server -Xms<span class="variable">$&#123;JVM_XMS&#125;</span> -Xmx<span class="variable">$&#123;JVM_XMX&#125;</span> -Xmn<span class="variable">$&#123;JVM_XMN&#125;</span> -XX:MetaspaceSize=<span class="variable">$&#123;JVM_MS&#125;</span> -XX:MaxMetaspaceSize=<span class="variable">$&#123;JVM_MMS&#125;</span>"</span></span><br><span class="line">  <span class="keyword">if</span> [[ <span class="string">"<span class="variable">$&#123;NACOS_DEBUG&#125;</span>"</span> == <span class="string">"y"</span> ]]; <span class="keyword">then</span></span><br><span class="line">    JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Xdebug -Xrunjdwp:transport=dt_socket,address=9555,server=y,suspend=n"</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line">  JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -XX:-OmitStackTraceInFastThrow -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=<span class="variable">$&#123;BASE_DIR&#125;</span>/logs/java_heapdump.hprof"</span></span><br><span class="line">  JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -XX:-UseLargePages"</span></span><br><span class="line">  print_servers</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#===========================================================================================</span></span><br><span class="line"><span class="comment"># Setting system properties 配置nacos系统配置 https://nacos.io/zh-cn/docs/system-configurations.html</span></span><br><span class="line"><span class="comment">#===========================================================================================</span></span><br><span class="line"><span class="comment"># set  mode that Nacos Server function of split</span></span><br><span class="line"><span class="keyword">if</span> [[ <span class="string">"<span class="variable">$&#123;FUNCTION_MODE&#125;</span>"</span> == <span class="string">"config"</span> ]]; <span class="keyword">then</span></span><br><span class="line">    JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Dnacos.functionMode=config"</span></span><br><span class="line"><span class="keyword">elif</span> [[ <span class="string">"<span class="variable">$&#123;FUNCTION_MODE&#125;</span>"</span> == <span class="string">"naming"</span> ]]; <span class="keyword">then</span></span><br><span class="line">    JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Dnacos.functionMode=naming"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment"># set nacos server ip</span></span><br><span class="line"><span class="keyword">if</span> [[ ! -z <span class="string">"<span class="variable">$&#123;NACOS_SERVER_IP&#125;</span>"</span> ]]; <span class="keyword">then</span></span><br><span class="line">    JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Dnacos.server.ip=<span class="variable">$&#123;NACOS_SERVER_IP&#125;</span>"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [[ ! -z <span class="string">"<span class="variable">$&#123;USE_ONLY_SITE_INTERFACES&#125;</span>"</span> ]]; <span class="keyword">then</span></span><br><span class="line">    JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Dnacos.inetutils.use-only-site-local-interfaces=<span class="variable">$&#123;USE_ONLY_SITE_INTERFACES&#125;</span>"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [[ ! -z <span class="string">"<span class="variable">$&#123;PREFERRED_NETWORKS&#125;</span>"</span> ]]; <span class="keyword">then</span></span><br><span class="line">    JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Dnacos.inetutils.preferred-networks=<span class="variable">$&#123;PREFERRED_NETWORKS&#125;</span>"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [[ ! -z <span class="string">"<span class="variable">$&#123;IGNORED_INTERFACES&#125;</span>"</span> ]]; <span class="keyword">then</span></span><br><span class="line">    JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Dnacos.inetutils.ignored-interfaces=<span class="variable">$&#123;IGNORED_INTERFACES&#125;</span>"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [[ <span class="string">"<span class="variable">$&#123;PREFER_HOST_MODE&#125;</span>"</span> == <span class="string">"hostname"</span> ]]; <span class="keyword">then</span></span><br><span class="line">    JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Dnacos.preferHostnameOverIp=true"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">JAVA_MAJOR_VERSION=$(<span class="variable">$JAVA</span> -version 2&gt;&amp;1 | sed -E -n <span class="string">'s/.* version "([0-9]*).*$/\1/p'</span>)</span><br><span class="line"><span class="keyword">if</span> [[ <span class="string">"<span class="variable">$JAVA_MAJOR_VERSION</span>"</span> -ge <span class="string">"9"</span> ]] ; <span class="keyword">then</span></span><br><span class="line">  JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -cp .:<span class="variable">$&#123;BASE_DIR&#125;</span>/plugins/cmdb/*.jar:<span class="variable">$&#123;BASE_DIR&#125;</span>/plugins/mysql/*.jar"</span></span><br><span class="line">  JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Xlog:gc*:file=<span class="variable">$&#123;BASE_DIR&#125;</span>/logs/nacos_gc.log:time,tags:filecount=10,filesize=102400"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Djava.ext.dirs=<span class="variable">$&#123;JAVA_HOME&#125;</span>/jre/lib/ext:<span class="variable">$&#123;JAVA_HOME&#125;</span>/lib/ext:<span class="variable">$&#123;BASE_DIR&#125;</span>/plugins/cmdb:<span class="variable">$&#123;BASE_DIR&#125;</span>/plugins/mysql"</span></span><br><span class="line">  JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Xloggc:<span class="variable">$&#123;BASE_DIR&#125;</span>/logs/nacos_gc.log -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -Dnacos.home=<span class="variable">$&#123;BASE_DIR&#125;</span>"</span>  <span class="comment"># nacos 位置</span></span><br><span class="line">JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> -jar <span class="variable">$&#123;BASE_DIR&#125;</span>/target/nacos-server.jar"</span> <span class="comment"># nacos jar包位置</span></span><br><span class="line">JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> <span class="variable">$&#123;JAVA_OPT_EXT&#125;</span>"</span></span><br><span class="line">JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> --spring.config.location=<span class="variable">$&#123;CUSTOM_SEARCH_LOCATIONS&#125;</span>"</span></span><br><span class="line">JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> --spring.config.name=<span class="variable">$&#123;CUSTOM_SEARCH_NAMES&#125;</span>"</span></span><br><span class="line">JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> --logging.config=<span class="variable">$&#123;BASE_DIR&#125;</span>/conf/nacos-logback.xml"</span></span><br><span class="line">JAVA_OPT=<span class="string">"<span class="variable">$&#123;JAVA_OPT&#125;</span> --server.max-http-header-size=524288"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"nacos is starting,you can check the <span class="variable">$&#123;BASE_DIR&#125;</span>/logs/start.out"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"<span class="variable">$JAVA</span> <span class="variable">$&#123;JAVA_OPT&#125;</span>"</span> &gt; <span class="variable">$&#123;BASE_DIR&#125;</span>/logs/start.out 2&gt;&amp;1 &amp;</span><br><span class="line">nohup <span class="variable">$JAVA</span> <span class="variable">$&#123;JAVA_OPT&#125;</span> &gt; <span class="variable">$&#123;BASE_DIR&#125;</span>/logs/start.out 2&gt;&amp;1 &lt; /dev/null <span class="comment">#启动，此时的start.out其实就是/dev/stdout</span></span><br></pre></td></tr></table></figure>
+
+<p>再来看一下application.properties：</p>
+<p>位置：</p>
+<p><a href="https://github.com/nacos-group/nacos-docker/blob/master/build/conf/application.properties" target="_blank" rel="noopener">https://github.com/nacos-group/nacos-docker/blob/master/build/conf/application.properties</a></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># spring</span><br><span class="line">server.servlet.contextPath=$&#123;SERVER_SERVLET_CONTEXTPATH:/nacos&#125;</span><br><span class="line">server.contextPath=/nacos</span><br><span class="line">server.port=$&#123;NACOS_SERVER_PORT:8848&#125;</span><br><span class="line">spring.datasource.platform=$&#123;SPRING_DATASOURCE_PLATFORM:&quot;&quot;&#125;</span><br><span class="line">nacos.cmdb.dumpTaskInterval=3600</span><br><span class="line">nacos.cmdb.eventTaskInterval=10</span><br><span class="line">nacos.cmdb.labelTaskInterval=300</span><br><span class="line">nacos.cmdb.loadDataAtStart=false</span><br><span class="line">db.num=$&#123;MYSQL_DATABASE_NUM:2&#125;</span><br><span class="line">db.url.0=jdbc:mysql://$&#123;MYSQL_MASTER_SERVICE_HOST&#125;:$&#123;MYSQL_MASTER_SERVICE_PORT:3306&#125;/$&#123;MYSQL_MASTER_SERVICE_DB_NAME&#125;?characterEncoding=utf8&amp;connectTimeout=1000&amp;socketTimeout=3000&amp;autoReconnect=true</span><br><span class="line">db.url.1=jdbc:mysql://$&#123;MYSQL_SLAVE_SERVICE_HOST&#125;:$&#123;MYSQL_SLAVE_SERVICE_PORT:3306&#125;/$&#123;MYSQL_MASTER_SERVICE_DB_NAME&#125;?characterEncoding=utf8&amp;connectTimeout=1000&amp;socketTimeout=3000&amp;autoReconnect=true</span><br><span class="line">db.user=$&#123;MYSQL_MASTER_SERVICE_USER&#125;</span><br><span class="line">db.password=$&#123;MYSQL_MASTER_SERVICE_PASSWORD&#125;</span><br><span class="line">server.tomcat.accesslog.enabled=$&#123;TOMCAT_ACCESSLOG_ENABLED:false&#125;</span><br><span class="line">server.tomcat.accesslog.pattern=%h %l %u %t &quot;%r&quot; %s %b %D</span><br><span class="line"># default current work dir</span><br><span class="line">server.tomcat.basedir=</span><br><span class="line">## spring security config</span><br><span class="line">### turn off security</span><br><span class="line"></span><br><span class="line">nacos.security.ignore.urls=/,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/v1/auth/login,/v1/console/health/**,/v1/cs/**,/v1/ns/**,/v1/cmdb/**,/actuator/**,/v1/console/server/**</span><br><span class="line"># metrics for elastic search</span><br><span class="line">management.metrics.export.elastic.enabled=false</span><br><span class="line">management.metrics.export.influx.enabled=false</span><br><span class="line"></span><br><span class="line">nacos.naming.distro.taskDispatchThreadCount=10</span><br><span class="line">nacos.naming.distro.taskDispatchPeriod=200</span><br><span class="line">nacos.naming.distro.batchSyncKeyCount=1000</span><br><span class="line">nacos.naming.distro.initDataRatio=0.9</span><br><span class="line">nacos.naming.distro.syncRetryDelay=5000</span><br><span class="line">nacos.naming.data.warmup=true</span><br></pre></td></tr></table></figure>
+
+<p>这里就是如何通过环境变量的方式配置Nacos的啦，如果变量名为空，那么将使用冒号后面的默认值。</p>
+<p>你还记得BASH中如何设置成这种效果嘛？</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 格式1： $&#123;KEY:-VALUE&#125; 如果KEY没有定义，那么使用默认值VALUE，但KEY一直为空，没有改变其原始值。</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;name&#125;</span></span><br><span class="line"></span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;name:-NAME&#125;</span></span><br><span class="line">NAME</span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;name&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 格式2：$&#123;KEY:=VALUE&#125; 如果KEY没有定义，那么设置KEY=VALUE，此时已经改变了KEY的值</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;name&#125;</span></span><br><span class="line"></span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;name:=NAME&#125;</span></span><br><span class="line">NAME</span><br><span class="line">~$ <span class="built_in">echo</span> <span class="variable">$&#123;name&#125;</span></span><br><span class="line">NAME</span><br><span class="line"></span><br><span class="line"><span class="comment"># 格式3：$&#123;KEY:?VALUE&#125; 如果KEY值没有定义，或者定义了值为空，将在终端报错退出，用于检查是否定义以及是否为空：</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;age&#125;</span></span><br><span class="line"></span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;age:?AGE NULL&#125;</span></span><br><span class="line">-bash: age: AGE NULL</span><br><span class="line"></span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;age:?&#125;</span>        </span><br><span class="line">-bash: age: parameter null or not <span class="built_in">set</span></span><br><span class="line"></span><br><span class="line">$ age=<span class="string">''</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;age:?&#125;</span></span><br><span class="line">-bash: age: parameter null or not <span class="built_in">set</span></span><br><span class="line"></span><br><span class="line">$ age=22</span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;age:?&#125;</span></span><br><span class="line">22</span><br><span class="line"></span><br><span class="line"><span class="comment"># 格式4：$&#123;KEY:+VALUE&#125; 当KEY定义了且值不为空时，将用VALUE替换KEY的值，否则什么也不做，与$&#123;KEY:-VALUE&#125;相反，同样不改变原始值。</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;sex:+3&#125;</span></span><br><span class="line"></span><br><span class="line">$ sex=1</span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;sex:+3&#125;</span></span><br><span class="line">3</span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$&#123;sex&#125;</span></span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>好了，Nacos如何实现Docker化的我们大概了解了，下面就是如何在Kubernetes安装Docker化的Nacos。</p>
+<h2 id="在Kubernetes环境下安装Nacos集群"><a href="#在Kubernetes环境下安装Nacos集群" class="headerlink" title="在Kubernetes环境下安装Nacos集群"></a>在Kubernetes环境下安装Nacos集群</h2><blockquote>
+<p>参考：</p>
+<p><a href="https://nacos.io/zh-cn/docs/use-nacos-with-kubernetes.html" target="_blank" rel="noopener">https://nacos.io/zh-cn/docs/use-nacos-with-kubernetes.html</a></p>
+<p><a href="https://github.com/nacos-group/nacos-k8s/tree/master/deploy/nacos" target="_blank" rel="noopener">https://github.com/nacos-group/nacos-k8s/tree/master/deploy/nacos</a></p>
+</blockquote>
+<p>这里我们是用<code>nfs-client-provisioner</code> 来提供持久化，关于<code>nfs-client-provisioner</code> 的安装请参考：<a href="/2019/12/02/install-nfs-client-provisioner-storageclass.html" title="在Kubernetes上安装nfs-client-provisioner来提供StorageClass">在Kubernetes上安装nfs-client-provisioner来提供StorageClass</a></p>
+<p>修改基础文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ wget -c <span class="string">"https://github.com/nacos-group/nacos-k8s/raw/master/deploy/nacos/nacos-pvc-nfs.yaml"</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="YAML"><a href="#YAML" class="headerlink" title="YAML"></a>YAML</h3><p>修改成如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">cat</span> <span class="string">nacos-pvc-nfs.yaml</span> </span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nacos-headless</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nacos</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">service.alpha.kubernetes.io/tolerate-unready-endpoints:</span> <span class="string">"true"</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">8848</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">server</span></span><br><span class="line">      <span class="attr">targetPort:</span> <span class="number">8848</span></span><br><span class="line">  <span class="attr">clusterIP:</span> <span class="string">None</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nacos</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="attr">spring.datasource.platform:</span> <span class="string">"mysql"</span></span><br><span class="line">  <span class="attr">mysql.database.num:</span> <span class="string">"1"</span></span><br><span class="line">  <span class="attr">mysql.master.host:</span> <span class="string">"x.x.x.x"</span></span><br><span class="line">  <span class="attr">mysql.master.db.name:</span> <span class="string">"nacos"</span></span><br><span class="line">  <span class="attr">mysql.master.port:</span> <span class="string">"3306"</span></span><br><span class="line">  <span class="attr">mysql.master.user:</span> <span class="string">"nacos"</span></span><br><span class="line">  <span class="attr">mysql.master.password:</span> <span class="string">"nacos-password"</span></span><br><span class="line">  <span class="attr">nacos_server_port:</span> <span class="string">"8848"</span></span><br><span class="line">  <span class="attr">prefer_host_mode:</span> <span class="string">"hostname"</span></span><br><span class="line">  <span class="attr">nacos_servers:</span> <span class="string">"nacos-0.nacos-headless.default.svc.cluster.local:8848 nacos-1.nacos-headless.default.svc.cluster.local:8848 nacos-2.nacos-headless.default.svc.cluster.local:8848"</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nacos</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">serviceName:</span> <span class="string">nacos-headless</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">nacos</span></span><br><span class="line">      <span class="attr">annotations:</span></span><br><span class="line">        <span class="attr">pod.alpha.kubernetes.io/initialized:</span> <span class="string">"true"</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">affinity:</span></span><br><span class="line">        <span class="attr">podAntiAffinity:</span></span><br><span class="line">          <span class="attr">requiredDuringSchedulingIgnoredDuringExecution:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">labelSelector:</span></span><br><span class="line">                <span class="attr">matchExpressions:</span></span><br><span class="line">                  <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">"app"</span></span><br><span class="line">                    <span class="attr">operator:</span> <span class="string">In</span></span><br><span class="line">                    <span class="attr">values:</span></span><br><span class="line">                      <span class="bullet">-</span> <span class="string">nacos</span></span><br><span class="line">              <span class="attr">topologyKey:</span> <span class="string">"kubernetes.io/hostname"</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nacos</span></span><br><span class="line">          <span class="attr">imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line">          <span class="attr">image:</span> <span class="string">nacos/nacos-server:1.1.4</span>  <span class="comment">#指定了版本，不使用latest版本</span></span><br><span class="line">          <span class="attr">resources:</span></span><br><span class="line">            <span class="attr">requests:</span></span><br><span class="line">              <span class="attr">memory:</span> <span class="string">"2Gi"</span></span><br><span class="line">              <span class="attr">cpu:</span> <span class="string">"100m"</span></span><br><span class="line">            <span class="attr">limits:</span></span><br><span class="line">              <span class="attr">memory:</span> <span class="string">"2Gi"</span></span><br><span class="line">              <span class="attr">cpu:</span> <span class="string">"300m"</span></span><br><span class="line">          <span class="attr">ports:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">8848</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">client-port</span></span><br><span class="line">          <span class="attr">env:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">NACOS_REPLICAS</span> <span class="comment"># 指定nacos 节点数</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">"3"</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">SERVICE_NAME</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">"nacos-headless"</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">POD_NAMESPACE</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">fieldRef:</span></span><br><span class="line">                  <span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line">                  <span class="attr">fieldPath:</span> <span class="string">metadata.namespace</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">SPRING_DATASOURCE_PLATFORM</span> <span class="comment">#指定数据库类型为mysql</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">configMapKeyRef:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line">                  <span class="attr">key:</span> <span class="string">spring.datasource.platform</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">MYSQL_MASTER_SERVICE_HOST</span> <span class="comment">#指定mysql数据库地址</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">configMapKeyRef:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line">                  <span class="attr">key:</span> <span class="string">mysql.master.host</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">MYSQL_MASTER_SERVICE_DB_NAME</span> <span class="comment"># 指定数据库名称</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">configMapKeyRef:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line">                  <span class="attr">key:</span> <span class="string">mysql.master.db.name</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">MYSQL_MASTER_SERVICE_PORT</span> <span class="comment"># 指定数据库端口</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">configMapKeyRef:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line">                  <span class="attr">key:</span> <span class="string">mysql.master.port</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">MYSQL_DATABASE_NUM</span> <span class="comment"># 指定数据库个数，默认是2个</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">configMapKeyRef:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line">                  <span class="attr">key:</span> <span class="string">mysql.database.num</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">MYSQL_MASTER_SERVICE_USER</span> <span class="comment"># 数据库用户名</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">configMapKeyRef:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line">                  <span class="attr">key:</span> <span class="string">mysql.master.user</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">MYSQL_MASTER_SERVICE_PASSWORD</span> <span class="comment"># 数据库密码</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">configMapKeyRef:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line">                  <span class="attr">key:</span> <span class="string">mysql.master.password</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">JVM_XMS_NUM</span> <span class="comment">#从resource获取请求内存，注意这里只是数字，不带m或者g。</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                  <span class="attr">resourceFieldRef:</span></span><br><span class="line">                    <span class="attr">divisor:</span> <span class="string">1Gi</span></span><br><span class="line">                    <span class="attr">resource:</span> <span class="string">requests.memory</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">JVM_XMS</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">$(JVM_XMS_NUM)g</span> <span class="comment"># 已用上面的JVM_XMS环境变量值，并加单位g</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">JVM_XMX_NUM</span> <span class="comment"># 同理</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                  <span class="attr">resourceFieldRef:</span></span><br><span class="line">                    <span class="attr">divisor:</span> <span class="string">1Gi</span></span><br><span class="line">                    <span class="attr">resource:</span> <span class="string">limits.memory</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">JVM_XMX</span> <span class="comment"># 同理</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">$(JVM_XMX_NUM)g</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">JVM_XMN</span> <span class="comment"># 直接指定大小</span></span><br><span class="line">              <span class="comment">#value: $((JVM_XMX_NUM * 1024 / 2))m # 不知道如何做计算</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">1g</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">NACOS_SERVER_PORT</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">configMapKeyRef:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line">                  <span class="attr">key:</span> <span class="string">nacos_server_port</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">PREFER_HOST_MODE</span> <span class="comment"># 使用主机名代替IP</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">configMapKeyRef:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line">                  <span class="attr">key:</span> <span class="string">prefer_host_mode</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">NACOS_SERVERS</span> <span class="comment"># 直接指定cluste中的所有的节点</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">configMapKeyRef:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">nacos-cm</span></span><br><span class="line">                  <span class="attr">key:</span> <span class="string">nacos_servers</span></span><br><span class="line">          <span class="attr">readinessProbe:</span></span><br><span class="line">            <span class="attr">httpGet:</span></span><br><span class="line">              <span class="attr">port:</span> <span class="string">client-port</span></span><br><span class="line">              <span class="attr">path:</span> <span class="string">/nacos/v1/console/health/readiness</span></span><br><span class="line">            <span class="attr">initialDelaySeconds:</span> <span class="number">90</span></span><br><span class="line">            <span class="attr">timeoutSeconds:</span> <span class="number">3</span></span><br><span class="line">          <span class="attr">livenessProbe:</span></span><br><span class="line">            <span class="attr">httpGet:</span></span><br><span class="line">              <span class="attr">port:</span> <span class="string">client-port</span></span><br><span class="line">              <span class="attr">path:</span> <span class="string">/nacos/v1/console/health/liveness</span></span><br><span class="line">            <span class="attr">initialDelaySeconds:</span> <span class="number">90</span></span><br><span class="line">            <span class="attr">timeoutSeconds:</span> <span class="number">3</span></span><br><span class="line">          <span class="attr">volumeMounts:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">datadir</span></span><br><span class="line">              <span class="attr">mountPath:</span> <span class="string">/home/nacos/data</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">logdir</span></span><br><span class="line">              <span class="attr">mountPath:</span> <span class="string">/home/nacos/logs</span></span><br><span class="line">  <span class="attr">volumeClaimTemplates:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">metadata:</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">datadir</span></span><br><span class="line">      <span class="attr">spec:</span></span><br><span class="line">        <span class="attr">storageClassName:</span> <span class="string">nfs-client</span></span><br><span class="line">        <span class="attr">accessModes:</span> <span class="string">[</span> <span class="string">"ReadWriteMany"</span> <span class="string">]</span></span><br><span class="line">        <span class="attr">resources:</span></span><br><span class="line">          <span class="attr">requests:</span></span><br><span class="line">            <span class="attr">storage:</span> <span class="string">1Gi</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">metadata:</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">logdir</span></span><br><span class="line">      <span class="attr">spec:</span></span><br><span class="line">        <span class="attr">storageClassName:</span> <span class="string">nfs-client</span></span><br><span class="line">        <span class="attr">accessModes:</span> <span class="string">[</span> <span class="string">"ReadWriteMany"</span> <span class="string">]</span></span><br><span class="line">        <span class="attr">resources:</span></span><br><span class="line">          <span class="attr">requests:</span></span><br><span class="line">            <span class="attr">storage:</span> <span class="string">1Gi</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">nacos</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nacos</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">"nginx"</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment">#tls:</span></span><br><span class="line">  <span class="comment">#  - hosts:</span></span><br><span class="line">  <span class="comment">#    - nacos.test.aws.test.com</span></span><br><span class="line">  <span class="comment">#    secretName: nacos.test.aws.test.com</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">nacos.test.aws.test.com</span></span><br><span class="line">    <span class="attr">http:</span></span><br><span class="line">      <span class="attr">paths:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/nacos</span></span><br><span class="line">        <span class="attr">backend:</span></span><br><span class="line">          <span class="attr">serviceName:</span> <span class="string">nacos-headless</span></span><br><span class="line">          <span class="attr">servicePort:</span> <span class="string">server</span></span><br></pre></td></tr></table></figure>
+
+<p>修改说明：</p>
+<ul>
+<li><p>没有使用官方的<code>initContainers</code>的<code>nacos/nacos-peer-finder-plugin:latest</code>，经测试启动正常，也能看到页面，但是，一直无法查看到集群主机列表，一直提示：<code>server is STARTING now, please try again later!</code>，所有的API接口也提示这个。</p>
+<p>所以直接通过环境变量指定了所有的Nacos Cluster 节点的地址。</p>
+</li>
+<li><p>使用resource中的资源充当<code>-Xms,-Xmx</code>，但是<code>-Xmn</code>,需要手动指定。</p>
+</li>
+<li><p>将环境变量的值，都从configmap获取。</p>
+</li>
+<li><p>带来的问题：扩缩容比较麻烦</p>
+</li>
+</ul>
+<p>应用yaml：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl apply -f nacos-pvc-nfs.yaml</span><br></pre></td></tr></table></figure>
+
+<p>然后配置域名解析<code>nacos.test.aws.test.com</code>指定到nginx-ingress-controller的公网地址。</p>
+<p>访问<code>nacos.test.aws.test.com</code>，查看集群节点列表：</p>
+<p><img src="/images/install-nacos-cluster-on-kubernetes/nacos-cluster-list.jpg" alt></p>
+<div class="note danger">
+            <p>又如之前<a href="/2019/12/02/install-nacos-cluster-manually.html" title="手动安装Nacos集群">手动安装Nacos集群</a>，虽然访问Nacos Dashboard需要用户名和密码认证。但是当直接访问其OpenAPI接口是<strong>不需要认证的</strong>。</p><p>所以这里建议将nginx ingress配置成Basic Auth认证。</p><p>详情请参考：<a href="/2019/11/22/Using-Helm3-Install-InfluDB-Prometheus-Operator.html" title="使用Helm3安装Prometheus-Operator + InfluxDB">使用Helm3安装Prometheus-Operator + InfluxDB</a></p>
+          </div>
+
+<p>注意：这里只是映射了Nacos的Dashboard，但是如果开发人员需要通过公网使用Nacos呢？</p>
+<p>这里使用nginx-ingress-controller的TCP转发功能：</p>
+<p>首先：确认nginx-ingress-controller参数中使用的TCP的configmap是哪个？</p>
+<p>如果是通过Helm安装的话：在values.yaml如果tcp和udp的配置是空的，那么默认不会添加这两个参数的：<code>--tcp-services-configmap</code>和<code>--udp-services-configmap</code> 建议通过Helm update进行升级。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">containers:</span><br><span class="line">- args:</span><br><span class="line">  - /nginx-ingress-controller</span><br><span class="line">  - --default-backend-service=kube-system/nginx-ingress-default-backend</span><br><span class="line">  - --election-id=ingress-controller-leader</span><br><span class="line">  - --ingress-class=nginx</span><br><span class="line">  - --configmap=kube-system/nginx-ingress-controller</span><br><span class="line">  - --tcp-services-configmap=kube-system/nginx-ingress-tcp <span class="comment"># 这个nginx-ingress-tcp在kube-system空间下</span></span><br><span class="line">  - --udp-services-configmap=kube-system/nginx-ingress-udp</span><br></pre></td></tr></table></figure>
+
+<p>我们来编辑这个configMap：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">kubectl</span> <span class="string">-n</span> <span class="string">kube-system</span> <span class="string">edit</span> <span class="string">cm</span> <span class="string">nginx-ingress-tcp</span> </span><br><span class="line"><span class="comment"># Please edit the object below. Lines beginning with a '#' will be ignored,</span></span><br><span class="line"><span class="comment"># and an empty file will abort the edit. If an error occurs while saving this file will be</span></span><br><span class="line"><span class="comment"># reopened with the relevant failures.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="attr">"2181":</span> <span class="string">default/zookeeper:2181</span></span><br><span class="line">  <span class="attr">"8848":</span> <span class="string">default/nacos-headless:8848</span> <span class="comment"># 这里定义</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">creationTimestamp:</span> <span class="string">"2019-11-27T08:58:01Z"</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nginx-ingress</span></span><br><span class="line">    <span class="attr">chart:</span> <span class="string">nginx-ingress-1.6.0</span></span><br><span class="line">    <span class="attr">component:</span> <span class="string">controller</span></span><br><span class="line">    <span class="attr">heritage:</span> <span class="string">Tiller</span></span><br><span class="line">    <span class="attr">release:</span> <span class="string">dev-microoak-cn-ingress</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nginx-ingress-tcp</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">kube-system</span></span><br><span class="line">  <span class="attr">resourceVersion:</span> <span class="string">"96042220"</span></span><br><span class="line">  <span class="attr">selfLink:</span> <span class="string">/api/v1/namespaces/kube-system/configmaps/nginx-ingress-tcp</span></span><br><span class="line">  <span class="attr">uid:</span> <span class="number">04158536</span><span class="string">-10f4-11ea-9238-0296672f1eaa</span></span><br></pre></td></tr></table></figure>
+
+<p>在data下添加：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;8848&quot;: microoak/nacos-headless:8848</span><br></pre></td></tr></table></figure>
+
+<p>格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PORT: &lt;namespace&gt;/&lt;service name&gt;:&lt;service port&gt;</span><br><span class="line"></span><br><span class="line">PORT 为nginx-ingress-controller监听的端口，并将流量转发到后端</span><br><span class="line">&lt;namespace&gt; 为nginx-ingress-controller将流量转发到的后端所在的namespace</span><br><span class="line">&lt;service name&gt; 为nginx-ingress-controller将流量转发到的后端的service name，这里是nacos-headless</span><br><span class="line">&lt;service port&gt; 为nginx-ingress-controller将流量转发到的后端的service port，这里是8848</span><br></pre></td></tr></table></figure>
+
+<p>然后就可以通过：</p>
+<p>&lt;nginx-ingress-controller IP&gt;:PORT 访问了；</p>
+<p>如果nginx-ingress-controller有多个，最好前边再加个LB。通过访问LB IP+LB PORT的方式访问。</p>
+<hr>
+<blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+        <div class="reward-container">
+  <div>如有疏忽错误欢迎在留言区评论指正，如果对您有所帮助欢迎点击下方进行打赏。</div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/wechatpay.jpg" alt="Knner.Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/alipay.jpg" alt="Knner.Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2019/12/02/install-nacos-cluster-on-kubernetes.html" title="在Kubernetes上安装Nacos集群">https://knner.wang/2019/12/02/install-nacos-cluster-on-kubernetes.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/nacos/" rel="tag"># nacos</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/12/02/install-nacos-cluster-manually.html" rel="next" title="手动安装Nacos集群">
+                  <i class="fa fa-chevron-left"></i> 手动安装Nacos集群
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2019/12/05/install-and-config-zookeeper-and-kafka-cluster.html" rel="prev" title="安装配置Zookeeper和Kafka集群">
+                  安装配置Zookeeper和Kafka集群 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#了解Nacos-Docker化"><span class="nav-number">1.</span> <span class="nav-text">了解Nacos Docker化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#环境变量配置项"><span class="nav-number">1.1.</span> <span class="nav-text">环境变量配置项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在Kubernetes环境下安装Nacos集群"><span class="nav-number">2.</span> <span class="nav-text">在Kubernetes环境下安装Nacos集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#YAML"><span class="nav-number">2.1.</span> <span class="nav-text">YAML</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: {page: {
+            url: "https://knner.wang/2019/12/02/install-nacos-cluster-on-kubernetes.html",
+            identifier: "2019/12/02/install-nacos-cluster-on-kubernetes.html",
+            title: "在Kubernetes上安装Nacos集群"
+          }
+        }
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://knner.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    (function() {
+      var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+      if (offsetTop <= 0) {
+        // load directly when there's no a scrollbar
+        window.addEventListener('load', loadComments, false);
+      } else {
+        var disqus_scroll = () => {
+          // offsetTop may changes because of manually resizing browser window or lazy loading images.
+          var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+          var scrollTop = window.scrollY;
+
+          // pre-load comments a bit? (margin or anything else)
+          if (offsetTop - scrollTop < 60) {
+            window.removeEventListener('scroll', disqus_scroll);
+            loadComments();
+          }
+        };
+        window.addEventListener('scroll', disqus_scroll);
+      }
+    })();
+  
+</script>
+
+</body>
+</html>

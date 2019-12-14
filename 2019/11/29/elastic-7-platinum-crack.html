@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="在之前的文章中我们分享了安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp;amp; Keystore中，我们已经安装了安全的Elasticsearch，可以在实际的生产环境进行部署了，但是我们可能需要体验一下白金版的其他的特性（LDAP统一认证等）怎么办呢，推荐去官网申请Licence，有效期三十天进行测试，测试符合你的要求后再去购">
+<meta name="keywords" content="elasticsearch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elasticsearch 7.x 白金版">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;11&#x2F;29&#x2F;elastic-7-platinum-crack.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="在之前的文章中我们分享了安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp;amp; Keystore中，我们已经安装了安全的Elasticsearch，可以在实际的生产环境进行部署了，但是我们可能需要体验一下白金版的其他的特性（LDAP统一认证等）怎么办呢，推荐去官网申请Licence，有效期三十天进行测试，测试符合你的要求后再去购">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;luyten-license-jar.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;luyten-build-jar.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;platinum-lic.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:updated_time" content="2019-11-29T01:58:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;luyten-license-jar.jpg">
+
+<link rel="canonical" href="https://knner.wang/2019/11/29/elastic-7-platinum-crack.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Elasticsearch 7.x 白金版 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">16</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/29/elastic-7-platinum-crack.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Elasticsearch 7.x 白金版
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-29 09:58:00" itemprop="dateCreated datePublished" datetime="2019-11-29T09:58:00+08:00">2019-11-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/elasticsearch/" itemprop="url" rel="index">
+                    <span itemprop="name">elasticsearch</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/29/elastic-7-platinum-crack.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/29/elastic-7-platinum-crack.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在之前的文章中我们分享了<a href="/2019/11/26/install-elasticsearch-cluster-7-4.html" title="安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp; Keystore">安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp; Keystore</a>中，我们已经安装了安全的Elasticsearch，可以在实际的生产环境进行部署了，但是我们可能需要体验一下白金版的其他的特性（LDAP统一认证等）怎么办呢，推荐去<a href="https://license.elastic.co/registration" target="_blank" rel="noopener">官网申请Licence</a>，有效期三十天进行测试，测试符合你的要求后再去购买对应的版本，<a href="https://www.elastic.co/cn/subscriptions" target="_blank" rel="noopener">版本对比</a>。</p><p>这里呢我们介绍另外一种方式，去除Elastic的License认证，当然仅仅用于研究测试，生产使用请<a href="https://www.elastic.co/cn/subscriptions" target="_blank" rel="noopener">购买License</a>。</p><p>环境说明：</p><ul>
+<li>Amazon Linux 2 AMI</li>
+<li>Windows 10</li>
+<li>Elasticsearch 7.4.2</li>
+<li>Luyten v0.5.4 <a href="https://github.com/deathmarine/Luyten/releases" target="_blank" rel="noopener">GitHub</a></li>
+<li>WinRAR</li>
+</ul><a id="more"></a>
+
+
+
+<h2 id="下载Elasticsearch-7-4-2"><a href="#下载Elasticsearch-7-4-2" class="headerlink" title="下载Elasticsearch 7.4.2"></a>下载Elasticsearch 7.4.2</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.4.2-linux-x86_64.tar.gz</span><br><span class="line">$ tar xf elasticsearch-7.4.2-linux-x86_64.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>我们提取出<code>x-pack-core</code>这个jar包，拷贝到windows上，位置如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ES_HOME/modules/x-pack-core/x-pack-core-7.4.2.jar</span><br></pre></td></tr></table></figure>
+
+<p>获取Jar包查看工具Luyten，你可以可以使用其他的工具，<a href="https://github.com/deathmarine/Luyten/releases" target="_blank" rel="noopener">GitHub</a>，下载Windows版本的exe文件。</p>
+<p>然后打开<code>x-pack-core-7.4.2.jar</code>这个文件：</p>
+<p>定位到两个文件：然后点击File–Save As 另存为java源码文件：</p>
+<p><code>org.elasticsearch.license/LicenseVerifier.class</code></p>
+<p><img src="/images/elastic-7-platinum-crack/luyten-license-jar.jpg" alt></p>
+<p><code>org.elasticsearch.xpack.core/XPackBuild.class</code></p>
+<p><img src="/images/elastic-7-platinum-crack/luyten-build-jar.jpg" alt></p>
+<p>这里拿到两个Java源码文件，如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">LicenseVerifier.java</span><br><span class="line">XPackBuild.java</span><br></pre></td></tr></table></figure>
+
+<p>下面分别进行修改：</p>
+<h2 id="LicenseVerifier-java-修改"><a href="#LicenseVerifier-java-修改" class="headerlink" title="LicenseVerifier.java 修改"></a>LicenseVerifier.java 修改</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> org.elasticsearch.license;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.nio.*;</span><br><span class="line"><span class="keyword">import</span> org.elasticsearch.common.bytes.*;</span><br><span class="line"><span class="keyword">import</span> java.security.*;</span><br><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"><span class="keyword">import</span> org.elasticsearch.common.xcontent.*;</span><br><span class="line"><span class="keyword">import</span> org.apache.lucene.util.*;</span><br><span class="line"><span class="keyword">import</span> org.elasticsearch.core.internal.io.*;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LicenseVerifier</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">verifyLicense</span><span class="params">(<span class="keyword">final</span> License license, <span class="keyword">final</span> <span class="keyword">byte</span>[] publicKeyData)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/* 注释掉这一大段</span></span><br><span class="line"><span class="comment">        byte[] signedContent = null;</span></span><br><span class="line"><span class="comment">        byte[] publicKeyFingerprint = null;</span></span><br><span class="line"><span class="comment">        try &#123;</span></span><br><span class="line"><span class="comment">            final byte[] signatureBytes = Base64.getDecoder().decode(license.signature());</span></span><br><span class="line"><span class="comment">            final ByteBuffer byteBuffer = ByteBuffer.wrap(signatureBytes);</span></span><br><span class="line"><span class="comment">            final int version = byteBuffer.getInt();</span></span><br><span class="line"><span class="comment">            final int magicLen = byteBuffer.getInt();</span></span><br><span class="line"><span class="comment">            final byte[] magic = new byte[magicLen];</span></span><br><span class="line"><span class="comment">            byteBuffer.get(magic);</span></span><br><span class="line"><span class="comment">            final int hashLen = byteBuffer.getInt();</span></span><br><span class="line"><span class="comment">            publicKeyFingerprint = new byte[hashLen];</span></span><br><span class="line"><span class="comment">            byteBuffer.get(publicKeyFingerprint);</span></span><br><span class="line"><span class="comment">            final int signedContentLen = byteBuffer.getInt();</span></span><br><span class="line"><span class="comment">            signedContent = new byte[signedContentLen];</span></span><br><span class="line"><span class="comment">            byteBuffer.get(signedContent);</span></span><br><span class="line"><span class="comment">            final XContentBuilder contentBuilder = XContentFactory.contentBuilder(XContentType.JSON);</span></span><br><span class="line"><span class="comment">            license.toXContent(contentBuilder, (ToXContent.Params)new ToXContent.MapParams((Map)Collections.singletonMap("license_spec_view", "true")));</span></span><br><span class="line"><span class="comment">            final Signature rsa = Signature.getInstance("SHA512withRSA");</span></span><br><span class="line"><span class="comment">            rsa.initVerify(CryptUtils.readPublicKey(publicKeyData));</span></span><br><span class="line"><span class="comment">            final BytesRefIterator iterator = BytesReference.bytes(contentBuilder).iterator();</span></span><br><span class="line"><span class="comment">            BytesRef ref;</span></span><br><span class="line"><span class="comment">            while ((ref = iterator.next()) != null) &#123;</span></span><br><span class="line"><span class="comment">                rsa.update(ref.bytes, ref.offset, ref.length);</span></span><br><span class="line"><span class="comment">            &#125;</span></span><br><span class="line"><span class="comment">            return rsa.verify(signedContent);</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">        catch (IOException ex) &#123;&#125;</span></span><br><span class="line"><span class="comment">        catch (NoSuchAlgorithmException ex2) &#123;&#125;</span></span><br><span class="line"><span class="comment">        catch (SignatureException ex3) &#123;&#125;</span></span><br><span class="line"><span class="comment">        catch (InvalidKeyException e) &#123;</span></span><br><span class="line"><span class="comment">            throw new IllegalStateException(e);</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">        finally &#123;</span></span><br><span class="line"><span class="comment">            if (signedContent != null) &#123;</span></span><br><span class="line"><span class="comment">                Arrays.fill(signedContent, (byte)0);</span></span><br><span class="line"><span class="comment">            &#125;</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>; <span class="comment">// 增加这行</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">verifyLicense</span><span class="params">(<span class="keyword">final</span> License license)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/* 注释掉这一大段</span></span><br><span class="line"><span class="comment">        byte[] publicKeyBytes;</span></span><br><span class="line"><span class="comment">        try &#123;</span></span><br><span class="line"><span class="comment">            final InputStream is = LicenseVerifier.class.getResourceAsStream("/public.key");</span></span><br><span class="line"><span class="comment">            try &#123;</span></span><br><span class="line"><span class="comment">                final ByteArrayOutputStream out = new ByteArrayOutputStream();</span></span><br><span class="line"><span class="comment">                Streams.copy(is, (OutputStream)out);</span></span><br><span class="line"><span class="comment">                publicKeyBytes = out.toByteArray();</span></span><br><span class="line"><span class="comment">                if (is != null) &#123;</span></span><br><span class="line"><span class="comment">                    is.close();</span></span><br><span class="line"><span class="comment">                &#125;</span></span><br><span class="line"><span class="comment">            &#125;</span></span><br><span class="line"><span class="comment">            catch (Throwable t) &#123;</span></span><br><span class="line"><span class="comment">                if (is != null) &#123;</span></span><br><span class="line"><span class="comment">                    try &#123;</span></span><br><span class="line"><span class="comment">                        is.close();</span></span><br><span class="line"><span class="comment">                    &#125;</span></span><br><span class="line"><span class="comment">                    catch (Throwable t2) &#123;</span></span><br><span class="line"><span class="comment">                        t.addSuppressed(t2);</span></span><br><span class="line"><span class="comment">                    &#125;</span></span><br><span class="line"><span class="comment">                &#125;</span></span><br><span class="line"><span class="comment">                throw t;</span></span><br><span class="line"><span class="comment">            &#125;</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">        catch (IOException ex) &#123;</span></span><br><span class="line"><span class="comment">            throw new IllegalStateException(ex);</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">        return verifyLicense(license, publicKeyBytes);</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>; <span class="comment">// 增加这行</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="XPackBuild-java-修改"><a href="#XPackBuild-java-修改" class="headerlink" title="XPackBuild.java 修改"></a>XPackBuild.java 修改</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> org.elasticsearch.xpack.core;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.elasticsearch.common.io.*;</span><br><span class="line"><span class="keyword">import</span> java.net.*;</span><br><span class="line"><span class="keyword">import</span> org.elasticsearch.common.*;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.*;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.util.jar.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">XPackBuild</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> XPackBuild CURRENT;</span><br><span class="line">    <span class="keyword">private</span> String shortHash;</span><br><span class="line">    <span class="keyword">private</span> String date;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@SuppressForbidden</span>(reason = <span class="string">"looks up path of xpack.jar directly"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">static</span> Path <span class="title">getElasticsearchCodebase</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> URL url = XPackBuild<span class="class">.<span class="keyword">class</span>.<span class="title">getProtectionDomain</span>().<span class="title">getCodeSource</span>().<span class="title">getLocation</span>()</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> PathUtils.get(url.toURI());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> (URISyntaxException bogus) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(bogus);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    XPackBuild(<span class="keyword">final</span> String shortHash, <span class="keyword">final</span> String date) &#123;</span><br><span class="line">        <span class="keyword">this</span>.shortHash = shortHash;</span><br><span class="line">        <span class="keyword">this</span>.date = date;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">shortHash</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.shortHash;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">date</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.date;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> Path path = getElasticsearchCodebase();</span><br><span class="line">        String shortHash = <span class="keyword">null</span>;</span><br><span class="line">        String date = <span class="keyword">null</span>;</span><br><span class="line">        Label_0109: &#123;</span><br><span class="line">            <span class="comment">/* 注释掉这一大段即可</span></span><br><span class="line"><span class="comment">            if (path.toString().endsWith(".jar")) &#123;</span></span><br><span class="line"><span class="comment">                try &#123;</span></span><br><span class="line"><span class="comment">                    final JarInputStream jar = new JarInputStream(Files.newInputStream(path, new OpenOption[0]));</span></span><br><span class="line"><span class="comment">                    try &#123;</span></span><br><span class="line"><span class="comment">                        final Manifest manifest = jar.getManifest();</span></span><br><span class="line"><span class="comment">                        shortHash = manifest.getMainAttributes().getValue("Change");</span></span><br><span class="line"><span class="comment">                        date = manifest.getMainAttributes().getValue("Build-Date");</span></span><br><span class="line"><span class="comment">                        jar.close();</span></span><br><span class="line"><span class="comment">                    &#125;</span></span><br><span class="line"><span class="comment">                    catch (Throwable t) &#123;</span></span><br><span class="line"><span class="comment">                        try &#123;</span></span><br><span class="line"><span class="comment">                            jar.close();</span></span><br><span class="line"><span class="comment">                        &#125;</span></span><br><span class="line"><span class="comment">                        catch (Throwable t2) &#123;</span></span><br><span class="line"><span class="comment">                            t.addSuppressed(t2);</span></span><br><span class="line"><span class="comment">                        &#125;</span></span><br><span class="line"><span class="comment">                        throw t;</span></span><br><span class="line"><span class="comment">                    &#125;</span></span><br><span class="line"><span class="comment">                    break Label_0109;</span></span><br><span class="line"><span class="comment">                &#125;</span></span><br><span class="line"><span class="comment">                catch (IOException e) &#123;</span></span><br><span class="line"><span class="comment">                    throw new RuntimeException(e);</span></span><br><span class="line"><span class="comment">                &#125;</span></span><br><span class="line"><span class="comment">            &#125;</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            shortHash = <span class="string">"Unknown"</span>;</span><br><span class="line">            date = <span class="string">"Unknown"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        CURRENT = <span class="keyword">new</span> XPackBuild(shortHash, date);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>源代码已经更改完毕，下面就是生成class文件，然后替换源class文件即可：</p>
+<h2 id="生成Class文件"><a href="#生成Class文件" class="headerlink" title="生成Class文件"></a>生成Class文件</h2><p>将两个修改好后的文件：<code>LicenseVerifier.java</code>，<code>XPackBuild.java</code>上传到Elasticsearch所在的Linux服务上，将如下脚本放到和这两个java文件同级目录：</p>
+<figure class="highlight bash"><figcaption><span>java2class.sh</span></figcaption><table><tr><td class="code"><pre><span class="line">$ cat java2class.sh</span><br><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line">ES_HOME=<span class="string">"/opt/elk74/es01"</span> <span class="comment"># 指定Elasticsearch的目录</span></span><br><span class="line">ES_JAR=$(<span class="built_in">cd</span> <span class="variable">$ES_HOME</span> &amp;&amp; ls lib/elasticsearch-[0-9]*.jar)</span><br><span class="line">ESCORE_JAR=$(<span class="built_in">cd</span> <span class="variable">$ES_HOME</span> &amp;&amp; ls lib/elasticsearch-core-*.jar)</span><br><span class="line">LUCENE_JAR=$(<span class="built_in">cd</span> <span class="variable">$ES_HOME</span> &amp;&amp; ls lib/lucene-core-*.jar)</span><br><span class="line">XPACK_JAR=$(<span class="built_in">cd</span> <span class="variable">$ES_HOME</span> &amp;&amp; ls modules/x-pack-core/x-pack-core-*.jar)</span><br><span class="line"></span><br><span class="line">javac -cp <span class="string">"<span class="variable">$&#123;ES_HOME&#125;</span>/<span class="variable">$&#123;ES_JAR&#125;</span>:<span class="variable">$&#123;ES_HOME&#125;</span>/<span class="variable">$&#123;LUCENE_JAR&#125;</span>:<span class="variable">$&#123;ES_HOME&#125;</span>/<span class="variable">$&#123;XPACK_JAR&#125;</span>:<span class="variable">$&#123;ES_HOME&#125;</span>/<span class="variable">$&#123;ESCORE_JAR&#125;</span>"</span> LicenseVerifier.java</span><br><span class="line"></span><br><span class="line">javac -cp <span class="string">"<span class="variable">$&#123;ES_HOME&#125;</span>/<span class="variable">$&#123;ES_JAR&#125;</span>:<span class="variable">$&#123;ES_HOME&#125;</span>/<span class="variable">$&#123;LUCENE_JAR&#125;</span>:<span class="variable">$&#123;ES_HOME&#125;</span>/<span class="variable">$&#123;XPACK_JAR&#125;</span>:<span class="variable">$&#123;ES_HOME&#125;</span>/<span class="variable">$&#123;ESCORE_JAR&#125;</span>"</span> XPackBuild.java</span><br><span class="line"></span><br><span class="line"><span class="comment"># 目录结构如下：</span></span><br><span class="line">[ec2-user@test01 es74-test]$ ll</span><br><span class="line">total 2732</span><br><span class="line">-rw-rw-r-- 1 ec2-user ec2-user     528 Nov 29 11:03 java2class.sh</span><br><span class="line">-rw-r--r-- 1 ec2-user ec2-user     531 Nov 25 21:58 LicenseVerifier.java</span><br><span class="line">-rw-r--r-- 1 ec2-user ec2-user    1275 Nov 25 22:06 XPackBuild.java</span><br></pre></td></tr></table></figure>
+
+<div class="note sucess">
+            <p>说明：</p><p>这个脚本的主要作用是，方便对于不同版本的ES、不同目录的ES进行快速的生成class文件，免的再去修改路径啊，版本啊，其实上面的脚本就是执行两条语句如下：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ javac -cp /opt/wanghk/es01/lib/elasticsearch-7.4.2.jar:/opt/wanghk/es01/lib/lucene-core-8.2.0.jar:/opt/wanghk/es01/modules/x-pack-core/x-pack-core-7.4.2.jar:/opt/wanghk/es01/lib/elasticsearch-core-7.4.2.jar LicenseVerifier.java</span><br><span class="line"></span><br><span class="line">$ javac -cp /opt/wanghk/es01/lib/elasticsearch-7.4.2.jar:/opt/wanghk/es01/lib/lucene-core-8.2.0.jar:/opt/wanghk/es01/modules/x-pack-core/x-pack-core-7.4.2.jar:/opt/wanghk/es01/lib/elasticsearch-core-7.4.2.jar XPackBuild.java</span><br></pre></td></tr></table></figure>
+          </div>
+
+<p>然后执行这个脚本：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sh java2class.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可以看到生成了两个class文件：</span></span><br><span class="line">[ec2-user@test01 es74-test]$ ll</span><br><span class="line">total 2732</span><br><span class="line">-rw-rw-r-- 1 ec2-user ec2-user     528 Nov 29 11:03 java2class.sh</span><br><span class="line">-rw-rw-r-- 1 ec2-user ec2-user     410 Nov 29 11:04 LicenseVerifier.class</span><br><span class="line">-rw-r--r-- 1 ec2-user ec2-user     531 Nov 25 21:58 LicenseVerifier.java</span><br><span class="line">-rw-rw-r-- 1 ec2-user ec2-user    1512 Nov 29 11:04 XPackBuild.class</span><br><span class="line">-rw-r--r-- 1 ec2-user ec2-user    1275 Nov 25 22:06 XPackBuild.java</span><br></pre></td></tr></table></figure>
+
+<p>好了两个Class文件已经生成了，下面就是把jar包中对应的这两个class给替换掉我们生成的，有两种方式：</p>
+<h2 id="替换掉x-pack-core-7-4-2-jar中的两个class文件"><a href="#替换掉x-pack-core-7-4-2-jar中的两个class文件" class="headerlink" title="替换掉x-pack-core-7.4.2.jar中的两个class文件"></a>替换掉<code>x-pack-core-7.4.2.jar</code>中的两个class文件</h2><h3 id="第一种方式"><a href="#第一种方式" class="headerlink" title="第一种方式"></a>第一种方式</h3><p>相对简单，将这两个class下载到windows上，然后使用Winrar打开x-pack-core-7.4.2.jar，定位到：<code>org\elasticsearch\license</code>，然后将我们生成的LicenseVerifier.class拖入到这里。</p>
+<p>定位到<code>org\elasticsearch\xpack\core</code>，将XPackBuild.class拖入到这里。</p>
+<h3 id="第二种方式"><a href="#第二种方式" class="headerlink" title="第二种方式"></a>第二种方式</h3><p>这里在linux上操作：</p>
+<p>我们把<code>$ES_HOME/modules/x-pack-core/x-pack-core-7.4.2.jar</code>提取出来，放到一个临时的/elk/x-pack目录中。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">export</span> ES_HOME=<span class="string">"/opt/elk74/es01"</span></span><br><span class="line">$ cp <span class="variable">$ES_HOME</span>/modules/x-pack-core/x-pack-core-7.4.2.jar /elk/x-pack</span><br><span class="line">$ <span class="built_in">cd</span> /elk/x-pack</span><br><span class="line"><span class="comment"># 解压x-pack-core-7.4.2.jar</span></span><br><span class="line">$ jar -xvf x-pack-core-7.4.2.jar</span><br><span class="line"></span><br><span class="line"><span class="comment"># 替换.class文件</span></span><br><span class="line">$ cp /root/XPackBuild.class /elk/x-pack/org/elasticsearch/xpack/core/</span><br><span class="line">$ cp /root/LicenseVerifier.class /elk/x-pack/org/elasticsearch/license/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新打包生成x-pack-core-7.4.2.jar文件</span></span><br><span class="line">$ <span class="built_in">cd</span> /elk/x-pack</span><br><span class="line">$ rm -rf x-pack-core-7.0.1.jar   <span class="comment"># 删除临时拷贝过来的源文件</span></span><br><span class="line">$ jar cvf x-pack-core-7.0.1.jar .</span><br></pre></td></tr></table></figure>
+
+<p>采用上面任意一种方式，这个jar包就是我们修改后的了，然后替换<code>$ES_HOME/modules/x-pack-core/x-pack-core-7.4.2.jar</code>即可。</p>
+<div class="note danger">
+            <p>注意：对于ES集群，需要把每个node的节点的<code>x-pack-core-7.4.2.jar</code>都替换成我们修改后的才可的。</p>
+          </div>
+
+
+
+<h2 id="申请License"><a href="#申请License" class="headerlink" title="申请License"></a>申请License</h2><p>去<a href="https://license.elastic.co/registration" target="_blank" rel="noopener">官网申请License</a>。</p>
+<p>我们将申请下来的License中的<code>type</code>改为<code>platinum</code>，将<code>expiry_date_in_millis</code>延长N年时间：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;<span class="attr">"license"</span>:</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"uid"</span>:<span class="string">"13370dd7-23e4-4470-ad2a-ccacb620f60a"</span>,</span><br><span class="line">    <span class="attr">"type"</span>:<span class="string">"platinum"</span>,</span><br><span class="line">    <span class="attr">"issue_date_in_millis"</span>:<span class="number">1563235200000</span>,</span><br><span class="line">    <span class="attr">"expiry_date_in_millis"</span>:<span class="number">3107746200000</span>,</span><br><span class="line">    <span class="attr">"max_nodes"</span>:<span class="number">100</span>,<span class="attr">"issued_to"</span>:<span class="string">"l l (juzj)"</span>,</span><br><span class="line">    <span class="attr">"issuer"</span>:<span class="string">"Web Form"</span>,</span><br><span class="line">    <span class="attr">"signature"</span>:<span class="string">"AAAAAwAAAA3uiNJR7B8rdgnwFZItAAABmC9ZN0hjZDBGYnVyRXpCOW5Bb3FjZDAxOWpSbTVoMVZwUzRxVk1PSmkxaktJRVl5MUYvUWh3bHZVUTllbXNPbzBUemtnbWpBbmlWRmRZb25KNFlBR2x0TXc2K2p1Y1VtMG1UQU9TRGZVSGRwaEJGUjE3bXd3LzRqZ05iLzRteWFNekdxRGpIYlFwYkJiNUs0U1hTVlJKNVlXekMrSlVUdFIvV0FNeWdOYnlESDc3MWhlY3hSQmdKSjJ2ZTcvYlBFOHhPQlV3ZHdDQ0tHcG5uOElCaDJ4K1hob29xSG85N0kvTWV3THhlQk9NL01VMFRjNDZpZEVXeUtUMXIyMlIveFpJUkk2WUdveEZaME9XWitGUi9WNTZVQW1FMG1DenhZU0ZmeXlZakVEMjZFT2NvOWxpZGlqVmlHNC8rWVVUYzMwRGVySHpIdURzKzFiRDl4TmM1TUp2VTBOUlJZUlAyV0ZVL2kvVk10L0NsbXNFYVZwT3NSU082dFNNa2prQ0ZsclZ4NTltbU1CVE5lR09Bck93V2J1Y3c9PQAAAQCyhef7hVFMq4orIbwULz0c1dX+Ng4sva5RTmWxKYLnJAyXmMRLp2Pvk9YE5G9JoI4gaSB4mIUtVyPzNGJpHLQCPS/kQ8y0B+mc0aXbBKZgbDTqE6p9E+kk1j8myN9GU+JR8QnYd8GiP4ziBUc2zOyx4hskiGE++Kx1KbD4862GbZwLCo9pIIHoxnpt44OytDB9lb7rYr2JBwc07flaR8ndkHlOL7AhuV2OMwDNw978l4OK/O4qxdthxc/XVo6l03IkVoy17coeJ9Oi4YIpOBXrIAYRgjPa68SvnnM8Ykb0KvNvJ7Y8GJ7x+l2q5qMu8QrBeJQ6U0fH/2ATgUy9EiwA"</span>,</span><br><span class="line">    <span class="attr">"start_date_in_millis"</span>:<span class="number">1563235200000</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好了license.json文件已经OK了，根据<a href="/2019/11/26/install-elasticsearch-cluster-7-4.html" title="安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp; Keystore">安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp; Keystore</a>来安装ES高安全集群。</p>
+<p>然后加载License到ES中：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl -XPUT -u elastic <span class="string">'http://localhost:9200/_xpack/license'</span> -H <span class="string">"Content-Type: application/json"</span> -d @license.json</span><br><span class="line">Enter host password <span class="keyword">for</span> user <span class="string">'elastic'</span>:           <span class="comment"># 输入elastic用户密码</span></span><br><span class="line">&#123;<span class="string">"acknowledged"</span>:<span class="literal">true</span>,<span class="string">"license_status"</span>:<span class="string">"valid"</span>&#125;    <span class="comment"># license写入成功</span></span><br></pre></td></tr></table></figure>
+
+<p>查看License：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl -XGET -uelastic http://localhost:9200/_license</span><br><span class="line">Enter host password <span class="keyword">for</span> user <span class="string">'elastic'</span>: </span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"license"</span> : &#123;</span><br><span class="line">    <span class="string">"status"</span> : <span class="string">"active"</span>,</span><br><span class="line">    <span class="string">"uid"</span> : <span class="string">"537458c7-c1dd-43ea-ab69-68es09d80c98"</span>,</span><br><span class="line">    <span class="string">"type"</span> : <span class="string">"platinum"</span>,</span><br><span class="line">    <span class="string">"issue_date"</span> : <span class="string">"2019-11-29T00:00:00.000Z"</span>,</span><br><span class="line">    <span class="string">"issue_date_in_millis"</span> : 1558051200000,</span><br><span class="line">    <span class="string">"expiry_date"</span> : <span class="string">"2068-06-24T14:50:00.999Z"</span>,</span><br><span class="line">    <span class="string">"expiry_date_in_millis"</span> : 2524579200999,</span><br><span class="line">    <span class="string">"max_nodes"</span> : 1000,</span><br><span class="line">    <span class="string">"issued_to"</span> : <span class="string">"pyker"</span>,</span><br><span class="line">    <span class="string">"issuer"</span> : <span class="string">"Web Form"</span>,</span><br><span class="line">    <span class="string">"start_date_in_millis"</span> : 1558051200000</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>登陆Kibana查看一下吧：</p>
+<p><img src="/images/elastic-7-platinum-crack/platinum-lic.jpg" alt></p>
+<blockquote>
+<p>参考：</p>
+<p> <a href="https://www.ipyker.com/2019/03/13/elastic-x-pack" target="_blank" rel="noopener">https://www.ipyker.com/2019/03/13/elastic-x-pack</a> </p>
+</blockquote>
+<hr>
+<blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+        <div class="reward-container">
+  <div>如有疏忽错误欢迎在留言区评论指正，如果对您有所帮助欢迎点击下方进行打赏。</div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/wechatpay.jpg" alt="Knner.Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/alipay.jpg" alt="Knner.Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2019/11/29/elastic-7-platinum-crack.html" title="Elasticsearch 7.x 白金版">https://knner.wang/2019/11/29/elastic-7-platinum-crack.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/elasticsearch/" rel="tag"># elasticsearch</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/11/26/install-elasticsearch-cluster-7-4.html" rel="next" title="安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana & Keystore">
+                  <i class="fa fa-chevron-left"></i> 安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana & Keystore
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2019/12/02/install-nfs-client-provisioner-storageclass.html" rel="prev" title="在Kubernetes上安装nfs-client-provisioner来提供StorageClass">
+                  在Kubernetes上安装nfs-client-provisioner来提供StorageClass <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#下载Elasticsearch-7-4-2"><span class="nav-number">1.</span> <span class="nav-text">下载Elasticsearch 7.4.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LicenseVerifier-java-修改"><span class="nav-number">2.</span> <span class="nav-text">LicenseVerifier.java 修改</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XPackBuild-java-修改"><span class="nav-number">3.</span> <span class="nav-text">XPackBuild.java 修改</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成Class文件"><span class="nav-number">4.</span> <span class="nav-text">生成Class文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#替换掉x-pack-core-7-4-2-jar中的两个class文件"><span class="nav-number">5.</span> <span class="nav-text">替换掉x-pack-core-7.4.2.jar中的两个class文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#第一种方式"><span class="nav-number">5.1.</span> <span class="nav-text">第一种方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第二种方式"><span class="nav-number">5.2.</span> <span class="nav-text">第二种方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#申请License"><span class="nav-number">6.</span> <span class="nav-text">申请License</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: {page: {
+            url: "https://knner.wang/2019/11/29/elastic-7-platinum-crack.html",
+            identifier: "2019/11/29/elastic-7-platinum-crack.html",
+            title: "Elasticsearch 7.x 白金版"
+          }
+        }
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://knner.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    (function() {
+      var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+      if (offsetTop <= 0) {
+        // load directly when there's no a scrollbar
+        window.addEventListener('load', loadComments, false);
+      } else {
+        var disqus_scroll = () => {
+          // offsetTop may changes because of manually resizing browser window or lazy loading images.
+          var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+          var scrollTop = window.scrollY;
+
+          // pre-load comments a bit? (margin or anything else)
+          if (offsetTop - scrollTop < 60) {
+            window.removeEventListener('scroll', disqus_scroll);
+            loadComments();
+          }
+        };
+        window.addEventListener('scroll', disqus_scroll);
+      }
+    })();
+  
+</script>
+
+</body>
+</html>

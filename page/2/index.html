@@ -146,12 +146,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">9</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">11</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">11</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">16</span></a>
 
   </li>
         <li class="menu-item menu-item-about">
@@ -183,6 +183,501 @@
             
 
   <div class="posts-expand">
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html" class="post-title-link" itemprop="url">使用kubeadm快速安装kubernetes 1.15.5测试环境</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-12 10:02:02" itemprop="dateCreated datePublished" datetime="2019-11-12T10:02:02+08:00">2019-11-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。</p><p>这里介绍快速安装kubernetes集群，单台master，2台worker。</p><h2 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h2><p>本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像（基于CentOS7），采用 m4.xlarge（4C 16G）。</p><p>AWS 环境有两点需要注意：</p><div class="note danger">
+            <p>注意1：安全组需要添加一条允许当前安全组访问组内EC2的规则。</p>
+          </div><div class="note danger">
+            <p>注意2：需要关闭“源/目标检查“，路径：EC2设置–联网–源/目标检查：如下图，选择“是，请禁用”</p><p><img src="/images/Quick-install-kubernetes-1-15-5-for-test/aws-disable-check.jpg" alt></p>
+          </div>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/05/typora-markdown.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/05/typora-markdown.html" class="post-title-link" itemprop="url">markdown 语法参考</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-05 09:47:03" itemprop="dateCreated datePublished" datetime="2019-11-05T09:47:03+08:00">2019-11-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-11-30 11:46:14" itemprop="dateModified" datetime="2019-11-30T11:46:14+08:00">2019-11-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/typora/" itemprop="url" rel="index">
+                    <span itemprop="name">typora</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/typora/markdown/" itemprop="url" rel="index">
+                    <span itemprop="name">markdown</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/05/typora-markdown.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/05/typora-markdown.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img src="/images/logos/markdown.jpg" alt></p><p>Markdown 编辑器有很多，可以用vscode，typora，这里使用typora这个软件，markdown格式自动渲染，非常的不错。</p><h2 id="整体目录"><a href="#整体目录" class="headerlink" title="整体目录"></a>整体目录</h2><p>Hexo 内无法显示，参考左侧的目录</p><p>[toc]</p><h2 id="Typora-链接"><a href="#Typora-链接" class="headerlink" title="Typora 链接"></a>Typora 链接</h2><p>官网：</p><p><a href="https://typora.io" target="_blank" rel="noopener">https://typora.io</a></p><p>文档：</p><p><a href="http://support.typora.io" target="_blank" rel="noopener">http://support.typora.io</a></p><h2 id="Typora-安装"><a href="#Typora-安装" class="headerlink" title="Typora 安装"></a>Typora 安装</h2><h3 id="下载并安装Typora："><a href="#下载并安装Typora：" class="headerlink" title="下载并安装Typora："></a>下载并安装Typora：</h3><p><a href="https://typora.io/#windows" target="_blank" rel="noopener">Windows</a></p><p><a href="https://typora.io/download/Typora.dmg" target="_blank" rel="noopener">Mac</a></p><p><a href="https://typora.io/#linux" target="_blank" rel="noopener">Linux</a></p><p>安装步骤下一步即可。</p><h3 id="下载并安装Pandoc："><a href="#下载并安装Pandoc：" class="headerlink" title="下载并安装Pandoc："></a>下载并安装Pandoc：</h3><p>typora导出的时候使用，如果不需要导出则不需要安装。<a href="http://support.typora.io/Install-and-Use-Pandoc/" target="_blank" rel="noopener">官网参考</a></p><p>Typora支持的导出格式如下：</p><p><img src="/images/typora-markdown/typora-export.jpg" alt="typora导出格式"></p><p><a href="https://github.com/jgm/pandoc" target="_blank" rel="noopener">Pandoc GitHub</a></p><p><a href="https://github.com/jgm/pandoc/releases/latest" target="_blank" rel="noopener">Pandoc下载</a>，选择对应版本下载安装即可</p><h2 id="Markdown-语法"><a href="#Markdown-语法" class="headerlink" title="Markdown 语法"></a>Markdown 语法</h2>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/05/typora-markdown.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/03/Hexo-ThemeNext-Writing.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/03/Hexo-ThemeNext-Writing.html" class="post-title-link" itemprop="url">Hexo + Theme Next -- 写作</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-03 14:27:55" itemprop="dateCreated datePublished" datetime="2019-11-03T14:27:55+08:00">2019-11-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-11-18 14:27:55" itemprop="dateModified" datetime="2019-11-18T14:27:55+08:00">2019-11-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hexo/" itemprop="url" rel="index">
+                    <span itemprop="name">hexo</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hexo/next/" itemprop="url" rel="index">
+                    <span itemprop="name">next</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/03/Hexo-ThemeNext-Writing.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/03/Hexo-ThemeNext-Writing.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>前面记录的我的Hexo建站过程，Hexo+ThemeNext的优化配置，这里来到博客网站中最重要的部分：写作。</p><p>其实写作很简单，只需要三步即可：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 步骤1，创建post文章：</span></span><br><span class="line">$ hexo new mypost</span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤2，使用Markdown的方式写文章</span></span><br><span class="line">$ vim mypost.md</span><br><span class="line">typora mypost.md</span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤3，检查并发布文章</span></span><br><span class="line">$ hexo clean &amp;&amp; hexo server</span><br><span class="line"></span><br><span class="line">$ hexo clean &amp;&amp; hexo gen &amp;&amp; hexo deploy</span><br></pre></td></tr></table></figure><p>但是如何写好文章，文章排版，图片的引用，注意提醒，流程图等等，这些光靠Markdown还是不够的，我们需要知道Hexo以及主题Next对于我们的写作扩展了哪些非常好用的功能，来丰富我们的写作内容。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/03/Hexo-ThemeNext-Writing.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/02/Hexo-ThemeNext-Settings.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/02/Hexo-ThemeNext-Settings.html" class="post-title-link" itemprop="url">Hexo + Theme Next -- 设置</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-02 14:27:55" itemprop="dateCreated datePublished" datetime="2019-11-02T14:27:55+08:00">2019-11-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-11-18 14:27:55" itemprop="dateModified" datetime="2019-11-18T14:27:55+08:00">2019-11-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hexo/" itemprop="url" rel="index">
+                    <span itemprop="name">hexo</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hexo/next/" itemprop="url" rel="index">
+                    <span itemprop="name">next</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/02/Hexo-ThemeNext-Settings.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/02/Hexo-ThemeNext-Settings.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+</blockquote>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/01/my-first-blog.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/01/my-first-blog.html" class="post-title-link" itemprop="url">使用hexo + github pages 创建博客</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-01 21:34:00" itemprop="dateCreated datePublished" datetime="2019-11-01T21:34:00+08:00">2019-11-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-11-30 11:44:31" itemprop="dateModified" datetime="2019-11-30T11:44:31+08:00">2019-11-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/hexo/" itemprop="url" rel="index">
+                    <span itemprop="name">hexo</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/01/my-first-blog.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/01/my-first-blog.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>我的第一个hexo 文章,分享从头开始安装使用配置hexo，并设置好自己喜欢的主题，特做此文章记录。</p><h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p>首页：<br><a href="https://hexo.io/" target="_blank" rel="noopener">https://hexo.io/</a><br><a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener">https://hexo.io/zh-cn/</a></p><p>文档：<br><a href="https://hexo.io/docs/" target="_blank" rel="noopener">https://hexo.io/docs/</a><br><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">https://hexo.io/zh-cn/docs/</a></p><h2 id="Hexo安装"><a href="#Hexo安装" class="headerlink" title="Hexo安装"></a>Hexo安装</h2><h3 id="安装依赖：nodejs"><a href="#安装依赖：nodejs" class="headerlink" title="安装依赖：nodejs"></a>安装依赖：nodejs</h3><p>通过nvm来安装管理nodejs</p><h4 id="安装nvm："><a href="#安装nvm：" class="headerlink" title="安装nvm："></a>安装nvm：</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | sh</span><br></pre></td></tr></table></figure><h4 id="通过nvm安装node："><a href="#通过nvm安装node：" class="headerlink" title="通过nvm安装node："></a>通过nvm安装node：</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">num install node</span><br></pre></td></tr></table></figure><h4 id="安装hexo工具："><a href="#安装hexo工具：" class="headerlink" title="安装hexo工具："></a>安装hexo工具：</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/01/my-first-blog.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
         
   
   
@@ -233,6 +728,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/01/hello-world.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/01/hello-world.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -316,19 +825,19 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">16</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -371,7 +880,7 @@
   <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
-    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="https://knner.wang/images/logos/upyun_logo5.png"></a>提供CDN服务
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
   </div>
   <span class="post-meta-divider">|</span>
   <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
@@ -457,6 +966,17 @@ if (document.querySelectorAll('pre.mermaid').length) {
   
 
   
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
 
 </body>
 </html>

@@ -52,13 +52,13 @@
   };
 </script>
 
-  <meta name="description" content="有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。这里介绍快速安装kubernetes集群，单台master，2台worker。环境介绍本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像，采用 m4.xlarge（4C 16G）。AWS 环境有两点需要注意：             注意1：安全组需要添加一条允许当前安全组访问组">
+  <meta name="description" content="有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。这里介绍快速安装kubernetes集群，单台master，2台worker。环境介绍本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像（基于CentOS7），采用 m4.xlarge（4C 16G）。AWS 环境有两点需要注意：             注意1：安全组需要添加一">
 <meta name="keywords" content="kubernetes">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用kubeadm快速安装kubernetes 1.15.5测试环境">
 <meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;11&#x2F;12&#x2F;Quick-install-kubernetes-1-15-5-for-test.html">
 <meta property="og:site_name" content="Knner.Wang&#39;s Blog">
-<meta property="og:description" content="有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。这里介绍快速安装kubernetes集群，单台master，2台worker。环境介绍本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像，采用 m4.xlarge（4C 16G）。AWS 环境有两点需要注意：             注意1：安全组需要添加一条允许当前安全组访问组">
+<meta property="og:description" content="有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。这里介绍快速安装kubernetes集群，单台master，2台worker。环境介绍本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像（基于CentOS7），采用 m4.xlarge（4C 16G）。AWS 环境有两点需要注意：             注意1：安全组需要添加一">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Quick-install-kubernetes-1-15-5-for-test&#x2F;aws-disable-check.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
@@ -150,12 +150,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">9</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">11</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">11</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">16</span></a>
 
   </li>
         <li class="menu-item menu-item-about">
@@ -229,6 +229,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -239,11 +253,19 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。</p><p>这里介绍快速安装kubernetes集群，单台master，2台worker。</p><h2 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h2><p>本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像，采用 m4.xlarge（4C 16G）。</p><p>AWS 环境有两点需要注意：</p><div class="note danger">
+        <p>有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。</p><p>这里介绍快速安装kubernetes集群，单台master，2台worker。</p><h2 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h2><p>本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像（基于CentOS7），采用 m4.xlarge（4C 16G）。</p><p>AWS 环境有两点需要注意：</p><div class="note danger">
             <p>注意1：安全组需要添加一条允许当前安全组访问组内EC2的规则。</p>
           </div><div class="note danger">
             <p>注意2：需要关闭“源/目标检查“，路径：EC2设置–联网–源/目标检查：如下图，选择“是，请禁用”</p><p><img src="/images/Quick-install-kubernetes-1-15-5-for-test/aws-disable-check.jpg" alt></p>
-          </div><table>
+          </div><a id="more"></a>
+
+
+
+
+
+
+
+<table>
 <thead>
 <tr>
 <th>IP</th>
@@ -274,15 +296,7 @@
 <td>docker-ce-18.06.3</td>
 <td>1.15.5</td>
 </tr>
-</tbody></table><a id="more"></a>
-
-
-
-
-
-
-
-
+</tbody></table>
 <h2 id="环境初始化"><a href="#环境初始化" class="headerlink" title="环境初始化"></a>环境初始化</h2><p>直接一条ansible即可：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ansible-playbook playbooks/roles/site.yml -e server=test_k8s -e cloud=aws -e env=dev --private-key keys/aws/dev_keyPair2_awsbj_cn.pem -b --become-method=sudo</span><br></pre></td></tr></table></figure>
 
@@ -472,6 +486,13 @@
 
           </div>
           
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
 
         </div>
           
@@ -512,19 +533,19 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">16</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -567,7 +588,7 @@
   <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
-    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="https://knner.wang/images/logos/upyun_logo5.png"></a>提供CDN服务
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
   </div>
   <span class="post-meta-divider">|</span>
   <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
@@ -653,6 +674,58 @@ if (document.querySelectorAll('pre.mermaid').length) {
   
 
   
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: {page: {
+            url: "https://knner.wang/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html",
+            identifier: "2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html",
+            title: "使用kubeadm快速安装kubernetes 1.15.5测试环境"
+          }
+        }
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://knner.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    (function() {
+      var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+      if (offsetTop <= 0) {
+        // load directly when there's no a scrollbar
+        window.addEventListener('load', loadComments, false);
+      } else {
+        var disqus_scroll = () => {
+          // offsetTop may changes because of manually resizing browser window or lazy loading images.
+          var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+          var scrollTop = window.scrollY;
+
+          // pre-load comments a bit? (margin or anything else)
+          if (offsetTop - scrollTop < 60) {
+            window.removeEventListener('scroll', disqus_scroll);
+            loadComments();
+          }
+        };
+        window.addEventListener('scroll', disqus_scroll);
+      }
+    })();
+  
+</script>
 
 </body>
 </html>

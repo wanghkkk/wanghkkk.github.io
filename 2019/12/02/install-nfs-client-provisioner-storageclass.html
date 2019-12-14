@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="之前搭建的测试环境的Kubernetes一直没有StorageClass动态存储提供，导致很多的实验都是用emptyDir的方式，测试还是OK了，但是在企业中使用的话还是需要有永久的存储的，这里先以nfs-client-provisioner的方式，通过NFS Server来创建StorageClass，来响应k8s中pvc的创建需求。本文环境： Kubernetes 1.15.5 nfs-cli">
+<meta name="keywords" content="nfs-client-provisioner">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在Kubernetes上安装nfs-client-provisioner来提供StorageClass">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;12&#x2F;02&#x2F;install-nfs-client-provisioner-storageclass.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="之前搭建的测试环境的Kubernetes一直没有StorageClass动态存储提供，导致很多的实验都是用emptyDir的方式，测试还是OK了，但是在企业中使用的话还是需要有永久的存储的，这里先以nfs-client-provisioner的方式，通过NFS Server来创建StorageClass，来响应k8s中pvc的创建需求。本文环境： Kubernetes 1.15.5 nfs-cli">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:updated_time" content="2019-12-02T08:36:22.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+
+<link rel="canonical" href="https://knner.wang/2019/12/02/install-nfs-client-provisioner-storageclass.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>在Kubernetes上安装nfs-client-provisioner来提供StorageClass | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">16</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/12/02/install-nfs-client-provisioner-storageclass.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在Kubernetes上安装nfs-client-provisioner来提供StorageClass
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-02 16:36:22" itemprop="dateCreated datePublished" datetime="2019-12-02T16:36:22+08:00">2019-12-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/12/02/install-nfs-client-provisioner-storageclass.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/02/install-nfs-client-provisioner-storageclass.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>之前搭建的测试环境的Kubernetes一直没有StorageClass动态存储提供，导致很多的实验都是用emptyDir的方式，测试还是OK了，但是在企业中使用的话还是需要有永久的存储的，这里先以<code>nfs-client-provisioner</code>的方式，通过NFS Server来创建StorageClass，来响应k8s中pvc的创建需求。</p><p>本文环境：</p><ul>
+<li>Kubernetes 1.15.5</li>
+<li>nfs-client-provisioner chart version：1.2.8，app version：3.1.0</li>
+<li>Helm 3</li>
+<li>Amazon Linux 2 AMI，基于CentOS 7</li>
+</ul><p>有用链接：</p><p>nfs-client-provisioner GitHub：</p><a id="more"></a>
+
+
+
+
+<p><a href="https://github.com/kubernetes-incubator/external-storage/tree/master/nfs-client" target="_blank" rel="noopener">https://github.com/kubernetes-incubator/external-storage/tree/master/nfs-client</a></p>
+<p>nfs-client-provisioner Helm Chart：</p>
+<p><a href="https://github.com/helm/charts/tree/master/stable/nfs-client-provisioner" target="_blank" rel="noopener">https://github.com/helm/charts/tree/master/stable/nfs-client-provisioner</a></p>
+<h2 id="前提依赖"><a href="#前提依赖" class="headerlink" title="前提依赖"></a>前提依赖</h2><h3 id="Kubernetes环境"><a href="#Kubernetes环境" class="headerlink" title="Kubernetes环境"></a>Kubernetes环境</h3><p>请参考之前的文章：<a href="/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html" title="使用kubeadm快速安装kubernetes 1.15.5测试环境’ %}&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;Helm3-安装&quot;&gt;&lt;a href=&quot;#Helm3-安装&quot; class=&quot;headerlink&quot; title=&quot;Helm3 安装&quot;&gt;&lt;&#x2F;a&gt;Helm3 安装&lt;&#x2F;h3&gt;&lt;p&gt;同样请参考之前的文章：{% post_link Pre-trial-helm3 抢先试用Helm3，并安装nginx-ingress-controller’">使用kubeadm快速安装kubernetes 1.15.5测试环境’ %}&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;Helm3-安装&quot;&gt;&lt;a href=&quot;#Helm3-安装&quot; class=&quot;headerlink&quot; title=&quot;Helm3 安装&quot;&gt;&lt;&#x2F;a&gt;Helm3 安装&lt;&#x2F;h3&gt;&lt;p&gt;同样请参考之前的文章：{% post_link Pre-trial-helm3 抢先试用Helm3，并安装nginx-ingress-controller’</a></p>
+<h3 id="NFS-Server的安装"><a href="#NFS-Server的安装" class="headerlink" title="NFS Server的安装"></a>NFS Server的安装</h3><h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><p>我这里在K8S Master节点上安装NFS Server，该节点IP：172.17.0.7。</p>
+<p>其他的Kubernetes节点也需要安装，但是可以不需要配置<code>/etc/exports</code>，只是在挂载的时候使用。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 在所有的K8S节点上安装</span></span><br><span class="line">$ sudo yum install nfs-utils rpcbind -y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用ansible</span></span><br><span class="line">$ ansible dev_k8s -m yum  -a <span class="string">"name=rpcbind state=present"</span> --private-key keys/aws/dev_keyPair2_awsbj_cn.pem -b --become-method=sudo</span><br><span class="line">$ ansible dev_k8s -m yum  -a <span class="string">"name=nfs-utils state=present"</span> --private-key keys/aws/dev_keyPair2_awsbj_cn.pem -b --become-method=sudo</span><br></pre></td></tr></table></figure>
+
+<h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat &gt;&gt; /etc/exports &lt;&lt;EOF</span><br><span class="line">/data/kubernetes-storageclass *(rw,sync,no_root_squash)</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建所需目录</span></span><br><span class="line">$ sudo mkdir -p /data/kubernetes-storageclass</span><br><span class="line">$ sudo chmod 777 /data/kubernetes-storageclass</span><br><span class="line">$ ll /data/</span><br><span class="line">total 0</span><br><span class="line">drwxrwxrwx 2 root root 6 Dec  2 16:58 kubernetes-storageclass</span><br></pre></td></tr></table></figure>
+
+<h4 id="启动服务："><a href="#启动服务：" class="headerlink" title="启动服务："></a>启动服务：</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 注意顺序不能颠倒</span></span><br><span class="line">$ sudo systemctl restart rpcbind</span><br><span class="line">$ sudo systemctl restart nfs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开机启动</span></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> rpcbind</span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> nfs</span><br></pre></td></tr></table></figure>
+
+<h4 id="测试："><a href="#测试：" class="headerlink" title="测试："></a>测试：</h4><p>在随意一台K8S Node节点上测试：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ showmount -e 172.17.0.7</span><br><span class="line">Export list <span class="keyword">for</span> 172.17.0.7:</span><br><span class="line">/data/kubernetes-storageclass *</span><br></pre></td></tr></table></figure>
+
+<p>挂载测试：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建挂载点</span></span><br><span class="line">$ mkdir nfs</span><br><span class="line"><span class="comment"># 挂载NFS Server</span></span><br><span class="line">$ sudo mount 172.17.0.7:/data/kubernetes-storageclass nfs/</span><br><span class="line">$ df -h</span><br><span class="line">Filesystem                                Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                                  7.9G     0  7.9G   0% /dev</span><br><span class="line">tmpfs                                     7.9G     0  7.9G   0% /dev/shm</span><br><span class="line">tmpfs                                     7.9G  2.7M  7.9G   1% /run</span><br><span class="line">tmpfs                                     7.9G     0  7.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/xvda1                                100G  8.6G   92G   9% /</span><br><span class="line">tmpfs                                     1.6G     0  1.6G   0% /run/user/10086</span><br><span class="line">172.17.0.7:/data/kubernetes-storageclass  100G  7.4G   93G   8% /home/root/nfs <span class="comment"># 已经挂载</span></span><br><span class="line"><span class="comment"># 写入测试</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="built_in">test</span> &gt; nfs/<span class="built_in">test</span></span><br><span class="line">$ ll nfs</span><br><span class="line">total 4.0K</span><br><span class="line">-rw-rw-r-- 1 root root 5 Dec  2 17:24 <span class="built_in">test</span></span><br><span class="line">$ cat nfs/<span class="built_in">test</span> </span><br><span class="line"><span class="built_in">test</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从NFS Server上查看：</span></span><br><span class="line">$ ll /data/kubernetes-storageclass/</span><br><span class="line">total 4.0K</span><br><span class="line">-rw-rw-r-- 1 root root  5 Dec  2 17:24 <span class="built_in">test</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试OK后，卸载挂载</span></span><br><span class="line">$ sudo umount /home/microoak/nfs</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="安装nfs-client-provisioner"><a href="#安装nfs-client-provisioner" class="headerlink" title="安装nfs-client-provisioner"></a>安装nfs-client-provisioner</h2><p>记得一定先要更新repo：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ helm repo update </span><br><span class="line">Hang tight <span class="keyword">while</span> we grab the latest from your chart repositories...</span><br><span class="line">...Successfully got an update from the <span class="string">"stable"</span> chart repository</span><br><span class="line">...Successfully got an update from the <span class="string">"elastic"</span> chart repository</span><br><span class="line">Update Complete. ⎈ Happy Helming!⎈</span><br></pre></td></tr></table></figure>
+
+<p>搜索一下，是否有提供nfs-client-provisioner：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ helm search repo nfs-client-provisioner</span><br><span class="line">NAME                         	CHART VERSION	APP VERSION	DESCRIPTION                                       </span><br><span class="line">stable/nfs-client-provisioner	1.2.8        	3.1.0      	nfs-client is an automatic provisioner that use...</span><br></pre></td></tr></table></figure>
+
+<p>好了，下载下载，然后更改对应的values.yaml：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ helm pull stable/nfs-client-provisioner</span><br><span class="line">$ tar xf nfs-client-provisioner-1.2.8.tgz</span><br><span class="line"><span class="comment"># 备份原有的values.yaml</span></span><br><span class="line">$ cp values.yaml&#123;,.ori&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先查看Helm Chart GitHub，查看所有的key解释：</p>
+<blockquote>
+<h2 id="Configuration"><a href="#Configuration" class="headerlink" title="Configuration"></a>Configuration</h2><p>The following tables lists the configurable parameters of this chart and their default values.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>replicaCount</code></td>
+<td>Number of provisioner instances to deployed</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>strategyType</code></td>
+<td>Specifies the strategy used to replace old Pods by new ones</td>
+<td><code>Recreate</code></td>
+</tr>
+<tr>
+<td><code>image.repository</code></td>
+<td>Provisioner image</td>
+<td><code>quay.io/external_storage/nfs-client-provisioner</code></td>
+</tr>
+<tr>
+<td><code>image.tag</code></td>
+<td>Version of provisioner image</td>
+<td><code>v3.1.0-k8s1.11</code></td>
+</tr>
+<tr>
+<td><code>image.pullPolicy</code></td>
+<td>Image pull policy</td>
+<td><code>IfNotPresent</code></td>
+</tr>
+<tr>
+<td><code>storageClass.name</code></td>
+<td>Name of the storageClass</td>
+<td><code>nfs-client</code></td>
+</tr>
+<tr>
+<td><code>storageClass.defaultClass</code></td>
+<td>Set as the default StorageClass</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>storageClass.allowVolumeExpansion</code></td>
+<td>Allow expanding the volume 允许扩充volume</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>storageClass.reclaimPolicy</code></td>
+<td>Method used to reclaim an obsoleted volume 删除策略</td>
+<td><code>Delete</code></td>
+</tr>
+<tr>
+<td><code>storageClass.provisionerName</code></td>
+<td>Name of the provisionerName</td>
+<td>null</td>
+</tr>
+<tr>
+<td><code>storageClass.archiveOnDelete</code></td>
+<td>Archive pvc when deleting 删除时归档</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>nfs.server</code></td>
+<td>Hostname of the NFS server 服务地址</td>
+<td>null (ip or hostname)</td>
+</tr>
+<tr>
+<td><code>nfs.path</code></td>
+<td>Basepath of the mount point to be used 服务端的路径</td>
+<td><code>/ifs/kubernetes</code></td>
+</tr>
+<tr>
+<td><code>nfs.mountOptions</code></td>
+<td>Mount options (e.g. ‘nfsvers=3’)</td>
+<td>null</td>
+</tr>
+<tr>
+<td><code>resources</code></td>
+<td>Resources required (e.g. CPU, memory) 资源大小</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>rbac.create</code></td>
+<td>Use Role-based Access Control</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>podSecurityPolicy.enabled</code></td>
+<td>Create &amp; use Pod Security Policy resources</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>priorityClassName</code></td>
+<td>Set pod priorityClassName</td>
+<td>null</td>
+</tr>
+<tr>
+<td><code>serviceAccount.create</code></td>
+<td>Should we create a ServiceAccount</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>serviceAccount.name</code></td>
+<td>Name of the ServiceAccount to use</td>
+<td>null</td>
+</tr>
+<tr>
+<td><code>nodeSelector</code></td>
+<td>Node labels for pod assignment</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>affinity</code></td>
+<td>Affinity settings</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>tolerations</code></td>
+<td>List of node taints to tolerate</td>
+<td><code>[]</code></td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>修改values.yaml，只列出了修改的部分：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 更改成azk8s中国区的源</span></span><br><span class="line"><span class="attr">image:</span></span><br><span class="line">  <span class="attr">repository:</span> <span class="string">quay.azk8s.cn/external_storage/nfs-client-provisioner</span></span><br><span class="line"></span><br><span class="line"><span class="attr">nfs:</span></span><br><span class="line">  <span class="attr">server:</span> <span class="number">172.17</span><span class="number">.0</span><span class="number">.7</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">/data/kubernetes-storageclass</span></span><br><span class="line"></span><br><span class="line"><span class="attr">resources:</span></span><br><span class="line">  <span class="attr">limits:</span></span><br><span class="line">   <span class="attr">cpu:</span> <span class="string">100m</span></span><br><span class="line">   <span class="attr">memory:</span> <span class="string">128Mi</span></span><br><span class="line">  <span class="attr">requests:</span></span><br><span class="line">   <span class="attr">cpu:</span> <span class="string">100m</span></span><br><span class="line">   <span class="attr">memory:</span> <span class="string">128Mi</span></span><br></pre></td></tr></table></figure>
+
+<p>查看渲染后的yaml：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">helm</span> <span class="string">-n</span> <span class="string">kube-system</span> <span class="string">install</span> <span class="string">nfs-client-provisioner</span> <span class="string">./</span> <span class="string">--dry-run</span> <span class="string">--debug</span></span><br><span class="line"><span class="attr">install.go:148:</span> <span class="string">[debug]</span> <span class="attr">Original chart version:</span> <span class="string">""</span></span><br><span class="line"><span class="attr">install.go:165:</span> <span class="string">[debug]</span> <span class="attr">CHART PATH:</span> <span class="string">/home/microoak/kubernetes/helm/nfs-client-provisioner</span></span><br><span class="line"></span><br><span class="line"><span class="attr">NAME:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="attr">LAST DEPLOYED:</span> <span class="string">Mon</span> <span class="string">Dec</span>  <span class="number">2</span> <span class="number">17</span><span class="string">:32:37</span> <span class="number">2019</span></span><br><span class="line"><span class="attr">NAMESPACE:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">STATUS:</span> <span class="string">pending-install</span></span><br><span class="line"><span class="attr">REVISION:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">TEST SUITE:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">USER-SUPPLIED VALUES:</span></span><br><span class="line"><span class="string">&#123;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">COMPUTED VALUES:</span></span><br><span class="line"><span class="attr">affinity:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">image:</span></span><br><span class="line">  <span class="attr">pullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line">  <span class="attr">repository:</span> <span class="string">quay.io/external_storage/nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">tag:</span> <span class="string">v3.1.0-k8s1.11</span></span><br><span class="line"><span class="attr">nfs:</span></span><br><span class="line">  <span class="attr">mountOptions:</span> <span class="literal">null</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">/data/kubernetes-storageclass</span></span><br><span class="line">  <span class="attr">server:</span> <span class="number">172.17</span><span class="number">.0</span><span class="number">.7</span></span><br><span class="line"><span class="attr">nodeSelector:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">podSecurityPolicy:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">rbac:</span></span><br><span class="line">  <span class="attr">create:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">replicaCount:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">resources:</span></span><br><span class="line">  <span class="attr">limits:</span></span><br><span class="line">    <span class="attr">cpu:</span> <span class="string">100m</span></span><br><span class="line">    <span class="attr">memory:</span> <span class="string">128Mi</span></span><br><span class="line">  <span class="attr">requests:</span></span><br><span class="line">    <span class="attr">cpu:</span> <span class="string">100m</span></span><br><span class="line">    <span class="attr">memory:</span> <span class="string">128Mi</span></span><br><span class="line"><span class="attr">serviceAccount:</span></span><br><span class="line">  <span class="attr">create:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">name:</span> <span class="literal">null</span></span><br><span class="line"><span class="attr">storageClass:</span></span><br><span class="line">  <span class="attr">allowVolumeExpansion:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">archiveOnDelete:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">create:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">defaultClass:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nfs-client</span></span><br><span class="line">  <span class="attr">reclaimPolicy:</span> <span class="string">Delete</span></span><br><span class="line"><span class="attr">strategyType:</span> <span class="string">Recreate</span></span><br><span class="line"><span class="attr">tolerations:</span> <span class="string">[]</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HOOKS:</span></span><br><span class="line"><span class="attr">MANIFEST:</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># Source: nfs-client-provisioner/templates/storageclass.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">storage.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StorageClass</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">    <span class="attr">chart:</span> <span class="string">nfs-client-provisioner-1.2.8</span></span><br><span class="line">    <span class="attr">heritage:</span> <span class="string">Helm</span></span><br><span class="line">    <span class="attr">release:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nfs-client</span></span><br><span class="line"><span class="attr">provisioner:</span> <span class="string">cluster.local/nfs-client-provisioner</span></span><br><span class="line"><span class="attr">allowVolumeExpansion:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">reclaimPolicy:</span> <span class="string">Delete</span></span><br><span class="line"><span class="attr">parameters:</span></span><br><span class="line">  <span class="attr">archiveOnDelete:</span> <span class="string">"true"</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># Source: nfs-client-provisioner/templates/serviceaccount.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">    <span class="attr">chart:</span> <span class="string">nfs-client-provisioner-1.2.8</span></span><br><span class="line">    <span class="attr">heritage:</span> <span class="string">Helm</span></span><br><span class="line">    <span class="attr">release:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># Source: nfs-client-provisioner/templates/clusterrole.yaml</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">    <span class="attr">chart:</span> <span class="string">nfs-client-provisioner-1.2.8</span></span><br><span class="line">    <span class="attr">heritage:</span> <span class="string">Helm</span></span><br><span class="line">    <span class="attr">release:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nfs-client-provisioner-runner</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">apiGroups:</span> <span class="string">[""]</span></span><br><span class="line">    <span class="attr">resources:</span> <span class="string">["persistentvolumes"]</span></span><br><span class="line">    <span class="attr">verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"create"</span><span class="string">,</span> <span class="string">"delete"</span><span class="string">]</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">apiGroups:</span> <span class="string">[""]</span></span><br><span class="line">    <span class="attr">resources:</span> <span class="string">["persistentvolumeclaims"]</span></span><br><span class="line">    <span class="attr">verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"update"</span><span class="string">]</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">apiGroups:</span> <span class="string">["storage.k8s.io"]</span></span><br><span class="line">    <span class="attr">resources:</span> <span class="string">["storageclasses"]</span></span><br><span class="line">    <span class="attr">verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">]</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">apiGroups:</span> <span class="string">[""]</span></span><br><span class="line">    <span class="attr">resources:</span> <span class="string">["events"]</span></span><br><span class="line">    <span class="attr">verbs:</span> <span class="string">["create",</span> <span class="string">"update"</span><span class="string">,</span> <span class="string">"patch"</span><span class="string">]</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># Source: nfs-client-provisioner/templates/clusterrolebinding.yaml</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">    <span class="attr">chart:</span> <span class="string">nfs-client-provisioner-1.2.8</span></span><br><span class="line">    <span class="attr">heritage:</span> <span class="string">Helm</span></span><br><span class="line">    <span class="attr">release:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">run-nfs-client-provisioner</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">    <span class="attr">namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line">  <span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nfs-client-provisioner-runner</span></span><br><span class="line">  <span class="attr">apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># Source: nfs-client-provisioner/templates/role.yaml</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">    <span class="attr">chart:</span> <span class="string">nfs-client-provisioner-1.2.8</span></span><br><span class="line">    <span class="attr">heritage:</span> <span class="string">Helm</span></span><br><span class="line">    <span class="attr">release:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">leader-locking-nfs-client-provisioner</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">apiGroups:</span> <span class="string">[""]</span></span><br><span class="line">    <span class="attr">resources:</span> <span class="string">["endpoints"]</span></span><br><span class="line">    <span class="attr">verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"create"</span><span class="string">,</span> <span class="string">"update"</span><span class="string">,</span> <span class="string">"patch"</span><span class="string">]</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># Source: nfs-client-provisioner/templates/rolebinding.yaml</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">    <span class="attr">chart:</span> <span class="string">nfs-client-provisioner-1.2.8</span></span><br><span class="line">    <span class="attr">heritage:</span> <span class="string">Helm</span></span><br><span class="line">    <span class="attr">release:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">leader-locking-nfs-client-provisioner</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">    <span class="attr">namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line">  <span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">leader-locking-nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># Source: nfs-client-provisioner/templates/deployment.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">    <span class="attr">chart:</span> <span class="string">nfs-client-provisioner-1.2.8</span></span><br><span class="line">    <span class="attr">heritage:</span> <span class="string">Helm</span></span><br><span class="line">    <span class="attr">release:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">strategy:</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">Recreate</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">      <span class="attr">release:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">annotations:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">        <span class="attr">release:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">serviceAccountName:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line">          <span class="attr">image:</span> <span class="string">"quay.azk8s.cn/external_storage/nfs-client-provisioner:v3.1.0-k8s1.11"</span></span><br><span class="line">          <span class="attr">imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line">          <span class="attr">volumeMounts:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nfs-client-root</span></span><br><span class="line">              <span class="attr">mountPath:</span> <span class="string">/persistentvolumes</span></span><br><span class="line">          <span class="attr">env:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">PROVISIONER_NAME</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">cluster.local/nfs-client-provisioner</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">NFS_SERVER</span></span><br><span class="line">              <span class="attr">value:</span> <span class="number">172.17</span><span class="number">.0</span><span class="number">.7</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">NFS_PATH</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">/data/kubernetes-storageclass</span></span><br><span class="line">          <span class="attr">resources:</span></span><br><span class="line">            <span class="attr">limits:</span></span><br><span class="line">              <span class="attr">cpu:</span> <span class="string">100m</span></span><br><span class="line">              <span class="attr">memory:</span> <span class="string">128Mi</span></span><br><span class="line">            <span class="attr">requests:</span></span><br><span class="line">              <span class="attr">cpu:</span> <span class="string">100m</span></span><br><span class="line">              <span class="attr">memory:</span> <span class="string">128Mi</span></span><br><span class="line">      <span class="attr">volumes:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nfs-client-root</span></span><br><span class="line">          <span class="attr">nfs:</span></span><br><span class="line">            <span class="attr">server:</span> <span class="number">172.17</span><span class="number">.0</span><span class="number">.7</span></span><br><span class="line">            <span class="attr">path:</span> <span class="string">/data/kubernetes-storageclass</span></span><br></pre></td></tr></table></figure>
+
+<p>安装：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> nfs-client-provisioner</span><br><span class="line">$ helm -n kube-system install nfs-client-provisioner ./</span><br></pre></td></tr></table></figure>
+
+<p>检查状态：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ helm -n kube-system ls</span><br><span class="line">NAME                  	NAMESPACE  	REVISION	UPDATED                                	STATUS  	CHART                       	APP VERSION</span><br><span class="line">nfs-client-provisioner	kube-system	1       	2019-12-02 17:37:05.261060723 +0800 CST	deployed	nfs-client-provisioner-1.2.8	3.1.0</span><br><span class="line">$ kubectl -n kube-system get po</span><br><span class="line">NAME                                             READY   STATUS    RESTARTS   AGE</span><br><span class="line">calico-kube-controllers-7b4657785d-7gw8s         1/1     Running   0          20d</span><br><span class="line">calico-node-lpnmf                                1/1     Running   0          10d</span><br><span class="line">calico-node-v26zq                                1/1     Running   0          20d</span><br><span class="line">calico-node-vxknt                                1/1     Running   0          10d</span><br><span class="line">coredns-5c98db65d4-f6bjz                         1/1     Running   3          20d</span><br><span class="line">coredns-5c98db65d4-xn6fg                         1/1     Running   3          20d</span><br><span class="line">etcd-k8s01.test.awsbj.cn                         1/1     Running   0          10d</span><br><span class="line">kube-apiserver-k8s01.test.awsbj.cn               1/1     Running   0          18d</span><br><span class="line">kube-controller-manager-k8s01.test.awsbj.cn      1/1     Running   1          18d</span><br><span class="line">kube-proxy-kgv74                                 1/1     Running   0          10d</span><br><span class="line">kube-proxy-vmbqj                                 1/1     Running   0          10d</span><br><span class="line">kube-proxy-zq5rl                                 1/1     Running   0          10d</span><br><span class="line">kube-scheduler-k8s01.test.awsbj.cn               1/1     Running   2          20d</span><br><span class="line">nfs-client-provisioner-794f85c5d4-m5wp2          1/1     Running   0          11s <span class="comment"># 在这里</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看日志，看有无报错</span></span><br><span class="line">$ kubectl -n kube-system logs nfs-client-provisioner-794f85c5d4-m5wp2 </span><br><span class="line">I1202 09:37:09.420679       1 leaderelection.go:185] attempting to acquire leader lease  kube-system/cluster.local-nfs-client-provisioner...</span><br><span class="line">I1202 09:37:09.518361       1 leaderelection.go:194] successfully acquired lease kube-system/cluster.local-nfs-client-provisioner</span><br><span class="line">I1202 09:37:09.518540       1 controller.go:631] Starting provisioner controller cluster.local/nfs-client-provisioner_nfs-client-provisioner-794f85c5d4-m5wp2_4fa17668-14e7-11ea-a2bb-f610a73d4488!</span><br><span class="line">I1202 09:37:09.518648       1 event.go:221] Event(v1.ObjectReference&#123;Kind:<span class="string">"Endpoints"</span>, Namespace:<span class="string">"kube-system"</span>, Name:<span class="string">"cluster.local-nfs-client-provisioner"</span>, UID:<span class="string">"6c942278-9a6a-4a0c-8faf-c9dbea3de870"</span>, APIVersion:<span class="string">"v1"</span>, ResourceVersion:<span class="string">"2760006"</span>, FieldPath:<span class="string">""</span>&#125;): <span class="built_in">type</span>: <span class="string">'Normal'</span> reason: <span class="string">'LeaderElection'</span> nfs-client-provisioner-794f85c5d4-m5wp2_4fa17668-14e7-11ea-a2bb-f610a73d4488 became leader</span><br><span class="line">I1202 09:37:09.714669       1 controller.go:680] Started provisioner controller cluster.local/nfs-client-provisioner_nfs-client-provisioner-794f85c5d4-m5wp2_4fa17668-14e7-11ea-a2bb-f610a73d4488!</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看storageclass，名称是nfs-client，后续需要用到</span></span><br><span class="line">$ kubectl get sc</span><br><span class="line">NAME         PROVISIONER                            AGE</span><br><span class="line">nfs-client   cluster.local/nfs-client-provisioner   39s</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="创建pvc，测试nfs-client-provisioner"><a href="#创建pvc，测试nfs-client-provisioner" class="headerlink" title="创建pvc，测试nfs-client-provisioner"></a>创建pvc，测试nfs-client-provisioner</h2><h3 id="创建测试pvc"><a href="#创建测试pvc" class="headerlink" title="创建测试pvc"></a>创建测试pvc</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">cat</span> <span class="string">test-pvc.yaml</span> </span><br><span class="line"><span class="attr">kind:</span> <span class="string">PersistentVolumeClaim</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">test-claim</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">storageClassName:</span> <span class="string">nfs-client</span> <span class="comment"># 指定storageClass的名称</span></span><br><span class="line">  <span class="attr">accessModes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">ReadWriteMany</span></span><br><span class="line">  <span class="attr">resources:</span></span><br><span class="line">    <span class="attr">requests:</span></span><br><span class="line">      <span class="attr">storage:</span> <span class="string">1Mi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装</span></span><br><span class="line"><span class="string">$</span> <span class="string">kubectl</span> <span class="string">apply</span> <span class="string">-f</span> <span class="string">test-pvc.yaml</span></span><br></pre></td></tr></table></figure>
+
+<p>检查：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl get pvc,pv</span><br><span class="line">NAME                               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE</span><br><span class="line">persistentvolumeclaim/<span class="built_in">test</span>-claim   Bound    pvc-67b598fd-dec8-422d-be6a-dc7ccf589fe7   1Mi        RWX            nfs-client     4m49s</span><br><span class="line"></span><br><span class="line">NAME                                                        CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                STORAGECLASS   REASON   AGE</span><br><span class="line">persistentvolume/pvc-67b598fd-dec8-422d-be6a-dc7ccf589fe7   1Mi        RWX            Delete           Bound    default/<span class="built_in">test</span>-claim   nfs-client              4m48s</span><br></pre></td></tr></table></figure>
+
+<p>已经自动创了对应的PV，名为：<code>pvc-67b598fd-dec8-422d-be6a-dc7ccf589fe7</code>，我们再去NFS Server上看看：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ll /data/kubernetes-storageclass/</span><br><span class="line">total 4.0K</span><br><span class="line">drwxrwxrwx 2 root     root     21 Dec  2 17:55 default-test-claim-pvc-67b598fd-dec8-422d-be6a-dc7ccf589fe7</span><br><span class="line">-rw-rw-r-- 1 root root  5 Dec  2 17:24 <span class="built_in">test</span></span><br></pre></td></tr></table></figure>
+
+<p>已经创建了对应的目录：格式为：</p>
+<p>&lt;NAMESPACE&gt;-&lt;PVC_NAME&gt;-&lt;PV_NAME&gt;</p>
+<h3 id="创建测试pod"><a href="#创建测试pod" class="headerlink" title="创建测试pod"></a>创建测试pod</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">cat</span> <span class="string">test-pod.yaml</span> </span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">test-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">test-pod</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">wanghkkk/busyboxplus</span></span><br><span class="line">    <span class="attr">command:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">"/bin/sh"</span></span><br><span class="line">    <span class="attr">args:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">"-c"</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">"touch /mnt/SUCCESS &amp;&amp; exit 0 || exit 1"</span></span><br><span class="line">    <span class="attr">volumeMounts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nfs-pvc</span></span><br><span class="line">        <span class="attr">mountPath:</span> <span class="string">"/mnt"</span></span><br><span class="line">  <span class="attr">restartPolicy:</span> <span class="string">"Never"</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nfs-pvc</span></span><br><span class="line">      <span class="attr">persistentVolumeClaim:</span></span><br><span class="line">        <span class="attr">claimName:</span> <span class="string">test-claim</span> <span class="comment"># 指定上面创建的pvc名称</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装</span></span><br><span class="line"><span class="string">$</span> <span class="string">kubectl</span> <span class="string">apply</span> <span class="string">-f</span> <span class="string">test-pod.yaml</span></span><br></pre></td></tr></table></figure>
+
+<p>检查：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl get po</span><br><span class="line">NAME                    READY   STATUS      RESTARTS   AGE</span><br><span class="line">nginx-9cb7f8c7d-wk89s   1/1     Running     0          19d</span><br><span class="line"><span class="built_in">test</span>-pod                0/1     Completed   0          8m8s <span class="comment"># 已经是正常完成了</span></span><br></pre></td></tr></table></figure>
+
+<p>检查NFS Server：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ll /data/kubernetes-storageclass/</span><br><span class="line">total 4.0K</span><br><span class="line">drwxrwxrwx 2 root     root     21 Dec  2 17:55 default-test-claim-pvc-67b598fd-dec8-422d-be6a-dc7ccf589fe7</span><br><span class="line">-rw-rw-r-- 1 root root  5 Dec  2 17:24 text</span><br><span class="line"></span><br><span class="line"><span class="comment"># 已经创建SUCCESS文件</span></span><br><span class="line">$ ll /data/kubernetes-storageclass/default-test-claim-pvc-67b598fd-dec8-422d-be6a-dc7ccf589fe7/</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec  2 17:55 SUCCESS</span><br></pre></td></tr></table></figure>
+
+<p>清理：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl delete -f <span class="built_in">test</span>-pod.yaml -f <span class="built_in">test</span>-pvc.yaml</span><br></pre></td></tr></table></figure>
+
+<p>再次检查：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl get pv,pvc</span><br><span class="line"></span><br><span class="line">No resources found.</span><br></pre></td></tr></table></figure>
+
+<p>查看NFS Server：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ll /data/kubernetes-storageclass/</span><br><span class="line">total 4.0K</span><br><span class="line">drwxrwxrwx 2 root     root     21 Dec  2 17:55 archived-default-test-claim-pvc-67b598fd-dec8-422d-be6a-dc7ccf589fe7</span><br><span class="line">-rw-rw-r-- 1 root root  5 Dec  2 17:24 text</span><br><span class="line"></span><br><span class="line">$ ll /data/kubernetes-storageclass/archived-default-test-claim-pvc-67b598fd-dec8-422d-be6a-dc7ccf589fe7/</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r-- 1 root root 0 Dec  2 17:55 SUCCESS</span><br></pre></td></tr></table></figure>
+
+<p>因为我们在安装的时候指定了archiveOnDelete=true，所以在删除pv的时候，该文件夹并没有被删除，只是重命名增加了archived。</p>
+<hr>
+<blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+        <div class="reward-container">
+  <div>如有疏忽错误欢迎在留言区评论指正，如果对您有所帮助欢迎点击下方进行打赏。</div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/wechatpay.jpg" alt="Knner.Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/alipay.jpg" alt="Knner.Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2019/12/02/install-nfs-client-provisioner-storageclass.html" title="在Kubernetes上安装nfs-client-provisioner来提供StorageClass">https://knner.wang/2019/12/02/install-nfs-client-provisioner-storageclass.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/nfs-client-provisioner/" rel="tag"># nfs-client-provisioner</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/11/29/elastic-7-platinum-crack.html" rel="next" title="Elasticsearch 7.x 白金版">
+                  <i class="fa fa-chevron-left"></i> Elasticsearch 7.x 白金版
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2019/12/02/install-nacos-cluster-manually.html" rel="prev" title="手动安装Nacos集群">
+                  手动安装Nacos集群 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前提依赖"><span class="nav-number">1.</span> <span class="nav-text">前提依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes环境"><span class="nav-number">1.1.</span> <span class="nav-text">Kubernetes环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NFS-Server的安装"><span class="nav-number">1.2.</span> <span class="nav-text">NFS Server的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装"><span class="nav-number">1.2.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置"><span class="nav-number">1.2.2.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#启动服务："><span class="nav-number">1.2.3.</span> <span class="nav-text">启动服务：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#测试："><span class="nav-number">1.2.4.</span> <span class="nav-text">测试：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装nfs-client-provisioner"><span class="nav-number">2.</span> <span class="nav-text">安装nfs-client-provisioner</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Configuration"><span class="nav-number">3.</span> <span class="nav-text">Configuration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建pvc，测试nfs-client-provisioner"><span class="nav-number">4.</span> <span class="nav-text">创建pvc，测试nfs-client-provisioner</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建测试pvc"><span class="nav-number">4.1.</span> <span class="nav-text">创建测试pvc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建测试pod"><span class="nav-number">4.2.</span> <span class="nav-text">创建测试pod</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: {page: {
+            url: "https://knner.wang/2019/12/02/install-nfs-client-provisioner-storageclass.html",
+            identifier: "2019/12/02/install-nfs-client-provisioner-storageclass.html",
+            title: "在Kubernetes上安装nfs-client-provisioner来提供StorageClass"
+          }
+        }
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://knner.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    (function() {
+      var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+      if (offsetTop <= 0) {
+        // load directly when there's no a scrollbar
+        window.addEventListener('load', loadComments, false);
+      } else {
+        var disqus_scroll = () => {
+          // offsetTop may changes because of manually resizing browser window or lazy loading images.
+          var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+          var scrollTop = window.scrollY;
+
+          // pre-load comments a bit? (margin or anything else)
+          if (offsetTop - scrollTop < 60) {
+            window.removeEventListener('scroll', disqus_scroll);
+            loadComments();
+          }
+        };
+        window.addEventListener('scroll', disqus_scroll);
+      }
+    })();
+  
+</script>
+
+</body>
+</html>

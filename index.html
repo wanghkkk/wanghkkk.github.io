@@ -146,12 +146,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">9</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">11</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">11</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">16</span></a>
 
   </li>
         <li class="menu-item menu-item-about">
@@ -183,6 +183,478 @@
             
 
   <div class="posts-expand">
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/12/05/install-and-config-zookeeper-and-kafka-cluster.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/12/05/install-and-config-zookeeper-and-kafka-cluster.html" class="post-title-link" itemprop="url">安装配置Zookeeper和Kafka集群</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-05 17:02:09" itemprop="dateCreated datePublished" datetime="2019-12-05T17:02:09+08:00">2019-12-05</time>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/12/05/install-and-config-zookeeper-and-kafka-cluster.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/05/install-and-config-zookeeper-and-kafka-cluster.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>此Kafka集群为了日志收集这一套，之前安装了Elasticsearch Cluster：参考：<a href="/2019/11/26/install-elasticsearch-cluster-7-4.html" title="安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp; Keystore">安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp; Keystore</a>。</p><p>FELK：</p><ul>
+<li>F    Filebeat | Fluentd | Fluent-bit</li>
+<li>E    Elasticsearch</li>
+<li>L    Logstash</li>
+<li>K    Kibana</li>
+</ul><p><img src="/images/logos/kafka.png" alt></p><p>FELK兼容性：</p><ul>
+<li>Filebeat 6：兼容kafka：between 0.11 and 2.0.0 <a href="https://www.elastic.co/guide/en/beats/filebeat/6.8/kafka-output.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/beats/filebeat/6.8/kafka-output.html</a></li>
+<li>Filebeat 7：兼容kafka：between 0.11 and 2.1.0 <a href="https://www.elastic.co/guide/en/beats/filebeat/current/kafka-output.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/beats/filebeat/current/kafka-output.html</a></li>
+<li>Logstash 6-7：使用Kafka client 2.1.0 <a href="https://www.elastic.co/guide/en/logstash/6.8/plugins-outputs-kafka.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/logstash/6.8/plugins-outputs-kafka.html</a></li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/12/05/install-and-config-zookeeper-and-kafka-cluster.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/12/02/install-nacos-cluster-on-kubernetes.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/12/02/install-nacos-cluster-on-kubernetes.html" class="post-title-link" itemprop="url">在Kubernetes上安装Nacos集群</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-02 21:03:36" itemprop="dateCreated datePublished" datetime="2019-12-02T21:03:36+08:00">2019-12-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-09 21:03:36" itemprop="dateModified" datetime="2019-12-09T21:03:36+08:00">2019-12-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kubernetes/nacos/" itemprop="url" rel="index">
+                    <span itemprop="name">nacos</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/12/02/install-nacos-cluster-on-kubernetes.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/02/install-nacos-cluster-on-kubernetes.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img src="/images/logos/nacos.jpg" alt></p><p>如果想要在K8S环境上部署某软件的话，那么首先先要了解的是该软件在Bare Metal裸金属环境下的手动安装方式、如何配置，启动等等；然后再考虑如何将软件Docker化，怎么编写Dockerfile，Docker环境下如何配置、启动等。最后根据之前Docker的方式选用K8S的YAML资源来创建该服务，例如：Deployment、DaemonSet、Service，ConfigMap，Secret。最后，建议做成Helm Chart的方式，来发布，部署，管理。</p><p>按照这个步骤，我们之前已经了解了手动安装Nacos集群的方式，参考：<a href="/2019/12/02/install-nacos-cluster-manually.html" title="手动安装Nacos集群">手动安装Nacos集群</a>，那么这里我们先了解一下Docker化的Nacos，以及如何部署在K8S环境中。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/12/02/install-nacos-cluster-on-kubernetes.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/12/02/install-nacos-cluster-manually.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/12/02/install-nacos-cluster-manually.html" class="post-title-link" itemprop="url">手动安装Nacos集群</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-02 21:02:16" itemprop="dateCreated datePublished" datetime="2019-12-02T21:02:16+08:00">2019-12-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nacos/" itemprop="url" rel="index">
+                    <span itemprop="name">nacos</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/12/02/install-nacos-cluster-manually.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/02/install-nacos-cluster-manually.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img src="/images/logos/nacos.jpg" alt></p><p>因最近要上微服务，采用spring-cloud-alibaba，组件如下：</p><p><a href="https://github.com/alibaba/spring-cloud-alibaba/blob/master/README-zh.md" target="_blank" rel="noopener">https://github.com/alibaba/spring-cloud-alibaba/blob/master/README-zh.md</a></p><p><strong><a href="https://github.com/alibaba/Sentinel" target="_blank" rel="noopener">Sentinel</a></strong>：把流量作为切入点，从流量控制、熔断降级、系统负载保护等多个维度保护服务的稳定性。</p><p><strong><a href="https://github.com/alibaba/Nacos" target="_blank" rel="noopener">Nacos</a></strong>：一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。</p><p><strong><a href="https://rocketmq.apache.org/" target="_blank" rel="noopener">RocketMQ</a></strong>：一款开源的分布式消息系统，基于高可用分布式集群技术，提供低延时的、高可靠的消息发布与订阅服务。</p><p><strong><a href="https://github.com/apache/dubbo" target="_blank" rel="noopener">Dubbo</a></strong>：Apache Dubbo™ 是一款高性能 Java RPC 框架。</p><p><strong><a href="https://github.com/seata/seata" target="_blank" rel="noopener">Seata</a></strong>：阿里巴巴开源产品，一个易于使用的高性能微服务分布式事务解决方案。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/12/02/install-nacos-cluster-manually.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/12/02/install-nfs-client-provisioner-storageclass.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/12/02/install-nfs-client-provisioner-storageclass.html" class="post-title-link" itemprop="url">在Kubernetes上安装nfs-client-provisioner来提供StorageClass</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-02 16:36:22" itemprop="dateCreated datePublished" datetime="2019-12-02T16:36:22+08:00">2019-12-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/12/02/install-nfs-client-provisioner-storageclass.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/02/install-nfs-client-provisioner-storageclass.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>之前搭建的测试环境的Kubernetes一直没有StorageClass动态存储提供，导致很多的实验都是用emptyDir的方式，测试还是OK了，但是在企业中使用的话还是需要有永久的存储的，这里先以<code>nfs-client-provisioner</code>的方式，通过NFS Server来创建StorageClass，来响应k8s中pvc的创建需求。</p><p>本文环境：</p><ul>
+<li>Kubernetes 1.15.5</li>
+<li>nfs-client-provisioner chart version：1.2.8，app version：3.1.0</li>
+<li>Helm 3</li>
+<li>Amazon Linux 2 AMI，基于CentOS 7</li>
+</ul><p>有用链接：</p><p>nfs-client-provisioner GitHub：</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/12/02/install-nfs-client-provisioner-storageclass.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/29/elastic-7-platinum-crack.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/29/elastic-7-platinum-crack.html" class="post-title-link" itemprop="url">Elasticsearch 7.x 白金版</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-29 09:58:00" itemprop="dateCreated datePublished" datetime="2019-11-29T09:58:00+08:00">2019-11-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/elasticsearch/" itemprop="url" rel="index">
+                    <span itemprop="name">elasticsearch</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/29/elastic-7-platinum-crack.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/29/elastic-7-platinum-crack.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在之前的文章中我们分享了<a href="/2019/11/26/install-elasticsearch-cluster-7-4.html" title="安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp; Keystore">安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp; Keystore</a>中，我们已经安装了安全的Elasticsearch，可以在实际的生产环境进行部署了，但是我们可能需要体验一下白金版的其他的特性（LDAP统一认证等）怎么办呢，推荐去<a href="https://license.elastic.co/registration" target="_blank" rel="noopener">官网申请Licence</a>，有效期三十天进行测试，测试符合你的要求后再去购买对应的版本，<a href="https://www.elastic.co/cn/subscriptions" target="_blank" rel="noopener">版本对比</a>。</p><p>这里呢我们介绍另外一种方式，去除Elastic的License认证，当然仅仅用于研究测试，生产使用请<a href="https://www.elastic.co/cn/subscriptions" target="_blank" rel="noopener">购买License</a>。</p><p>环境说明：</p><ul>
+<li>Amazon Linux 2 AMI</li>
+<li>Windows 10</li>
+<li>Elasticsearch 7.4.2</li>
+<li>Luyten v0.5.4 <a href="https://github.com/deathmarine/Luyten/releases" target="_blank" rel="noopener">GitHub</a></li>
+<li>WinRAR</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/29/elastic-7-platinum-crack.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
         
   
   
@@ -233,6 +705,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/26/install-elasticsearch-cluster-7-4.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/26/install-elasticsearch-cluster-7-4.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -244,7 +730,7 @@
 
       
           <p>因为最近要测试Kubernetes日志收集这块，所以先要了解一下Elasticsearch 集群的手动搭建方式，这里记录一下在虚拟机上安装Elasticsearch Cluster 7.4的方式，并开启Auth认证以及Transport SSL。</p><p><img src="/images/logos/elastic-logo.jpg" alt></p><p><a href="https://www.elastic.co/cn/" target="_blank" rel="noopener">官网</a>    <a href="https://www.elastic.co/cn/downloads/" target="_blank" rel="noopener">下载</a>    <a href="https://www.elastic.co/cn/guide" target="_blank" rel="noopener">Docs</a></p><p>本文采用的环境以及版本：</p><ul>
-<li>一台EC2主机Amazon Linux 2 AMI，本身是基于Red Hat Enterprise的。</li>
+<li>一台EC2主机Amazon Linux 2 AMI，本身是基于CentOS 7的。</li>
 <li>通过tar包安装</li>
 <li>Elasticsearch 7.4.2，默认集成JDK（Openjdk 13.0.1）；这里简称ES</li>
 <li>Kibana 7.4.2</li>
@@ -320,6 +806,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/22/Using-Helm3-Install-InfluDB-Prometheus-Operator.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/22/Using-Helm3-Install-InfluDB-Prometheus-Operator.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -408,6 +908,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/20/Prometheus-Operator-test.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/20/Prometheus-Operator-test.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -493,6 +1007,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/14/Pre-trial-helm3.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/14/Pre-trial-helm3.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -578,6 +1106,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/11/13/docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/13/docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -592,462 +1134,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/11/13/docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Knner.Wang">
-      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Knner.Wang's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html" class="post-title-link" itemprop="url">使用kubeadm快速安装kubernetes 1.15.5测试环境</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-11-12 10:02:02" itemprop="dateCreated datePublished" datetime="2019-11-12T10:02:02+08:00">2019-11-12</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/kubernetes/" itemprop="url" rel="index">
-                    <span itemprop="name">kubernetes</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>有的时候我们需要快速的安装kubernetes环境来方便我们测试，而不需要类似生产的高可用环境。</p><p>这里介绍快速安装kubernetes集群，单台master，2台worker。</p><h2 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h2><p>本机所有机器都在AWS，使用默认的Amazon Linux 2 AMI镜像，采用 m4.xlarge（4C 16G）。</p><p>AWS 环境有两点需要注意：</p><div class="note danger">
-            <p>注意1：安全组需要添加一条允许当前安全组访问组内EC2的规则。</p>
-          </div><div class="note danger">
-            <p>注意2：需要关闭“源/目标检查“，路径：EC2设置–联网–源/目标检查：如下图，选择“是，请禁用”</p><p><img src="/images/Quick-install-kubernetes-1-15-5-for-test/aws-disable-check.jpg" alt></p>
-          </div><table>
-<thead>
-<tr>
-<th>IP</th>
-<th>主机名</th>
-<th>角色</th>
-<th>Docker</th>
-<th>Kubernetes</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>172.17.0.7</td>
-<td>k8s01.test.awsbj.cn</td>
-<td>master01</td>
-<td>docker-ce-18.06.3</td>
-<td>1.15.5</td>
-</tr>
-<tr>
-<td>172.17.0.213</td>
-<td>k8s02.test.awsbj.cn</td>
-<td>worker01</td>
-<td>docker-ce-18.06.3</td>
-<td>1.15.5</td>
-</tr>
-<tr>
-<td>172.17.0.230</td>
-<td>k8s03.test.awsbj.cn</td>
-<td>worker02</td>
-<td>docker-ce-18.06.3</td>
-<td>1.15.5</td>
-</tr>
-</tbody></table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/11/12/Quick-install-kubernetes-1-15-5-for-test.html#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/05/typora-markdown.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Knner.Wang">
-      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Knner.Wang's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/05/typora-markdown.html" class="post-title-link" itemprop="url">markdown 语法参考</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-11-05 09:47:03" itemprop="dateCreated datePublished" datetime="2019-11-05T09:47:03+08:00">2019-11-05</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-11-30 11:46:14" itemprop="dateModified" datetime="2019-11-30T11:46:14+08:00">2019-11-30</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/typora/" itemprop="url" rel="index">
-                    <span itemprop="name">typora</span>
-                  </a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/typora/markdown/" itemprop="url" rel="index">
-                    <span itemprop="name">markdown</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><img src="/images/logos/markdown.jpg" alt></p><p>Markdown 编辑器有很多，可以用vscode，typora，这里使用typora这个软件，markdown格式自动渲染，非常的不错。</p><h2 id="整体目录"><a href="#整体目录" class="headerlink" title="整体目录"></a>整体目录</h2><p>Hexo 内无法显示，参考左侧的目录</p><p>[toc]</p><h2 id="Typora-链接"><a href="#Typora-链接" class="headerlink" title="Typora 链接"></a>Typora 链接</h2><p>官网：</p><p><a href="https://typora.io" target="_blank" rel="noopener">https://typora.io</a></p><p>文档：</p><p><a href="http://support.typora.io" target="_blank" rel="noopener">http://support.typora.io</a></p><h2 id="Typora-安装"><a href="#Typora-安装" class="headerlink" title="Typora 安装"></a>Typora 安装</h2><h3 id="下载并安装Typora："><a href="#下载并安装Typora：" class="headerlink" title="下载并安装Typora："></a>下载并安装Typora：</h3><p><a href="https://typora.io/#windows" target="_blank" rel="noopener">Windows</a></p><p><a href="https://typora.io/download/Typora.dmg" target="_blank" rel="noopener">Mac</a></p><p><a href="https://typora.io/#linux" target="_blank" rel="noopener">Linux</a></p><p>安装步骤下一步即可。</p><h3 id="下载并安装Pandoc："><a href="#下载并安装Pandoc：" class="headerlink" title="下载并安装Pandoc："></a>下载并安装Pandoc：</h3><p>typora导出的时候使用，如果不需要导出则不需要安装。<a href="http://support.typora.io/Install-and-Use-Pandoc/" target="_blank" rel="noopener">官网参考</a></p><p>Typora支持的导出格式如下：</p><p><img src="/images/typora-markdown/typora-export.jpg" alt="typora导出格式"></p><p><a href="https://github.com/jgm/pandoc" target="_blank" rel="noopener">Pandoc GitHub</a></p><p><a href="https://github.com/jgm/pandoc/releases/latest" target="_blank" rel="noopener">Pandoc下载</a>，选择对应版本下载安装即可</p><h2 id="Markdown-语法"><a href="#Markdown-语法" class="headerlink" title="Markdown 语法"></a>Markdown 语法</h2>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/11/05/typora-markdown.html#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/03/Hexo-ThemeNext-Writing.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Knner.Wang">
-      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Knner.Wang's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/03/Hexo-ThemeNext-Writing.html" class="post-title-link" itemprop="url">Hexo + Theme Next -- 写作</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-11-03 14:27:55" itemprop="dateCreated datePublished" datetime="2019-11-03T14:27:55+08:00">2019-11-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-11-18 14:27:55" itemprop="dateModified" datetime="2019-11-18T14:27:55+08:00">2019-11-18</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/hexo/" itemprop="url" rel="index">
-                    <span itemprop="name">hexo</span>
-                  </a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/hexo/next/" itemprop="url" rel="index">
-                    <span itemprop="name">next</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>前面记录的我的Hexo建站过程，Hexo+ThemeNext的优化配置，这里来到博客网站中最重要的部分：写作。</p><p>其实写作很简单，只需要三步即可：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 步骤1，创建post文章：</span></span><br><span class="line">$ hexo new mypost</span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤2，使用Markdown的方式写文章</span></span><br><span class="line">$ vim mypost.md</span><br><span class="line">typora mypost.md</span><br><span class="line"></span><br><span class="line"><span class="comment"># 步骤3，检查并发布文章</span></span><br><span class="line">$ hexo clean &amp;&amp; hexo server</span><br><span class="line"></span><br><span class="line">$ hexo clean &amp;&amp; hexo gen &amp;&amp; hexo deploy</span><br></pre></td></tr></table></figure><p>但是如何写好文章，文章排版，图片的引用，注意提醒，流程图等等，这些光靠Markdown还是不够的，我们需要知道Hexo以及主题Next对于我们的写作扩展了哪些非常好用的功能，来丰富我们的写作内容。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/11/03/Hexo-ThemeNext-Writing.html#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/02/Hexo-ThemeNext-Settings.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Knner.Wang">
-      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Knner.Wang's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/02/Hexo-ThemeNext-Settings.html" class="post-title-link" itemprop="url">Hexo + Theme Next -- 设置</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-11-02 14:27:55" itemprop="dateCreated datePublished" datetime="2019-11-02T14:27:55+08:00">2019-11-02</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-11-18 14:27:55" itemprop="dateModified" datetime="2019-11-18T14:27:55+08:00">2019-11-18</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/hexo/" itemprop="url" rel="index">
-                    <span itemprop="name">hexo</span>
-                  </a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/hexo/next/" itemprop="url" rel="index">
-                    <span itemprop="name">next</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote>
-<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
-<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
-</blockquote>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/11/01/my-first-blog.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="Knner.Wang">
-      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Knner.Wang's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/01/my-first-blog.html" class="post-title-link" itemprop="url">使用hexo + github pages 创建博客</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-11-01 21:34:00" itemprop="dateCreated datePublished" datetime="2019-11-01T21:34:00+08:00">2019-11-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-11-30 11:44:31" itemprop="dateModified" datetime="2019-11-30T11:44:31+08:00">2019-11-30</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/hexo/" itemprop="url" rel="index">
-                    <span itemprop="name">hexo</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>我的第一个hexo 文章,分享从头开始安装使用配置hexo，并设置好自己喜欢的主题，特做此文章记录。</p><h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p>首页：<br><a href="https://hexo.io/" target="_blank" rel="noopener">https://hexo.io/</a><br><a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener">https://hexo.io/zh-cn/</a></p><p>文档：<br><a href="https://hexo.io/docs/" target="_blank" rel="noopener">https://hexo.io/docs/</a><br><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">https://hexo.io/zh-cn/docs/</a></p><h2 id="Hexo安装"><a href="#Hexo安装" class="headerlink" title="Hexo安装"></a>Hexo安装</h2><h3 id="安装依赖：nodejs"><a href="#安装依赖：nodejs" class="headerlink" title="安装依赖：nodejs"></a>安装依赖：nodejs</h3><p>通过nvm来安装管理nodejs</p><h4 id="安装nvm："><a href="#安装nvm：" class="headerlink" title="安装nvm："></a>安装nvm：</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | sh</span><br></pre></td></tr></table></figure><h4 id="通过nvm安装node："><a href="#通过nvm安装node：" class="headerlink" title="通过nvm安装node："></a>通过nvm安装node：</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">num install node</span><br></pre></td></tr></table></figure><h4 id="安装hexo工具："><a href="#安装hexo工具：" class="headerlink" title="安装hexo工具："></a>安装hexo工具：</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/11/01/my-first-blog.html#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1117,19 +1203,19 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">16</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1172,7 +1258,7 @@
   <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
-    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="https://knner.wang/images/logos/upyun_logo5.png"></a>提供CDN服务
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
   </div>
   <span class="post-meta-divider">|</span>
   <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
@@ -1258,6 +1344,17 @@ if (document.querySelectorAll('pre.mermaid').length) {
   
 
   
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
 
 </body>
 </html>
