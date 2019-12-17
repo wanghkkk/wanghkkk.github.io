@@ -62,7 +62,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Quick-install-kubernetes-1-15-5-for-test&#x2F;aws-disable-check.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
-<meta property="og:updated_time" content="2019-11-12T02:02:02.000Z">
+<meta property="og:updated_time" content="2019-12-17T02:02:02.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Quick-install-kubernetes-1-15-5-for-test&#x2F;aws-disable-check.jpg">
 
@@ -150,12 +150,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">11</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">13</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">16</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">17</span></a>
 
   </li>
         <li class="menu-item menu-item-about">
@@ -216,6 +216,13 @@
 
               <time title="创建时间：2019-11-12 10:02:02" itemprop="dateCreated datePublished" datetime="2019-11-12T10:02:02+08:00">2019-11-12</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-17 10:02:02" itemprop="dateModified" datetime="2019-12-17T10:02:02+08:00">2019-12-17</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -298,55 +305,138 @@
 </tr>
 </tbody></table>
 <h2 id="环境初始化"><a href="#环境初始化" class="headerlink" title="环境初始化"></a>环境初始化</h2><p>直接一条ansible即可：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ansible-playbook playbooks/roles/site.yml -e server=test_k8s -e cloud=aws -e env=dev --private-key keys/aws/dev_keyPair2_awsbj_cn.pem -b --become-method=sudo</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ansible-playbook playbooks/roles/site.yml -e server=test_k8s -e cloud=aws -e env=dev --private-key keys/aws/dev_keyPair_awsbj_cn.pem -b --become-method=sudo</span><br></pre></td></tr></table></figure>
 
 <div class="note info">
-            <p>这里的ansible脚本只是为了初始化安装kubernetes所需的<strong>环境</strong>，其不包含安装kubernetes集群功能。</p>
+            <p>这里的ansible脚本只是为了初始化安装kubernetes所需的<strong>环境</strong>，其不包含安装kubernetes集群功能。</p><p>下面是具体的配置，方便不使用ansible的用户。</p>
           </div>
 
 <p>ansible 所做的事情解释：</p>
 <ul>
-<li><p>common 基础系统配置：部分为非必须</p>
+<li><p>common 基础系统配置：非必须</p>
 <ul>
-<li>yum 更新软件</li>
-<li>配置主机名称</li>
-<li>创建运维用账户</li>
-<li>配置limits</li>
-<li>创建标准目录</li>
-<li>配置sshd</li>
-<li>关闭SELINUX</li>
-<li>关闭防火墙</li>
-<li>配置sudo</li>
-<li>配置ldap</li>
-<li>安装jdk</li>
-<li>安装python3</li>
+<li><p>yum 更新软件</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum groups install @Development tools</span><br><span class="line">yum upgrade net-tools telnet curl nmap lrzsz lsof dos2unix tree sysstat bash openssh openssl openssl-devel unzip zlib zlib-devel openldap-clients nss-pam-ldapd nethogs supervisor bind-utils bash-completion libselinux-python sshpass</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
 </ul>
 </li>
+</ul>
+<ul>
+<li><p>配置主机名称</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hostnamectl <span class="built_in">set</span>-hostname k8s01.test.awsbj.cn</span><br><span class="line">   hostnamectl <span class="built_in">set</span>-hostname k8s02.test.awsbj.cn</span><br><span class="line">   hostnamectl <span class="built_in">set</span>-hostname k8s03.test.awsbj.cn</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p>创建运维用账户</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">groupadd -g 10000 knner</span><br><span class="line">useradd -g knner -m knner</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p>配置limits</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat &gt;&gt; /etc/security/limits.conf &lt;&lt;EOF</span><br><span class="line">*	-	nofile	65536</span><br><span class="line">*	-	nproc	65536</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p>创建标准目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir /opt/knner</span><br><span class="line">mkdir /opt/softs</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p>配置sshd</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /etc/ssh/sshd_config</span><br><span class="line">Port 44322</span><br><span class="line">Protocol 2</span><br><span class="line">LoginGraceTime 60</span><br><span class="line">PermitRootLogin no</span><br><span class="line">PermitEmptyPasswords no</span><br><span class="line">UseDNS no</span><br><span class="line">TCPKeepAlive yes</span><br><span class="line">MaxAuthTries 4</span><br><span class="line">AllowGroups knner maintainer ec2-user</span><br><span class="line">PasswordAuthentication yes</span><br><span class="line"></span><br><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p>关闭SELINUX</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setenforce 0</span><br><span class="line">vim /etc/selinux/config</span><br><span class="line">SELINUX=disabled</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p>关闭防火墙</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">systemctl stop firewalld.service</span><br><span class="line">systemctl disable firewalld.service</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p>配置sudo</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">visuso</span><br><span class="line">knner    ALL=(ALL)       ALL</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p>配置ldap</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">/sbin/authconfig --enableldap --enableldapauth --ldapserver=ldapsrv,ldapsrv2 --ldapbased</span><br><span class="line">n=<span class="string">"dc=example,dc=com"</span> --enablemkhomedir --update</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p>安装jdk，略过，这里不需要</p>
+</li>
+<li><p>安装python3，略过，这里不需要</p>
+</li>
+</ul>
+<ul>
 <li><p>docker安装配置</p>
 <ul>
 <li><p>使用Aliyun镜像源安装docker： docker-ce-18.06.3</p>
-</li>
-<li><p>配置Docker： </p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># /etc/docker/daemon.json</span><br><span class="line">&#123;</span><br><span class="line">  &quot;log-level&quot;: &quot;warn&quot;,</span><br><span class="line">  &quot;selinux-enabled&quot;: false,</span><br><span class="line">  &quot;max-concurrent-downloads&quot;: 100,</span><br><span class="line">  &quot;max-concurrent-uploads&quot;: 50,</span><br><span class="line">  &quot;live-restore&quot;: false,</span><br><span class="line">  &quot;default-shm-size&quot;: &quot;128M&quot;,</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://nxxx5.mirror.aliyuncs.com&quot;,&quot;http://exxxd.m.daocloud.io&quot;],</span><br><span class="line">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="line">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="line">  &quot;log-opts&quot;: &#123;</span><br><span class="line">    &quot;max-size&quot;: &quot;20m&quot;,</span><br><span class="line">    &quot;max-file&quot;: &quot;5&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="line">  &quot;storage-opts&quot;: [</span><br><span class="line">    &quot;overlay2.override_kernel_check=true&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">     </span><br><span class="line"># 允许FORWARD</span><br><span class="line">iptables -P FORWARD ACCEPT</span><br><span class="line">     </span><br><span class="line"># 配置sysctl</span><br><span class="line">net.bridge.bridge-nf-call-ip6tables=1</span><br><span class="line">net.bridge.bridge-nf-call-iptables=1</span><br><span class="line">net.ipv4.ip_forward=1</span><br><span class="line">vm.swappiness=0</span><br><span class="line">     </span><br><span class="line"># 增加运维账户到docker组中，能方便操作docker</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>启动docker</p>
-</li>
-</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo yum install -y yum-utils device-mapper-persistent-data lvm2</span><br><span class="line">sudo yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span><br><span class="line">sudo yum makecache fast</span><br><span class="line">sudo yum -y install docker-ce-18.06.3</span><br></pre></td></tr></table></figure>
+
+
+
 </li>
 </ul>
-<ul>
+</li>
+</ul>
+<pre><code>* 配置Docker： 
+  <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># /etc/docker/daemon.json</span><br><span class="line">&#123;</span><br><span class="line">  &quot;log-level&quot;: &quot;warn&quot;,</span><br><span class="line">  &quot;selinux-enabled&quot;: false,</span><br><span class="line">  &quot;max-concurrent-downloads&quot;: 100,</span><br><span class="line">  &quot;max-concurrent-uploads&quot;: 50,</span><br><span class="line">  &quot;live-restore&quot;: false,</span><br><span class="line">  &quot;default-shm-size&quot;: &quot;128M&quot;,</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://nxxx5.mirror.aliyuncs.com&quot;,&quot;http://exxxd.m.daocloud.io&quot;],</span><br><span class="line">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="line">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="line">  &quot;log-opts&quot;: &#123;</span><br><span class="line">    &quot;max-size&quot;: &quot;20m&quot;,</span><br><span class="line">    &quot;max-file&quot;: &quot;5&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="line">  &quot;storage-opts&quot;: [</span><br><span class="line">    &quot;overlay2.override_kernel_check=true&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">     </span><br><span class="line"># 允许FORWARD</span><br><span class="line">iptables -P FORWARD ACCEPT</span><br><span class="line"> </span><br><span class="line"># 配置sysctl</span><br><span class="line">net.bridge.bridge-nf-call-ip6tables=1</span><br><span class="line">net.bridge.bridge-nf-call-iptables=1</span><br><span class="line">net.ipv4.ip_forward=1</span><br><span class="line">vm.swappiness=0</span><br><span class="line">     </span><br><span class="line"># 增加运维账户knner到docker组中，能方便操作docker</span><br><span class="line">usermod -a -G docker knner</span><br></pre></td></tr></table></figure>
+
+* 启动docker
+
+  <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ systemcl <span class="built_in">enable</span> docker</span><br><span class="line">$ systemcl start docker</span><br></pre></td></tr></table></figure></code></pre><ul>
 <li><p>安装配置kubernetes</p>
 <ul>
-<li><p>配置ipvs:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># /etc/sysconfig/modules/ipvs.modules</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">ipvs_modules_dir=<span class="string">"/usr/lib/modules/`uname -r`/kernel/net/netfilter/ipvs"</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> `ls <span class="variable">$ipvs_modules_dir</span> | sed  -r <span class="string">'s#(.*).ko.*#\1#'</span>`; <span class="keyword">do</span></span><br><span class="line">    /sbin/modinfo -F filename <span class="variable">$i</span>  &amp;&gt; /dev/null</span><br><span class="line">    <span class="keyword">if</span> [ $? -eq 0 ]; <span class="keyword">then</span></span><br><span class="line">        /sbin/modprobe <span class="variable">$i</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用Aliyun镜像源安装kubectl，kubeadm，kubelet指定版本</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置好kubectl，kubeadm bash自动补全</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 下载好kubernetes所需docker镜像</span></span><br></pre></td></tr></table></figure>
+<li>配置ipvs:<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">      <span class="comment"># /etc/sysconfig/modules/ipvs.modules</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">#!/bin/bash</span></span><br><span class="line">      ipvs_modules_dir=<span class="string">"/usr/lib/modules/`uname -r`/kernel/net/netfilter/ipvs"</span></span><br><span class="line">      <span class="keyword">for</span> i <span class="keyword">in</span> `ls <span class="variable">$ipvs_modules_dir</span> | sed  -r <span class="string">'s#(.*).ko.*#\1#'</span>`; <span class="keyword">do</span></span><br><span class="line">          /sbin/modinfo -F filename <span class="variable">$i</span>  &amp;&gt; /dev/null</span><br><span class="line">          <span class="keyword">if</span> [ $? -eq 0 ]; <span class="keyword">then</span></span><br><span class="line">              /sbin/modprobe <span class="variable">$i</span></span><br><span class="line">          <span class="keyword">fi</span></span><br><span class="line">      <span class="keyword">done</span></span><br><span class="line"></span><br><span class="line">      <span class="comment"># 应用</span></span><br><span class="line">chmod +x /etc/sysconfig/modules/ipvs.modules &amp;&amp; \</span><br><span class="line">      bash /etc/sysconfig/modules/ipvs.modules &amp;&amp; \</span><br><span class="line">lsmod|grep ip_vs</span><br><span class="line">      </span><br><span class="line">      <span class="comment"># 使用Aliyun镜像源安装kubectl，kubeadm，kubelet指定版本</span></span><br><span class="line">cat &lt;&lt;EOF &gt; /etc/yum.repos.d/kubernetes.repo</span><br><span class="line">      [kubernetes]</span><br><span class="line">  name=Kubernetes</span><br><span class="line">      baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="line">      enabled=1</span><br><span class="line">      gpgcheck=1</span><br><span class="line">      repo_gpgcheck=1</span><br><span class="line">      gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br><span class="line">      EOF</span><br><span class="line">      </span><br><span class="line">      yum install kubeadm-1.15.5 kubectl-1.15.5 kubelet-1.15.5 -y</span><br><span class="line">      systemctl <span class="built_in">enable</span> kubelet</span><br><span class="line">      </span><br><span class="line">      <span class="comment"># 配置好kubectl，kubeadm bash自动补全</span></span><br><span class="line">      cat &gt;&gt; /etc/profile &lt;&lt;EOF</span><br><span class="line">      <span class="built_in">source</span> &lt;(kubectl completion bash)</span><br><span class="line">      <span class="built_in">source</span> &lt;(kubeadm completion bash)</span><br><span class="line">      EOF</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 下载好kubernetes所需docker镜像</span></span><br><span class="line">    <span class="keyword">for</span> image <span class="keyword">in</span> $(kubeadm config images list --kubernetes-version=1.15.5)</span><br><span class="line">    <span class="keyword">do</span> </span><br><span class="line">      docker-wrapper.py pull <span class="variable">$image</span></span><br><span class="line">    <span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
 </li>
+</ul>
+<ul>
 <li><p>下载kubernetes所需docker镜像脚本：docker-wrapper.py，参考：<a href="/2019/11/13/docker-io-gcr-io-k8s-gcr-io-quay-io-Chinese-source.html" title="docker.io gcr.io k8s.gcr.io quay.io 中国区源">docker.io gcr.io k8s.gcr.io quay.io 中国区源</a></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">    <span class="comment">#!/usr/bin/python</span></span><br><span class="line">    <span class="comment"># coding=utf8</span></span><br><span class="line">  </span><br><span class="line">    <span class="keyword">import</span> os</span><br><span class="line">    <span class="keyword">import</span> sys</span><br><span class="line">  </span><br><span class="line">    <span class="comment"># azure mirrors for gcr.io,k8s.gcr.io,quay.io in china</span></span><br><span class="line">    gcr_mirror = <span class="string">"gcr.azk8s.cn"</span></span><br><span class="line">    docker_mirror = <span class="string">"dockerhub.azk8s.cn"</span></span><br><span class="line">    quay_mirror = <span class="string">"quay.azk8s.cn"</span></span><br><span class="line">    </span><br><span class="line">    k8s_namespace = <span class="string">"google_containers"</span></span><br><span class="line">    </span><br><span class="line">    gcr_prefix = <span class="string">"gcr.io"</span></span><br><span class="line">special_gcr_prefix = <span class="string">"k8s.gcr.io"</span></span><br><span class="line">    quay_prefix = <span class="string">"quay.io"</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">execute_sys_cmd</span><span class="params">(cmd)</span>:</span></span><br><span class="line">        result = os.system(cmd)</span><br><span class="line">    <span class="keyword">if</span> result != <span class="number">0</span>:</span><br><span class="line">            print(cmd + <span class="string">" failed."</span>)</span><br><span class="line">            sys.exit(<span class="number">-1</span>)</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">usage</span><span class="params">()</span>:</span></span><br><span class="line">        print(<span class="string">"Usage: "</span> + sys.argv[<span class="number">0</span>] + <span class="string">" pull "</span>)</span><br><span class="line">    print(<span class="string">"Examples:"</span>)</span><br><span class="line">        print(sys.argv[<span class="number">0</span>] + <span class="string">" pull k8s.gcr.io/kube-apiserver:v1.14.1"</span>)</span><br><span class="line">        print(sys.argv[<span class="number">0</span>] + <span class="string">" pull gcr.io/google_containers/kube-apiserver:v1.14.1"</span>)</span><br><span class="line">        print(sys.argv[<span class="number">0</span>] + <span class="string">" pull quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1"</span>)</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">        <span class="keyword">if</span> len(sys.argv) != <span class="number">3</span>:</span><br><span class="line">        usage()</span><br><span class="line">            sys.exit(<span class="number">-1</span>)</span><br><span class="line">        <span class="keyword">elif</span> sys.argv[<span class="number">1</span>] != <span class="string">'pull'</span>:</span><br><span class="line">            usage()</span><br><span class="line">        sys.exit(<span class="number">-1</span>)</span><br><span class="line">    </span><br><span class="line">        <span class="comment"># image name like k8s.gcr.io/kube-apiserver:v1.14.1 or gcr.io/google_containers/kube-apiserver:v1.14.1</span></span><br><span class="line">        image = sys.argv[<span class="number">2</span>]</span><br><span class="line">        imageArray = image.split(<span class="string">"/"</span>)</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">if</span> imageArray[<span class="number">0</span>] == gcr_prefix:</span><br><span class="line">            imageArray[<span class="number">0</span>] = gcr_mirror</span><br><span class="line">    <span class="keyword">elif</span> imageArray[<span class="number">0</span>] == special_gcr_prefix:</span><br><span class="line">            imageArray[<span class="number">0</span>] = gcr_mirror</span><br><span class="line">        imageArray.insert(<span class="number">1</span>, k8s_namespace)</span><br><span class="line">        <span class="keyword">elif</span> imageArray[<span class="number">0</span>] == quay_prefix:</span><br><span class="line">            imageArray[<span class="number">0</span>] = quay_mirror</span><br><span class="line">        <span class="keyword">elif</span> len(imageArray) == <span class="number">1</span>:</span><br><span class="line">            imageArray.insert(<span class="number">0</span>, docker_mirror)</span><br><span class="line">            imageArray.insert(<span class="number">1</span>, <span class="string">"library"</span>)</span><br><span class="line">        <span class="keyword">elif</span> len(imageArray) == <span class="number">2</span>:</span><br><span class="line">            imageArray.insert(<span class="number">0</span>, docker_mirror)</span><br><span class="line">    </span><br><span class="line">        temp_image = <span class="string">"/"</span>.join(imageArray)</span><br><span class="line"></span><br><span class="line">        cmd = <span class="string">"docker pull &#123;image&#125;"</span>.format(image=temp_image)</span><br><span class="line">        print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">        execute_sys_cmd(cmd)</span><br><span class="line"></span><br><span class="line">        cmd = <span class="string">"docker tag &#123;newImage&#125; &#123;image&#125;"</span>.format(newImage=temp_image, image=image)</span><br><span class="line">        print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">        execute_sys_cmd(cmd)</span><br><span class="line"></span><br><span class="line">        cmd = <span class="string">"docker rmi &#123;newImage&#125;"</span>.format(newImage=temp_image)</span><br><span class="line">        print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">        execute_sys_cmd(cmd)</span><br><span class="line">    </span><br><span class="line">        print(<span class="string">"------Pull %s done"</span> % image)</span><br><span class="line">        sys.exit(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
-</li>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">  <span class="comment">#!/usr/bin/python</span></span><br><span class="line">  <span class="comment"># coding=utf8</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">import</span> os</span><br><span class="line">  <span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">  <span class="comment"># azure mirrors for gcr.io,k8s.gcr.io,quay.io in china</span></span><br><span class="line">  gcr_mirror = <span class="string">"gcr.azk8s.cn"</span></span><br><span class="line">  docker_mirror = <span class="string">"dockerhub.azk8s.cn"</span></span><br><span class="line">  quay_mirror = <span class="string">"quay.azk8s.cn"</span></span><br><span class="line">  </span><br><span class="line">  k8s_namespace = <span class="string">"google_containers"</span></span><br><span class="line">  </span><br><span class="line">  gcr_prefix = <span class="string">"gcr.io"</span></span><br><span class="line">special_gcr_prefix = <span class="string">"k8s.gcr.io"</span></span><br><span class="line">    quay_prefix = <span class="string">"quay.io"</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">execute_sys_cmd</span><span class="params">(cmd)</span>:</span></span><br><span class="line">        result = os.system(cmd)</span><br><span class="line">    <span class="keyword">if</span> result != <span class="number">0</span>:</span><br><span class="line">            print(cmd + <span class="string">" failed."</span>)</span><br><span class="line">            sys.exit(<span class="number">-1</span>)</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">usage</span><span class="params">()</span>:</span></span><br><span class="line">        print(<span class="string">"Usage: "</span> + sys.argv[<span class="number">0</span>] + <span class="string">" pull "</span>)</span><br><span class="line">    print(<span class="string">"Examples:"</span>)</span><br><span class="line">        print(sys.argv[<span class="number">0</span>] + <span class="string">" pull k8s.gcr.io/kube-apiserver:v1.14.1"</span>)</span><br><span class="line">        print(sys.argv[<span class="number">0</span>] + <span class="string">" pull gcr.io/google_containers/kube-apiserver:v1.14.1"</span>)</span><br><span class="line">        print(sys.argv[<span class="number">0</span>] + <span class="string">" pull quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1"</span>)</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">        <span class="keyword">if</span> len(sys.argv) != <span class="number">3</span>:</span><br><span class="line">        usage()</span><br><span class="line">            sys.exit(<span class="number">-1</span>)</span><br><span class="line">        <span class="keyword">elif</span> sys.argv[<span class="number">1</span>] != <span class="string">'pull'</span>:</span><br><span class="line">            usage()</span><br><span class="line">        sys.exit(<span class="number">-1</span>)</span><br><span class="line">    </span><br><span class="line">        <span class="comment"># image name like k8s.gcr.io/kube-apiserver:v1.14.1 or gcr.io/google_containers/kube-apiserver:v1.14.1</span></span><br><span class="line">        image = sys.argv[<span class="number">2</span>]</span><br><span class="line">        imageArray = image.split(<span class="string">"/"</span>)</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">if</span> imageArray[<span class="number">0</span>] == gcr_prefix:</span><br><span class="line">            imageArray[<span class="number">0</span>] = gcr_mirror</span><br><span class="line">    <span class="keyword">elif</span> imageArray[<span class="number">0</span>] == special_gcr_prefix:</span><br><span class="line">            imageArray[<span class="number">0</span>] = gcr_mirror</span><br><span class="line">        imageArray.insert(<span class="number">1</span>, k8s_namespace)</span><br><span class="line">        <span class="keyword">elif</span> imageArray[<span class="number">0</span>] == quay_prefix:</span><br><span class="line">            imageArray[<span class="number">0</span>] = quay_mirror</span><br><span class="line">        <span class="keyword">elif</span> len(imageArray) == <span class="number">1</span>:</span><br><span class="line">            imageArray.insert(<span class="number">0</span>, docker_mirror)</span><br><span class="line">            imageArray.insert(<span class="number">1</span>, <span class="string">"library"</span>)</span><br><span class="line">        <span class="keyword">elif</span> len(imageArray) == <span class="number">2</span>:</span><br><span class="line">            imageArray.insert(<span class="number">0</span>, docker_mirror)</span><br><span class="line">    </span><br><span class="line">        temp_image = <span class="string">"/"</span>.join(imageArray)</span><br><span class="line"></span><br><span class="line">        cmd = <span class="string">"docker pull &#123;image&#125;"</span>.format(image=temp_image)</span><br><span class="line">        print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">        execute_sys_cmd(cmd)</span><br><span class="line"></span><br><span class="line">        cmd = <span class="string">"docker tag &#123;newImage&#125; &#123;image&#125;"</span>.format(newImage=temp_image, image=image)</span><br><span class="line">        print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">        execute_sys_cmd(cmd)</span><br><span class="line"></span><br><span class="line">        cmd = <span class="string">"docker rmi &#123;newImage&#125;"</span>.format(newImage=temp_image)</span><br><span class="line">        print(<span class="string">"------Execute_cmd: %s"</span> % cmd)</span><br><span class="line">        execute_sys_cmd(cmd)</span><br><span class="line">    </span><br><span class="line">        print(<span class="string">"------Pull %s done"</span> % image)</span><br><span class="line">        sys.exit(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
 <li><p>docker-wrapper.py 使用方式：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker-wrapper.py pull k8s.gcr.io/kube-apiserver:v1.15.5</span><br></pre></td></tr></table></figure>
 
 <p>python脚本会自动从Azure中国镜像源下载对应的镜像，并重命名成所需的镜像。</p>
+</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -371,7 +461,7 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[init] Using Kubernetes version: v1.15.5</span><br><span class="line">[preflight] Running pre-flight checks</span><br><span class="line">[preflight] Pulling images required for setting up a Kubernetes cluster</span><br><span class="line">[preflight] This might take a minute or two, depending on the speed of your internet connection</span><br><span class="line">[preflight] You can also perform this action in beforehand using &apos;kubeadm config images pull&apos;</span><br><span class="line">[kubelet-start] Writing kubelet environment file with flags to file &quot;/var/lib/kubelet/kubeadm-flags.env&quot;</span><br><span class="line">[kubelet-start] Writing kubelet configuration to file &quot;/var/lib/kubelet/config.yaml&quot;</span><br><span class="line">[kubelet-start] Activating the kubelet service</span><br><span class="line">[certs] Using certificateDir folder &quot;/etc/kubernetes/pki&quot;</span><br><span class="line">[certs] Generating &quot;front-proxy-ca&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;front-proxy-client&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;etcd/ca&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;etcd/server&quot; certificate and key</span><br><span class="line">[certs] etcd/server serving cert is signed for DNS names [k8s01.test.awsbj.cn localhost] and IPs [172.17.0.7 127.0.0.1 ::1]</span><br><span class="line">[certs] Generating &quot;etcd/peer&quot; certificate and key</span><br><span class="line">[certs] etcd/peer serving cert is signed for DNS names [k8s01.test.awsbj.cn localhost] and IPs [172.17.0.7 127.0.0.1 ::1]</span><br><span class="line">[certs] Generating &quot;etcd/healthcheck-client&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;apiserver-etcd-client&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;ca&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;apiserver&quot; certificate and key</span><br><span class="line">[certs] apiserver serving cert is signed for DNS names [k8s01.test.awsbj.cn kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local] and IPs [10.100.0.1 172.17.0.7]</span><br><span class="line">[certs] Generating &quot;apiserver-kubelet-client&quot; certificate and key</span><br><span class="line">[certs] Generating &quot;sa&quot; key and public key</span><br><span class="line">[kubeconfig] Using kubeconfig folder &quot;/etc/kubernetes&quot;</span><br><span class="line">[kubeconfig] Writing &quot;admin.conf&quot; kubeconfig file</span><br><span class="line">[kubeconfig] Writing &quot;kubelet.conf&quot; kubeconfig file</span><br><span class="line">[kubeconfig] Writing &quot;controller-manager.conf&quot; kubeconfig file</span><br><span class="line">[kubeconfig] Writing &quot;scheduler.conf&quot; kubeconfig file</span><br><span class="line">[control-plane] Using manifest folder &quot;/etc/kubernetes/manifests&quot;</span><br><span class="line">[control-plane] Creating static Pod manifest for &quot;kube-apiserver&quot;</span><br><span class="line">[control-plane] Creating static Pod manifest for &quot;kube-controller-manager&quot;</span><br><span class="line">[control-plane] Creating static Pod manifest for &quot;kube-scheduler&quot;</span><br><span class="line">[etcd] Creating static Pod manifest for local etcd in &quot;/etc/kubernetes/manifests&quot;</span><br><span class="line">[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory &quot;/etc/kubernetes/manifests&quot;. This can take up to 4m0s</span><br><span class="line">[apiclient] All control plane components are healthy after 13.002203 seconds</span><br><span class="line">[upload-config] Storing the configuration used in ConfigMap &quot;kubeadm-config&quot; in the &quot;kube-system&quot; Namespace</span><br><span class="line">[kubelet] Creating a ConfigMap &quot;kubelet-config-1.15&quot; in namespace kube-system with the configuration for the kubelets in the cluster</span><br><span class="line">[upload-certs] Skipping phase. Please see --upload-certs</span><br><span class="line">[mark-control-plane] Marking the node k8s01.test.awsbj.cn as control-plane by adding the label &quot;node-role.kubernetes.io/master=&apos;&apos;&quot;</span><br><span class="line">[mark-control-plane] Marking the node k8s01.test.awsbj.cn as control-plane by adding the taints [node-role.kubernetes.io/master:NoSchedule]</span><br><span class="line">[bootstrap-token] Using token: 4m9zlz.0l3waicmvgl6envz</span><br><span class="line">[bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow certificate rotation for all node client certificates in the cluster</span><br><span class="line">[bootstrap-token] Creating the &quot;cluster-info&quot; ConfigMap in the &quot;kube-public&quot; namespace</span><br><span class="line">[addons] Applied essential addon: CoreDNS</span><br><span class="line">[addons] Applied essential addon: kube-proxy</span><br><span class="line"></span><br><span class="line">Your Kubernetes control-plane has initialized successfully!</span><br><span class="line"></span><br><span class="line">To start using your cluster, you need to run the following as a regular user:</span><br><span class="line"></span><br><span class="line">  mkdir -p $HOME/.kube</span><br><span class="line">  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br><span class="line">  sudo chown $(id -u):$(id -g) $HOME/.kube/config</span><br><span class="line"></span><br><span class="line">You should now deploy a pod network to the cluster.</span><br><span class="line">Run &quot;kubectl apply -f [podnetwork].yaml&quot; with one of the options listed at:</span><br><span class="line">  https://kubernetes.io/docs/concepts/cluster-administration/addons/</span><br><span class="line"></span><br><span class="line">Then you can join any number of worker nodes by running the following on each as root:</span><br><span class="line"></span><br><span class="line">kubeadm join 172.17.0.7:6443 --token 4m9zlz.0l3waicmvgl6envz \</span><br><span class="line">    --discovery-token-ca-cert-hash sha256:3ff0b4136b1af325e603f1f3d6d2554c7c3d04f78dc6d134696da3594ad63e0e</span><br></pre></td></tr></table></figure>
 
 <p>如果初始化失败，需要清理，如下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubeadm reset</span><br><span class="line">iptables -F &amp;&amp; iptables -t nat -F &amp;&amp; iptables -t mangle -F &amp;&amp; iptables -X</span><br><span class="line">ipvsadm --clear</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubeadm reset &amp;&amp; \</span><br><span class="line">iptables -F &amp;&amp; iptables -t nat -F &amp;&amp; iptables -t mangle -F &amp;&amp; iptables -X &amp;&amp; \</span><br><span class="line">ipvsadm --clear</span><br></pre></td></tr></table></figure>
 
 <p>拷贝admin.conf</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">sudo cp -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">sudo chown $(id -u):$(id -g) <span class="variable">$HOME</span>/.kube/config</span><br></pre></td></tr></table></figure>
@@ -390,7 +480,7 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@k8s01.test.awsbj.cn kubernetes]<span class="comment"># kubectl get node</span></span><br><span class="line">NAME                  STATUS     ROLES    AGE     VERSION</span><br><span class="line">k8s01.test.awsbj.cn   NotReady   master   6m30s   v1.15.5</span><br><span class="line">k8s02.test.awsbj.cn   NotReady   &lt;none&gt;   117s    v1.15.5</span><br><span class="line">k8s03.test.awsbj.cn   NotReady   &lt;none&gt;   43s     v1.15.5</span><br><span class="line"></span><br><span class="line">[root@k8s01.test.awsbj.cn microoak]<span class="comment"># kubectl cluster-info </span></span><br><span class="line">Kubernetes master is running at https://172.17.0.7:6443</span><br><span class="line">KubeDNS is running at https://172.17.0.7:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy</span><br><span class="line"></span><br><span class="line">To further debug and diagnose cluster problems, use <span class="string">'kubectl cluster-info dump'</span>.</span><br></pre></td></tr></table></figure>
 
 <p>都是NotReady状态，因为还没有安装网络插件呢。</p>
-<h2 id="安装网络插件：calico"><a href="#安装网络插件：calico" class="headerlink" title="安装网络插件：calico"></a>安装网络插件：calico</h2><p>这里使用calico 3.6版本，<a href="https://docs.projectcalico.org/v3.6/getting-started/kubernetes/installation/calico" target="_blank" rel="noopener">参考</a></p>
+<h2 id="安装网络插件：calico"><a href="#安装网络插件：calico" class="headerlink" title="安装网络插件：calico"></a>安装网络插件：calico</h2><p>这里使用calico 3.6版本，参考：<a href="https://docs.projectcalico.org/v3.6/getting-started/kubernetes/installation/calico" target="_blank" rel="noopener">https://docs.projectcalico.org/v3.6/getting-started/kubernetes/installation/calico</a></p>
 <p>下载yaml文件：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl \</span><br><span class="line">https://docs.projectcalico.org/v3.6/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml \</span><br><span class="line">-O</span><br></pre></td></tr></table></figure>
 
@@ -533,19 +623,19 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-count">17</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
