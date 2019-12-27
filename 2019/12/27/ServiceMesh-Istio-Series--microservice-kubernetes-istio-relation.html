@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="什么是服务网格？简而言之，服务网格是服务（包括微服务）之间通信的控制器。随着企业的发展，越来越多的容器应用的开发和部署，尤其是微服务，一个企业可能有成百上千或上万的容器在运行，怎么管理这些容器或者微服务间的通信，包括服务间的负载均衡，流量管理，路由，运行状况监视，安全策略以及服务间身份验证，就成为了巨大的挑战。以Istio为代表的的服务网格应运而生，架构上istio属于云原生技术的基础设施层，通过">
+<meta name="keywords" content="kubernetes,istio,servicemesh,microservice">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[服务网格Istio系列]--微服务 Kubernetes Istio关系">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;12&#x2F;27&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="什么是服务网格？简而言之，服务网格是服务（包括微服务）之间通信的控制器。随着企业的发展，越来越多的容器应用的开发和部署，尤其是微服务，一个企业可能有成百上千或上万的容器在运行，怎么管理这些容器或者微服务间的通信，包括服务间的负载均衡，流量管理，路由，运行状况监视，安全策略以及服务间身份验证，就成为了巨大的挑战。以Istio为代表的的服务网格应运而生，架构上istio属于云原生技术的基础设施层，通过">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;info.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;istio-example-project.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;microservice-normalservice.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;microservice-question.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;microservice-level1.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;microservice-level2.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;microservice-level3.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;microservice-level-compair.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;servicemesh-example.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;servicemesh-data-control.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;servicemesh-example-jump2.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;k8s-istio.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;istio-proxy.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;istio-in-k8s.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;istio-sdk-compare.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;istio-microservice-k8s.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:updated_time" content="2019-12-27T11:08:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation&#x2F;info.jpg">
+
+<link rel="canonical" href="https://knner.wang/2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>[服务网格Istio系列]--微服务 Kubernetes Istio关系 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">16</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">18</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [服务网格Istio系列]--微服务 Kubernetes Istio关系
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-27 19:08:29" itemprop="dateCreated datePublished" datetime="2019-12-27T19:08:29+08:00">2019-12-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/" itemprop="url" rel="index">
+                    <span itemprop="name">servicemesh</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/istio/" itemprop="url" rel="index">
+                    <span itemprop="name">istio</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/istio/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/istio/kubernetes/microservice/" itemprop="url" rel="index">
+                    <span itemprop="name">microservice</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="什么是服务网格？"><a href="#什么是服务网格？" class="headerlink" title="什么是服务网格？"></a>什么是服务网格？</h2><p>简而言之，<strong>服务网格是服务（包括微服务）之间通信的控制器</strong>。随着企业的发展，越来越多的容器应用的开发和部署，尤其是微服务，一个企业可能有成百上千或上万的容器在运行，怎么管理这些容器或者微服务间的通信，包括服务间的负载均衡，流量管理，路由，运行状况监视，安全策略以及服务间身份验证，就成为了巨大的挑战。以Istio为代表的的服务网格应运而生，架构上istio属于云原生技术的基础设施层，通过在容器旁（Sidecar，边车）提供一系列网络代理，所有进出的流量都通过我（Envoy），来实现服务间的通信控制。其中每一个网络代理（Envoy）就是一个网关，管理容器或容器集群中每个服务间的请求与交互。每个网络代理还拦截服务请求，并将服务请求分发到服务网格上。众多服务构成的无数连接编制成网，也就有了网格这个概念。</p><a id="more"></a>
+<p>服务网格的中央控制器，在Kubernetes的帮助下，<strong>通过服务策略来控制和调整网络代理的功能</strong>，包括收集服务的性能指标。虽然服务网格是从容器和微服务开始的，但是它的架构优势也可以适用于非容器应用或服务。</p>
+<p>作为云原生架构和技术栈的关键部分，服务网格技术Istio也逐渐成为云原生应用平台的另一块基石，这不仅仅是因为Istio为服务间提供了安全、可靠和高性能的通信机制，其本身的设计也代表一种由开发人员驱动的、基于策略和服务优先的云原生架构设计理念。</p>
+<h2 id="什么是云原生？"><a href="#什么是云原生？" class="headerlink" title="什么是云原生？"></a>什么是云原生？</h2><p>云原生，服务网格分别与云计算，微服务的概念有紧密的联系。</p>
+<p>依据CNCF（Cloud-Native Computing Foundation）的定义，云原生是对现代的动态环境下（比如云计算的三大场景，公有云，私有云和混合云）可用来构建并运行可扩展应用的<strong>技术的总和</strong>；服务网格则是云原生技术的典型代表之一，其他的技术还包括<strong>容器</strong>、<strong>微服务</strong>、<strong>不可变基础设施</strong>，<strong>声明式API</strong>等。</p>
+<p>从技术发展的角度来看，我们可以把云原生理解为云计算所关注的重心从“资源”逐渐转向应用的必然结果。</p>
+<ul>
+<li><p>以资源为中心的上一代云计算技术关注物理设备如何虚拟化，池化，多租户化，典型的代表是计算、网络、存储三大基础设施的运化，以及相关硬件，操作系统，管控面等技术。</p>
+</li>
+<li><p>而以应用为中心的云原生技术则关注应用如何更好的适应环境，相对于传统应用通过迁移改造上云而言，云原生通过一系列的技术支撑，使用户在云环境下快速开发和交付云原生已用。</p>
+</li>
+</ul>
+<p>作为云原生技术栈的一部分，服务网格则是指由云原生应用的服务化组件构成的一种网格。</p>
+<p>我们可以将服务网格理解为<strong>应用网络</strong>，即在应用内部或应用之间由服务访问、调用、负载均衡等服务连接关系构成的一种网络。</p>
+<p>微服务更多的从设计、开发的视角来描述应用的一种架构或开发模式。而服务网格事实上更为关注运行时的视角。采用“服务”这个用于描述应用内外部调用关系的术语更为合适。服务网格和微服务在云原生技术栈中是相辅相成的两部分，服务网格更关注应用的交付与运行时，微服务更关注应用的设计与开发。</p>
+<h2 id="Istio-介绍"><a href="#Istio-介绍" class="headerlink" title="Istio 介绍"></a>Istio 介绍</h2><p>istio是什么？</p>
+<ul>
+<li>是一个用于服务治理的开放平台</li>
+<li>是一个Service Mesh形态的用于服务治理的开放平台</li>
+<li>是一个与Kubernetes紧密结合的适用于云原生场景的Service Mesh形态的用于服务治理的开放平台</li>
+</ul>
+<p>istio的官方介绍：</p>
+<ul>
+<li><strong>连接（Connect）</strong>：通过集中配置的流量规则控制服务间的流量和调用，实现负载均衡，熔断，故障注入，重试，重定向等服务治理的功能。</li>
+<li><strong>安全（Secure）</strong>：提供透明的认证机制，通信加密，服务访问授权等安全能力，可增强服务访问的安全性。</li>
+<li><strong>策略执行（Control）</strong>：通过可动态插拔，可扩展的策略实现访问控制，速率限制，配额管理，服务计费等能力。</li>
+<li><strong>可观察性（Observe）</strong>：动态获取服务运行数据和输出，提供强大的调用链、监控和调用日志收集输出的能力。配合可视化工具，可方便运维人员了解服务的运行状态，发现并解决问题。</li>
+</ul>
+<blockquote>
+<p>Observe<br>英 /əbˈzɜːv/  美 /əbˈzɜːrv/  全球(英国)<br>vt. 观察；遵守；说；注意到；评论<br>vi. 观察；说；注意到；评论<br>过去式 observed过去分词 observed现在分词 observing第三人称单数 observes</p>
+</blockquote>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/info.jpg" alt></p>
+<p>istio提供的重要能力：</p>
+<ul>
+<li><strong>服务运行可观察性</strong>：监控应用及网络相关数据，将相关指标与日志记录发送到任意收集、聚合与查询系统中已实现功能扩展，追踪分析性能热点并对分布式故障模式进行诊断。</li>
+<li><strong>弹性与效率</strong>：提供了同一方法配置重试、负载均衡、流量控制和断路器等来解决网络可靠性低所造成的的各类常见故障，更轻松地运维高弹性服务网格。</li>
+<li><strong>研发人员生产力</strong>：确保研发人员专注于基于已选择的编程语言构建业务功能，不用在代码中处理分布式系统的问题，从而极大地提升生产能力。</li>
+<li><strong>策略驱动型运营</strong>：解耦开发和运维团队的工作，在无须修改代码的前提下提升安全性、监控能力、扩展性与服务拓扑水平。运营人员能够不依赖开发的能力精确控制生产流量。</li>
+<li><strong>默认安全</strong>：允许运营人员配置TLS双向认证并保护各服务之间的所有通信，并且开发人员和运维人员不用维护证书，以应对分布式计算中经常存在的大量网络安全问题。</li>
+<li><strong>增量使用</strong>：考虑到在网络内运行的各服务的透明性，允许团队按照自己的节奏和需求逐步的使用各项功能，例如先观察服务运行情况在进行服务治理等。</li>
+</ul>
+<h3 id="通过示例看看Istio能做什么"><a href="#通过示例看看Istio能做什么" class="headerlink" title="通过示例看看Istio能做什么"></a>通过示例看看Istio能做什么</h3><p>如图：天气预报服务forecast对recommendation服务的访问：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/istio-example-project.jpg" alt></p>
+<blockquote>
+<p>forecast</p>
+<p>英 /ˈfɔːkɑːst/  美 /ˈfɔːrkæst/<br>n. （天气、财经等的）预测，预报；预想<br>v. 预报，预测；预示；预言；进行预报，作预测</p>
+</blockquote>
+<p>示例中对两个服务的业务代码没有任何的要求，可以使用任何的语言开发，例如forecast服务用Node.js开发的，recommendation服务用java开发的。在forecast服务的代码中通过域名访问recommendation服务，在两个服务中都不包含任何服务访问的逻辑代码。</p>
+<p>istio在其中都做什么：</p>
+<ul>
+<li><p>自动通过服务发现获取recommendation服务实力列表，并根据负载均衡策略选择一个服务实例；</p>
+</li>
+<li><p>对服务双方启用双向认证和通道加密；</p>
+</li>
+<li><p>如果某个服务实例持续访问出错，则可以将该实例隔离一段时间，以提高访问质量；</p>
+</li>
+<li><p>设置最大连接数、最大请求数、访问超时等对服务进行保护；</p>
+</li>
+<li><p>限流；</p>
+</li>
+<li><p>对请求进行重试；</p>
+</li>
+<li><p>修改请求中的内容；</p>
+</li>
+<li><p>将一定特性的服务重定向；</p>
+</li>
+<li><p>灰度发布；</p>
+</li>
+<li><p>自动记录服务访问信息；</p>
+</li>
+<li><p>记录调用链，进行分布式追踪；</p>
+</li>
+<li><p>根据访问数据形成完整的应用访问拓扑；</p>
+</li>
+<li><p>……</p>
+</li>
+</ul>
+<p>所有的这些功能，都不需要修改用户代码，用户只需要在Istio的控制面做些配置即可，并且动态生效。以灰度发布为例，在Istio中是通过简单配置实现灰度发布的，其核心工作是实现两个版本同时在线，并且通过一定的流量策略将部分流量引到灰度版本上，无需修改代码，只需要下面的配置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">recommendation</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">recommendation</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">headers:</span></span><br><span class="line">        <span class="attr">cookie:</span></span><br><span class="line">          <span class="attr">exact:</span> <span class="string">"group=dev"</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">v2</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">v1</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>exact</p>
+<p>英 /ɪɡˈzækt/  美 /ɪɡˈzækt/<br>adj. 准确的，精密的；精确的<br>vt. 要求；强求；急需<br>vi. 勒索钱财</p>
+</blockquote>
+<p>解释：</p>
+<p>将group是dev的流量转发到recommendation服务的v2版本，其他用户还是访问v1版本，从而达到从v1版本中切分部分流量到灰度版本v2的效果。</p>
+<h3 id="Istio与服务治理"><a href="#Istio与服务治理" class="headerlink" title="Istio与服务治理"></a>Istio与服务治理</h3><p>Istio是一个服务治理平台，治理的是服务间的访问，只要有访问就可以治理，不在乎这个服务是不是微服务，也不要求在其上跑的代码是微服务化的。单体应用不满足微服务的若干哲学，用Istio治理也是完全可以的。</p>
+<h4 id="关于微服务"><a href="#关于微服务" class="headerlink" title="关于微服务"></a>关于微服务</h4><p>Martin Fowler对微服务的描述是“微服务是以一组小型服务来开发单个应用程序的方法，每个服务都运行在自己的进程中，服务间采用轻量级通信机制（通常用HTTP资源API）。这些服务围绕业务能力构建并通过全自动部署机制独立部署，还公用一个最小型的集中式管理，可用不同的语言开发，并使用不同的数据存储技术”，参加：<a href="https://martinfowler.com/articles/microservices.html" target="_blank" rel="noopener">https://martinfowler.com/articles/microservices.html</a></p>
+<p>微服务在本质上还是分而治之、化繁为简的哲学智慧子啊计算机领域的一个提现。</p>
+<p>这种方式带给我们很多好处：</p>
+<ul>
+<li>从开发视角来看，每个微服务的功能更内聚，可以在微服务内设计和扩展功能，并且采用不同的开发语言及开发工具；</li>
+<li>从运维视角来看，在微服务化后，每个微服务都在独立的进程里，可以自运维；更重要的是，微服务化是单一变更的基础，迭代速度更快，上线风险更小。</li>
+<li>从组织管理视角来看，将团队按照微服务切分为小组代替服务大组也有利于敏捷开发。</li>
+</ul>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/microservice-normalservice.jpg" alt></p>
+<p>微服务带来的挑战：</p>
+<ul>
+<li>微服务化仅仅是一种分而治之的方法，业务本身的规模和复杂度并没有减少，反而变多。</li>
+<li>在分布式系统中，网络可靠性、通信安全、网络延迟、网络拓扑变化等都成了我们需要关注的内容。</li>
+<li>微服务机制带来了大量的工作，比如服务如何请求目标服务，需要引入服务发现和负载均衡等，以及对跨进程的分布式调用栈进行分布式调用链追踪。</li>
+</ul>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/microservice-question.jpg" alt></p>
+<p>这就需要一些工具来做一些通用的工作，包括服务注册、服务发现、负载均衡等。在原来未微服务化的时候，单体应用的多模块之间根本不需要进程间通信，也不需要服务发现。所以，我们将这些工具理解为用于解决微服务化带来的新问题似乎更合理一些，但是这些工具集本身并没有带来更多的业务收益。</p>
+<h4 id="服务治理的三种形态"><a href="#服务治理的三种形态" class="headerlink" title="服务治理的三种形态"></a>服务治理的三种形态</h4><p>服务治理的演变至少经过了以下三种形态。</p>
+<h5 id="第一种形态：在应用程序中包含治理逻辑"><a href="#第一种形态：在应用程序中包含治理逻辑" class="headerlink" title="第一种形态：在应用程序中包含治理逻辑"></a>第一种形态：在应用程序中包含治理逻辑</h5><p>这种方式简单，对外部依赖少，但会导致存在大量的重复代码。所以微服务越多，重复的代码越多，维护越难；而且，业务代码和治理逻辑耦合，不管是对治理逻辑的全局升级，还是对业务的升级，都需要该同一段代码。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/microservice-level1.jpg" alt></p>
+<h5 id="第二种形态：治理逻辑独立的代码"><a href="#第二种形态：治理逻辑独立的代码" class="headerlink" title="第二种形态：治理逻辑独立的代码"></a>第二种形态：治理逻辑独立的代码</h5><p>在解决第一种形态的问题时，很容易想到把治理的公共逻辑抽象成一个公共库，让所有微服务都是用这个公共库。非常典型的这种服务治理框架就是Spring Cloud。</p>
+<p>SDK模式虽然在代码上解耦了业务和治理逻辑，单业务代码和SDK还是要一期编译的，业务代码和治理逻辑还在一个进程内。这就导致几个问题：</p>
+<ul>
+<li>业务代码必须和SDK基于同一种语言，及语言绑定。Spring Cloud等大部分治理框架都给予Java，因此也只适用于java语言开发的服务。</li>
+<li>自己基于其他语言编写的服务没有对应的治理框架。</li>
+<li>在治理逻辑升级时，还需要用户的整个服务升级，即使业务逻辑没有改变。</li>
+<li>SDK对开发人员来说有较高的学习门槛，虽然各种SDK都会讲如何开箱即用，但如果只是因为需要治理逻辑，就让开发人员放弃自己熟悉的内容去学习一套新的语言和开发框架，可能代价有点大。</li>
+</ul>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/microservice-level2.jpg" alt></p>
+<h5 id="第三种形态：治理逻辑独立的进程"><a href="#第三种形态：治理逻辑独立的进程" class="headerlink" title="第三种形态：治理逻辑独立的进程"></a>第三种形态：治理逻辑独立的进程</h5><p>SDK模式仍旧侵入了用户的代码，那就再解耦一层，把治理逻辑彻底从用户的代码中剥离出来，这就是Sidecar模式。</p>
+<p>用户的业务代码和治理逻辑都已独立的进程存在，两者的代码和运行都无耦合，这样可以做到与开发语言无关，升级也相互独立。对已存在的系统进行微服务治理时，只需要搭配Sidecar即可，对原服务无需做任何修改，并且可以对老系统渐进式升级改造，先对部分服务进行微服务化。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/microservice-level3.jpg" alt></p>
+<p>比较以上三种服务治理形态，我们可以看到服务治理组件的位置在持续下沉，对应用的侵入逐渐减少：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/microservice-level-compair.jpg" alt></p>
+<h4 id="Istio不止解决了微服务问题"><a href="#Istio不止解决了微服务问题" class="headerlink" title="Istio不止解决了微服务问题"></a>Istio不止解决了微服务问题</h4><p>微服务作为一种架构风格，更是一种敏捷的软件工程实战，说到底是一套方法论；与之对应的Istio等服务网格则是一种完整的实践，Istio更是一款设计良好的具有较好集成及可扩展能力的可落地的服务治理工具和平台。</p>
+<p>所以微服务是一套理论，Istio是一种实践。但是，Istio是用来解决问题的，并不是微服务理论的一种落地，在实际项目中拿微服务的细节列表来硬套Istio的功能，比如要求Istio治理的微服务必须实现服务注册的一些细节，就明显不太适当的。</p>
+<p>Istio对服务的治理不知包含在微服务中强调的负载均衡、熔断、限流这些一般的治理能力，还包含诸多其他能力：可插拔的服务安全、可扩展的控制策略、服务运行可观察性等更广泛的治理能力。</p>
+<h3 id="Istio与服务网格"><a href="#Istio与服务网格" class="headerlink" title="Istio与服务网格"></a>Istio与服务网格</h3><p>业界比较认同的是William Morgan关于服务网格（Service Mesh）的一段定义：</p>
+<ul>
+<li>基础设施：服务网格是一种处理服务间通信的基础设施层。</li>
+<li>云原生：服务网格尤其适用于在云原生场景下帮助应用程序在复杂的服务拓扑间可靠地传递请求。</li>
+<li>网络代理：服务网格一般都是通过一组轻量级网络代理来执行治理逻辑的。</li>
+<li>对应用透明：轻量网络代理与应用程序部署在一起，单应用感知不到代理的存在，还是使用原来的方式工作。</li>
+</ul>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/servicemesh-example.jpg" alt></p>
+<h4 id="时代选择服务网格"><a href="#时代选择服务网格" class="headerlink" title="时代选择服务网格"></a>时代选择服务网格</h4><p>在云原生时代，随着采用各种语言开发的服务剧增，应用间的访问拓扑更加复杂，治理需求也越来越多。原来的那种嵌入在应用中的治理功能无论是从形态、动态性还是可扩展性来说都不能满足需求，迫切需要一种具备云原生动态、弹性特点的应用治理基础设施。</p>
+<p>首先，从单个应用来看，Sidecar与应用进程的解耦带来的应用完全无侵入、开发语言无关等特点解除了开发语言的约束，从而极大降低了应用开发者的开发成本。这种方式也经常被称为一种应用的基础设施层，类比TCP/IP网络协议栈，应用程序像使用TCP/IP一样使用这个通用代理：TCP/IP 负责将字节码可靠地在网络节点间传递，Sidecar 则负责将请求可靠地在服务间进行传递。TCP/IP 面向的是底层的数据流，Sidecar 则可以支持多种高级协议（HTTP、gRPC、HTTPS 等），以及对服务运行时进行高级控制，使服务变得可监控、可管理。</p>
+<p>然后，从全局来看，在多个服务间有复杂的互相访问时才有服务治理的需求。即我们关注的是这些Sidecar 组成的网格，对网格内的服务间访问进行管理，应用还是按照本来的方式进行互相访问，每个应用程序的Inbound流量和Outbound流量都要经过Sidecar代理，并在Sidecar上执行治理动作。</p>
+<p>最后，Sidecar是网格动作的执行体，全局的管理规则和网格内的元数据维护通过一个统一的控制面实现，只有数据面的 Sidecar 和控制面有联系，应用感知不到Sidecar，更不会和控制面有任何联系，用户的业务和控制面彻底解耦。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/servicemesh-data-control.jpg" alt></p>
+<p>这种形态在服务的访问路径上多引入的两挑也是不容易回避的问题。</p>
+<p>如下图：从forecast服务到recommendation服务的一个访问必须要经过forecast服务的Sidecar拦截Outbound流量执行治理动作；在经过recommendation服务的Sidecar拦截Inbound流量，执行治理动作，这就引入两个问题：</p>
+<ul>
+<li>增加了两处延迟和可能的故障点；</li>
+<li>多出来的这两跳对于访问性能、整体可靠性及整个系统的复杂度都带来了新的挑战。</li>
+</ul>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/servicemesh-example-jump2.jpg" alt></p>
+<p>其中，后者本来就属于基础设施层面可维护性、可靠性的范畴，业界的几个产品都用各自的方式在保证。而前者引入的性能和资源损耗，网格提供商提供的方案一般是这样解决的：通过保证转发代理的轻量和高性能降低时延影响，尤其是考虑到后端实际使用的应用程序一般比代理更重，叠加代理并不会明显影响应用的访问性能；另外，对于这些高性能的代理，只要消耗足够的资源总能达到期望的性能，特别是云原生场景下服务的弹性特点使得服务实例的弹性扩展变得非常方便，通过扩展实例数量总是能得到期望的访问性能。<br>所以，对于考虑使用服务网格的用户来说，事情就会变成一个更简单的选择题：是否愿意花费额外的资源在这些基础设施上来换取开发、运维的灵活性、业务的非侵入性和扩展性等便利。相信，在这个计算资源越来越便宜、聪明的程序员越来越贵的时代，对于把程序员从机械的基础设施就可以搞定的繁杂事务中解放出来，使其专注于更能发挥聪明才智和产生巨大商业价值的业务开发上，我们很容易做出判断。</p>
+<h4 id="服务网格选择Istio"><a href="#服务网格选择Istio" class="headerlink" title="服务网格选择Istio"></a>服务网格选择Istio</h4><p>首先，在控制面上，Istio作为一种全新的设计，在功能、形态、架构和扩展性上提供了远超服务网格的能力范围。它基于XDS协议提供了一套标准的控制面板规范，想数据面传递服务信息和治理规则。Istio的早期版本使用Envoy V1版本的API，及Restful方式，其新版使用Envoy V2版本的API，及gRPC协议。标准的控制面API解耦了控制面和数据面的绑定。Nginx的nginMesh、F5 Networks的Aspen Mesh等多种数据面代理支持Istio的控制面，甚至有些老牌微服务SDK也开始往Istio上集成，虽然其本身的功能定位和功能集合有些“不对齐”，但至少说明了Istio控制面的影响力和认同程度。</p>
+<p>Envoy是使用C++开发的，其性能和资源占用比用Rust开发的 Linkerd Proxy 要更好，更能满足服务网格中对透明代理的轻量高性能要求；</p>
+<p>从能力上看，Envoy提供L3/L4过滤器、HTTP L7过滤器，支持HTTP/2、HTTP L7路由及gRPC、MongoDB、DynamoDB等协议，有服务发现、健康检查、高级LB、前端代理等能力，具有极好的可观察性、动态配置功能；</p>
+<p>从架构实现上看，Envoy是一个可高度定制化的程序，通过 Filter机制提供了高度扩展性，还支持热重启，其代码基于模块化编码，易于测试。除了在Istio中应用，Envoy在其他Service Mesh框架中也被广泛应用，渐渐成为Service Mesh的数据平面标准。</p>
+<p>最后，在大厂的支持上，Istio 由谷歌和 IBM 共同推出，从应用场景的分析规划到本身的定位，从自身架构的设计到与周边生态的结合，都有着比较严密的论证。Istio项目在发起时已经确认了将云原生生态系统中的容器作为核心打包和运行时，将Kubernetes作为管理容器的编排系统，需要一个系统管理在容器平台上运行的服务之间的交互，包括控制访问、安全、运行数据收集等，而 Istio 正是为此而生的；另外，Istio 成为架构的默认部分，就像容器和Kubernetes已经成为云原生架构的默认部分一样。</p>
+<h3 id="Istio与Kubernetes"><a href="#Istio与Kubernetes" class="headerlink" title="Istio与Kubernetes"></a>Istio与Kubernetes</h3><p>Kubernetes是一款用于管理容器化工作负载和服务的可移植、可扩展的开源平台，拥有庞大、快速发展的生态系统，它面向基础设施，将计算、网络、存储等资源进行紧密整合，为容器提供最佳运行环境，并面向应用提供封装好的、易用的工作负载与服务编排接口，以及运维所需的资源规格、弹性、运行参数、调度等配置管理接口，是新一代的云原生基础设施平台。<br>从平台架构而言，Kubernetes的设计围绕平台化理念，强调插件化设计与易扩展性，这是它与其他同类系统的最大区别之一，保障了对各种不同客户应用场景的普遍适应性。另外，Kubernetes与其他容器编排系统的显著区别是Kubernetes并不把无状态化、微服务化等条件作为在其上可运行的工作负载的约束。</p>
+<h4 id="Istio，Kubernetes的好帮手"><a href="#Istio，Kubernetes的好帮手" class="headerlink" title="Istio，Kubernetes的好帮手"></a>Istio，Kubernetes的好帮手</h4><p>Kubernetes已经提供了非常强大的应用负载的部署、升级、扩容等运行管理能力。Kubernetes 中的 Service 机制也已经可以做服务注册、服务发现和负载均衡，支持通过服务名访问到服务实例。</p>
+<p>从微服务的工具集观点来看，Kubernetes本身是支持微服务的架构，在Pod中部署微服务很合适，也已经解决了微服务的互访互通问题，但对服务间访问的管理如服务的熔断、限流、动态路由、调用链追踪等都不在Kubernetes的能力范围内。那么，如何提供一套从底层的负载部署运行到上层的服务访问治理端到端的解决方案？目前，最完美的答案就是在Kubernetes上叠加Istio这个好帮手：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/k8s-istio.jpg" alt></p>
+<p>Kubernetes的Service基于每个节点的Kube-proxy从Kube-apiserver上获取Service和Endpoint的信息，并将对Service的请求经过负载均衡转发到对应的Endpoint上。但是K8S只提供了4层负载均衡能力，无法基于应用层的信息进行负载均衡，更不会提供应用层的流量管理，在服务运行管理上也只提供了基本的探针机制，并不对服务访问指标和调用链追踪这种应用的服务运行诊断能力。</p>
+<p>Istio复用了Kubernetes Service的定义，在是线上进行了更细粒度的控制。Istio的服务发现就是从Kuber-apiserver中获取Service和Endpoint，然后将其转换成Istio服务模型的Service和ServiceInstance，但是其数据面组件不再是Kube-proxy，而是在每个Pod里部署的Sidecar，也可以将其看做每个服务实例的Proxy，这样，proxy的力度就更细了，和服务实例的联系也就更紧密了，可以做更多细粒度的服务治理。通过拦截Pod的Inbound和Outbound流量，并在Sidecar上解析各种应用层协议，Istio可以提供真正的应用层治理，监控和安全等能力：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/istio-proxy.jpg" alt></p>
+<h4 id="Kubernetes，Istio的好几座"><a href="#Kubernetes，Istio的好几座" class="headerlink" title="Kubernetes，Istio的好几座"></a>Kubernetes，Istio的好几座</h4><p>Istio最大化地利用了Kubernetes这个基础设施，与之叠加在一起形成了一个更强大的用于进行服务运行和治理的基础设施，并提供了更透明的用户体验。</p>
+<p>1.数据面<br>数据面Sidecar运行在Kubernetes的Pod里，作为一个Proxy和业务容器部署在一起。在服务网格的定义中要求应用程序在运行的时候感知不到Sidecar的存在。而基于Kubernetes的一个 Pod 多个容器的优秀设计使得部署运维对用户透明，用户甚至感知不到部署 Sidecar的过程。用户还是用原有的方式创建负载，通过 Istio 的自动注入服务，可以自动给指定的负载注入Proxy。如果在另一种环境下部署和使用Proxy，则不会有这样的便利。</p>
+<p>2.统一服务发现<br>Istio的服务发现机制非常完美地基于Kubernetes的域名访问机制构建而成，省去了再搭一个类似Eureka 的注册中心的麻烦，更避免了在 Kubernetes 上运行时服务发现数据不一致的问题。尽管 Istio 强调自己的可扩展性的重要性在于适配各种不同的平台，也可以对接其他服务发现机制，但在实际场景下，通过深入分析 Istio 几个版本的代码和设计，便可以发现其重要的能力都是基于Kubernetes进行构建的。</p>
+<p>3.基于Kubernetes CRD描述规则<br>Istio的所有路由规则和控制策略都是通过 Kubernetes CRD实现的，因此各种规则策略对应的数据也被存储在 Kube-apiserver 中，不需要另外一个单独的 APIServer 和后端的配置管理。所以，可以说Istio的APIServer就是Kubernetes的APIServer，数据也自然地被存在了对应Kubernetes的etcd中。Istio非常巧妙地应用了Kubernetes这个好基座，基于Kubernetes的已有能力来构建自身功能。Kubernetes里已经有的，绝不再自己搞一套，避免了数据不一致和用户使用体验的问题。</p>
+<p>Istio不仅数据面Envoy跑在Kubernetes的Pod里，其控制面也运行在Kubernetes集群中，其控制面组件本身存在的形式也是Kubernetes Deployment和Service，基于Kubernetes扩展和构建。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/istio-in-k8s.jpg" alt></p>
+<p>Istio+Kubernetes的方案与将SDK开发的微服务部署在Kubernetes上的方案的比较，如下图：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/istio-sdk-compare.jpg" alt></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Istio、微服务、容器与Kubernetes的关系：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation/istio-microservice-k8s.jpg" alt></p>
+<p>Kubernetes在容器编排领域已经成为无可争辩的事实标准；微服务化的服务与容器在轻量、敏捷、快速部署运维等特征上匹配，这类服务在容器中的运行也正日益流行；随着Istio 的成熟和服务网格技术的流行，使用 Istio 进行服务治理的实践也越来越多，正成为服务治理的趋势；而 Istio 与 Kubernetes 的天然融合且基于 Kubernetes 构建，也补齐了Kubernetes的治理能力，提供了端到端的服务运行治理 治理平台。这都使得Istio、微服务、容器及Kubernetes形成一个完美的闭环。<br>云原生应用采用 Kubernetes 构建应用编排能力，采用 Istio 构建服务治理能力，将逐渐成为企业技术转型的标准配置。</p>
+<blockquote>
+<p>来自：云原生服务网格Istio：原理、实践、架构与源码解析书籍，只作为读书笔记记录。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+        <div class="reward-container">
+  <div>如有疏忽错误欢迎在留言区评论指正，如果对您有所帮助欢迎点击下方进行打赏。</div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/wechatpay.jpg" alt="Knner.Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/alipay.jpg" alt="Knner.Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html" title="[服务网格Istio系列]--微服务 Kubernetes Istio关系">https://knner.wang/2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+              <a href="/tags/istio/" rel="tag"># istio</a>
+              <a href="/tags/servicemesh/" rel="tag"># servicemesh</a>
+              <a href="/tags/microservice/" rel="tag"># microservice</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/12/15/adding-filebeat-and-logstash-to-collect-and-processing-logs-in-kubernetes.html" rel="next" title="使用filebeat收集，logstash处理kubernetes日志，并收集nginx-ingress json日志">
+                  <i class="fa fa-chevron-left"></i> 使用filebeat收集，logstash处理kubernetes日志，并收集nginx-ingress json日志
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是服务网格？"><span class="nav-number">1.</span> <span class="nav-text">什么是服务网格？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是云原生？"><span class="nav-number">2.</span> <span class="nav-text">什么是云原生？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio-介绍"><span class="nav-number">3.</span> <span class="nav-text">Istio 介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#通过示例看看Istio能做什么"><span class="nav-number">3.1.</span> <span class="nav-text">通过示例看看Istio能做什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Istio与服务治理"><span class="nav-number">3.2.</span> <span class="nav-text">Istio与服务治理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#关于微服务"><span class="nav-number">3.2.1.</span> <span class="nav-text">关于微服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务治理的三种形态"><span class="nav-number">3.2.2.</span> <span class="nav-text">服务治理的三种形态</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#第一种形态：在应用程序中包含治理逻辑"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">第一种形态：在应用程序中包含治理逻辑</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#第二种形态：治理逻辑独立的代码"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">第二种形态：治理逻辑独立的代码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#第三种形态：治理逻辑独立的进程"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">第三种形态：治理逻辑独立的进程</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Istio不止解决了微服务问题"><span class="nav-number">3.2.3.</span> <span class="nav-text">Istio不止解决了微服务问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Istio与服务网格"><span class="nav-number">3.3.</span> <span class="nav-text">Istio与服务网格</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#时代选择服务网格"><span class="nav-number">3.3.1.</span> <span class="nav-text">时代选择服务网格</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务网格选择Istio"><span class="nav-number">3.3.2.</span> <span class="nav-text">服务网格选择Istio</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Istio与Kubernetes"><span class="nav-number">3.4.</span> <span class="nav-text">Istio与Kubernetes</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Istio，Kubernetes的好帮手"><span class="nav-number">3.4.1.</span> <span class="nav-text">Istio，Kubernetes的好帮手</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Kubernetes，Istio的好几座"><span class="nav-number">3.4.2.</span> <span class="nav-text">Kubernetes，Istio的好几座</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: {page: {
+            url: "https://knner.wang/2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html",
+            identifier: "2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html",
+            title: "[服务网格Istio系列]--微服务 Kubernetes Istio关系"
+          }
+        }
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://knner.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    (function() {
+      var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+      if (offsetTop <= 0) {
+        // load directly when there's no a scrollbar
+        window.addEventListener('load', loadComments, false);
+      } else {
+        var disqus_scroll = () => {
+          // offsetTop may changes because of manually resizing browser window or lazy loading images.
+          var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+          var scrollTop = window.scrollY;
+
+          // pre-load comments a bit? (margin or anything else)
+          if (offsetTop - scrollTop < 60) {
+            window.removeEventListener('scroll', disqus_scroll);
+            loadComments();
+          }
+        };
+        window.addEventListener('scroll', disqus_scroll);
+      }
+    })();
+  
+</script>
+
+</body>
+</html>
