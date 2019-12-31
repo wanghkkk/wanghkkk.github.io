@@ -60,12 +60,12 @@
 <meta property="og:site_name" content="Knner.Wang&#39;s Blog">
 <meta property="og:description" content="如果想要在K8S环境上部署某软件的话，那么首先先要了解的是该软件在Bare Metal裸金属环境下的手动安装方式、如何配置，启动等等；然后再考虑如何将软件Docker化，怎么编写Dockerfile，Docker环境下如何配置、启动等。最后根据之前Docker的方式选用K8S的YAML资源来创建该服务，例如：Deployment、DaemonSet、Service，ConfigMap，Secret">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;nacos.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-nacos-cluster-on-kubernetes&#x2F;nacos-cluster-list.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;logos&#x2F;nacos.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-nacos-cluster-on-kubernetes&#x2F;nacos-cluster-list.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
 <meta property="og:updated_time" content="2019-12-09T13:03:36.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;nacos.jpg">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;logos&#x2F;nacos.jpg">
 
 <link rel="canonical" href="https://knner.wang/2019/12/02/install-nacos-cluster-on-kubernetes.html">
 
@@ -267,7 +267,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p><img src="/images/logos/nacos.jpg" alt></p><p>如果想要在K8S环境上部署某软件的话，那么首先先要了解的是该软件在Bare Metal裸金属环境下的手动安装方式、如何配置，启动等等；然后再考虑如何将软件Docker化，怎么编写Dockerfile，Docker环境下如何配置、启动等。最后根据之前Docker的方式选用K8S的YAML资源来创建该服务，例如：Deployment、DaemonSet、Service，ConfigMap，Secret。最后，建议做成Helm Chart的方式，来发布，部署，管理。</p><p>按照这个步骤，我们之前已经了解了手动安装Nacos集群的方式，参考：<a href="/2019/12/02/install-nacos-cluster-manually.html" title="手动安装Nacos集群">手动安装Nacos集群</a>，那么这里我们先了解一下Docker化的Nacos，以及如何部署在K8S环境中。</p><a id="more"></a>
+        <p><img src="https://imgs.knner.wang/images/logos/nacos.jpg" alt></p><p>如果想要在K8S环境上部署某软件的话，那么首先先要了解的是该软件在Bare Metal裸金属环境下的手动安装方式、如何配置，启动等等；然后再考虑如何将软件Docker化，怎么编写Dockerfile，Docker环境下如何配置、启动等。最后根据之前Docker的方式选用K8S的YAML资源来创建该服务，例如：Deployment、DaemonSet、Service，ConfigMap，Secret。最后，建议做成Helm Chart的方式，来发布，部署，管理。</p><p>按照这个步骤，我们之前已经了解了手动安装Nacos集群的方式，参考：<a href="/2019/12/02/install-nacos-cluster-manually.html" title="手动安装Nacos集群">手动安装Nacos集群</a>，那么这里我们先了解一下Docker化的Nacos，以及如何部署在K8S环境中。</p><a id="more"></a>
 
 
 <p>官网：<a href="https://nacos.io/" target="_blank" rel="noopener">https://nacos.io/</a></p>
@@ -453,7 +453,7 @@
 
 <p>然后配置域名解析<code>nacos.test.aws.test.com</code>指定到nginx-ingress-controller的公网地址。</p>
 <p>访问<code>nacos.test.aws.test.com</code>，查看集群节点列表：</p>
-<p><img src="/images/install-nacos-cluster-on-kubernetes/nacos-cluster-list.jpg" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-nacos-cluster-on-kubernetes/nacos-cluster-list.jpg" alt></p>
 <div class="note danger">
             <p>又如之前<a href="/2019/12/02/install-nacos-cluster-manually.html" title="手动安装Nacos集群">手动安装Nacos集群</a>，虽然访问Nacos Dashboard需要用户名和密码认证。但是当直接访问其OpenAPI接口是<strong>不需要认证的</strong>。</p><p>所以这里建议将nginx ingress配置成Basic Auth认证。</p><p>详情请参考：<a href="/2019/11/22/Using-Helm3-Install-InfluDB-Prometheus-Operator.html" title="使用Helm3安装Prometheus-Operator + InfluxDB">使用Helm3安装Prometheus-Operator + InfluxDB</a></p>
           </div>
@@ -479,7 +479,7 @@
 <hr>
 <blockquote>
 <p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
-<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+<p><img src="https://imgs.knner.wang/images/knner/wx.jpg" alt="公众号"></p>
 </blockquote>
 
     </div>

@@ -60,16 +60,16 @@
 <meta property="og:site_name" content="Knner.Wang&#39;s Blog">
 <meta property="og:description" content="此Kafka集群为了日志收集这一套，之前安装了Elasticsearch Cluster：参考：安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp;amp; Keystore。FELK： F    Filebeat | Fluentd | Fluent-bit E    Elasticsearch L    Logstash K">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;kafka.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;zookeeper.gif">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-and-config-zookeeper-and-kafka-cluster&#x2F;kafka-apis.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-and-config-zookeeper-and-kafka-cluster&#x2F;log_anatomy.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-and-config-zookeeper-and-kafka-cluster&#x2F;log_consumer.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-and-config-zookeeper-and-kafka-cluster&#x2F;consumer-groups.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;logos&#x2F;kafka.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;logos&#x2F;zookeeper.gif">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-and-config-zookeeper-and-kafka-cluster&#x2F;kafka-apis.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-and-config-zookeeper-and-kafka-cluster&#x2F;log_anatomy.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-and-config-zookeeper-and-kafka-cluster&#x2F;log_consumer.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-and-config-zookeeper-and-kafka-cluster&#x2F;consumer-groups.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
 <meta property="og:updated_time" content="2019-12-05T09:02:09.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;kafka.png">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;logos&#x2F;kafka.png">
 
 <link rel="canonical" href="https://knner.wang/2019/12/05/install-and-config-zookeeper-and-kafka-cluster.html">
 
@@ -252,7 +252,7 @@
 <li>E    Elasticsearch</li>
 <li>L    Logstash</li>
 <li>K    Kibana</li>
-</ul><p><img src="/images/logos/kafka.png" alt></p><p>FELK兼容性：</p><ul>
+</ul><p><img src="https://imgs.knner.wang/images/logos/kafka.png" alt></p><p>FELK兼容性：</p><ul>
 <li>Filebeat 6：兼容kafka：between 0.11 and 2.0.0 <a href="https://www.elastic.co/guide/en/beats/filebeat/6.8/kafka-output.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/beats/filebeat/6.8/kafka-output.html</a></li>
 <li>Filebeat 7：兼容kafka：between 0.11 and 2.1.0 <a href="https://www.elastic.co/guide/en/beats/filebeat/current/kafka-output.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/beats/filebeat/current/kafka-output.html</a></li>
 <li>Logstash 6-7：使用Kafka client 2.1.0 <a href="https://www.elastic.co/guide/en/logstash/6.8/plugins-outputs-kafka.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/logstash/6.8/plugins-outputs-kafka.html</a></li>
@@ -276,7 +276,7 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ bin/kafka-server-start.sh config/server.properties</span><br></pre></td></tr></table></figure>
 
 <p>OK，一个测试用的Kafka和Zookeeper就安装完成了，但是我们要创建的是Kafka集群+Zookeeper集群，用于生产环境的，所以我们先部署Zookeeper集群：</p>
-<h2 id="Zookeeper："><a href="#Zookeeper：" class="headerlink" title="Zookeeper："></a>Zookeeper：</h2><p><img src="/images/logos/zookeeper.gif" alt></p>
+<h2 id="Zookeeper："><a href="#Zookeeper：" class="headerlink" title="Zookeeper："></a>Zookeeper：</h2><p><img src="https://imgs.knner.wang/images/logos/zookeeper.gif" alt></p>
 <p>官网：</p>
 <p><a href="https://zookeeper.apache.org/index.html" target="_blank" rel="noopener">https://zookeeper.apache.org/index.html</a></p>
 <p>文档：</p>
@@ -695,15 +695,15 @@
 <li><a href="https://kafka.apache.org/documentation/streams" target="_blank" rel="noopener">Streams API</a> 允许应用程序充当流处理器，从一个或多个主题消耗的输入流，并产生一个输出流至一个或多个输出的Topic。</li>
 <li><a href="https://kafka.apache.org/documentation.html#connect" target="_blank" rel="noopener">Connector API</a> 允许构建和运行可重复使用的生产者或消费者连接Kafka 主题，以现有的应用程序或数据系统。例如，关系数据库的连接器可能会捕获对表的所有更改。</li>
 </ul>
-<p><img src="/images/install-and-config-zookeeper-and-kafka-cluster/kafka-apis.png" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-and-config-zookeeper-and-kafka-cluster/kafka-apis.png" alt></p>
 <p>在Kafka中，客户端和服务器之间的通信是通过简单，高性能，与语言无关的<a href="https://kafka.apache.org/protocol.html" target="_blank" rel="noopener">TCP协议完成的</a>。</p>
 <h4 id="主题和日志-Topics-and-Logs"><a href="#主题和日志-Topics-and-Logs" class="headerlink" title="主题和日志 Topics and Logs"></a>主题和日志 Topics and Logs</h4><p>Kafka提供的记录主题的核心抽象。</p>
 <p>主题是将记录发布到的类别或订阅源名称。Kafka中的主题始终是多用户的；也就是说，一个主题可以有零个，一个或多个消费者来订阅写入该主题的数据。</p>
 <p>对于每个主题，Kafka集群都会维护一个分区日志，如下所示：</p>
-<p><img src="/images/install-and-config-zookeeper-and-kafka-cluster/log_anatomy.png" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-and-config-zookeeper-and-kafka-cluster/log_anatomy.png" alt></p>
 <p>每个分区都是有序的，不变的记录序列，这些记录连续地附加到结构化的提交日志中。每个分区中的记录都分配有一个称为<em>偏移</em>的顺序ID号，该ID 唯一地标识分区中的每个记录。</p>
 <p>Kafka集群使用可配置的保留期限持久地保留所有已发布的记录（无论是否已使用它们）。例如，如果将保留策略设置为两天，则在发布记录后的两天内，该记录可供使用，之后将被丢弃以释放空间。Kafka的性能相对于数据大小实际上是恒定的，因此长时间存储数据不是问题。</p>
-<p><img src="/images/install-and-config-zookeeper-and-kafka-cluster/log_consumer.png" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-and-config-zookeeper-and-kafka-cluster/log_consumer.png" alt></p>
 <p>实际上，基于每个消费者保留的唯一元数据是该消费者在日志中的偏移量或位置。此偏移量由使用者控制：通常，使用者在读取记录时会线性地推进其偏移量，但是实际上，由于位置是由使用者控制的，因此它可以按喜欢的任何顺序使用记录。例如，使用者可以重置到较旧的偏移量以重新处理过去的数据，或者跳到最近的记录并从“现在”开始使用。</p>
 <p>这些功能的组合意味着Kafka的消费者非常便宜-他们来来去去对集群或其他消费者没有太大影响。例如，您可以使用我们的命令行工具来“尾部”任何主题的内容，而无需更改任何现有使用者所消耗的内容。</p>
 <p>日志中的分区有多种用途。首先，它们允许日志扩展到超出单个服务器所能容纳的大小。每个单独的分区都必须适合托管它的服务器，但是一个主题可能有很多分区，因此它可以处理任意数量的数据。其次，它们充当并行性的单元–稍有更多。</p>
@@ -714,7 +714,7 @@
 <h4 id="消费者-Consumers"><a href="#消费者-Consumers" class="headerlink" title="消费者 Consumers"></a>消费者 Consumers</h4><p>消费者使用<strong>消费者组</strong>名称标记自己，并且发布到主题的每条记录都会传递到<strong>每个订阅消费者组中的<em>一个</em>消费者实例</strong>。使用者实例可以在单独的进程中或在单独的机器上。</p>
 <p>如果所有使用者实例都具有相同的使用者组，那么将在这些使用者实例上有效地平衡记录。</p>
 <p>如果所有使用者实例具有不同的使用者组，则每条记录将广播到所有使用者进程</p>
-<p><img src="/images/install-and-config-zookeeper-and-kafka-cluster/consumer-groups.png" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-and-config-zookeeper-and-kafka-cluster/consumer-groups.png" alt></p>
 <p>一个由两台服务器组成的Kafka群集，其中包含四个带有两个使用者组的分区（P0-P3）。使用者组A有两个使用者实例，组B有四个。</p>
 <p>但是，更常见的是，我们发现主题具有少量的消费者组，每个“逻辑订户”一个。每个组均由许多使用者实例组成，以实现可伸缩性和容错能力。这无非就是发布-订阅语义，其中订阅者是消费者的集群而不是单个进程。</p>
 <p>在Kafka中实现消耗的方式是通过在消费者实例上划分日志中的分区，以便每个实例在任何时间点都是分区“公平份额”的排他消费者。Kafka协议动态处理了维护组成员身份的过程。如果新实例加入该组，它们将接管该组其他成员的某些分区；如果实例死亡，则其分区将分配给其余实例。</p>
@@ -1237,7 +1237,7 @@
 </blockquote>
 <blockquote>
 <p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
-<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+<p><img src="https://imgs.knner.wang/images/knner/wx.jpg" alt="公众号"></p>
 </blockquote>
 
     </div>

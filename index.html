@@ -487,7 +487,7 @@
           <p>在Kubernetes日志收集的系列文章里，我们分部介绍了：</p><ul>
 <li>安装生产可用、高安全的Elasticsearch集群+Kibana：<a href="/2019/11/26/install-elasticsearch-cluster-7-4.html" title="安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp; Keystore">安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp; Keystore</a></li>
 <li>安装了Zookeeper &amp; Kafka生产可用的集群：<a href="/2019/12/05/install-and-config-zookeeper-and-kafka-cluster.html" title="安装配置Zookeeper和Kafka集群">安装配置Zookeeper和Kafka集群</a></li>
-</ul><p>最终的架构图如下所示：</p><p><img src="/images/adding-filebeat-and-logstash-to-collect-and-processing-logs-in-kubernetes/felk.png" alt></p><p>架构说明：</p><ul>
+</ul><p>最终的架构图如下所示：</p><p><img src="https://imgs.knner.wang/images/adding-filebeat-and-logstash-to-collect-and-processing-logs-in-kubernetes/felk.png" alt></p><p>架构说明：</p><ul>
 <li>所有的beats，这里主要说明filebeat，都使用DaemonSet的方式安装的Kubernetes集群上，收集各个node节点的容器日志，并做简单的处理，例如多行等，然后将数据发送到Kafka集群中。</li>
 <li>Kafka 集群这里主要安装在Kubernetes集群以外，负责解耦、缓冲beats发来的数据，同时也可以存储处理好的日志，作为中转站，方便其他需要后期处理日志的工具订阅数据。</li>
 <li>Logstash 可以安装在Kubernetes集群内部或者外部，从kafka收集beat发来的日志，做一些处理，例如：geoip获取IP地址的地理位置，处理Useragent等，然后将处理好的日志clone一份，同时输出到Elasticsearch集群不同index和Kafka中不同的topic上，方便其他流处理工具进行后期的实时计算。如果日志量很大，单台logstash无法支撑，可以启动多台logstash，属于同一个消费者组，这里可以分担处理。注意：最大的logstash台数不要超过topic的partitions数量，否则，多出来的logstash也是闲置的。</li>
@@ -577,7 +577,7 @@
 <li>E    Elasticsearch</li>
 <li>L    Logstash</li>
 <li>K    Kibana</li>
-</ul><p><img src="/images/logos/kafka.png" alt></p><p>FELK兼容性：</p><ul>
+</ul><p><img src="https://imgs.knner.wang/images/logos/kafka.png" alt></p><p>FELK兼容性：</p><ul>
 <li>Filebeat 6：兼容kafka：between 0.11 and 2.0.0 <a href="https://www.elastic.co/guide/en/beats/filebeat/6.8/kafka-output.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/beats/filebeat/6.8/kafka-output.html</a></li>
 <li>Filebeat 7：兼容kafka：between 0.11 and 2.1.0 <a href="https://www.elastic.co/guide/en/beats/filebeat/current/kafka-output.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/beats/filebeat/current/kafka-output.html</a></li>
 <li>Logstash 6-7：使用Kafka client 2.1.0 <a href="https://www.elastic.co/guide/en/logstash/6.8/plugins-outputs-kafka.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/logstash/6.8/plugins-outputs-kafka.html</a></li>
@@ -684,7 +684,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><img src="/images/logos/nacos.jpg" alt></p><p>如果想要在K8S环境上部署某软件的话，那么首先先要了解的是该软件在Bare Metal裸金属环境下的手动安装方式、如何配置，启动等等；然后再考虑如何将软件Docker化，怎么编写Dockerfile，Docker环境下如何配置、启动等。最后根据之前Docker的方式选用K8S的YAML资源来创建该服务，例如：Deployment、DaemonSet、Service，ConfigMap，Secret。最后，建议做成Helm Chart的方式，来发布，部署，管理。</p><p>按照这个步骤，我们之前已经了解了手动安装Nacos集群的方式，参考：<a href="/2019/12/02/install-nacos-cluster-manually.html" title="手动安装Nacos集群">手动安装Nacos集群</a>，那么这里我们先了解一下Docker化的Nacos，以及如何部署在K8S环境中。</p>
+          <p><img src="https://imgs.knner.wang/images/logos/nacos.jpg" alt></p><p>如果想要在K8S环境上部署某软件的话，那么首先先要了解的是该软件在Bare Metal裸金属环境下的手动安装方式、如何配置，启动等等；然后再考虑如何将软件Docker化，怎么编写Dockerfile，Docker环境下如何配置、启动等。最后根据之前Docker的方式选用K8S的YAML资源来创建该服务，例如：Deployment、DaemonSet、Service，ConfigMap，Secret。最后，建议做成Helm Chart的方式，来发布，部署，管理。</p><p>按照这个步骤，我们之前已经了解了手动安装Nacos集群的方式，参考：<a href="/2019/12/02/install-nacos-cluster-manually.html" title="手动安装Nacos集群">手动安装Nacos集群</a>，那么这里我们先了解一下Docker化的Nacos，以及如何部署在K8S环境中。</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/12/02/install-nacos-cluster-on-kubernetes.html#more" rel="contents">
@@ -774,7 +774,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><img src="/images/logos/nacos.jpg" alt></p><p>因最近要上微服务，采用spring-cloud-alibaba，组件如下：</p><p><a href="https://github.com/alibaba/spring-cloud-alibaba/blob/master/README-zh.md" target="_blank" rel="noopener">https://github.com/alibaba/spring-cloud-alibaba/blob/master/README-zh.md</a></p><p><strong><a href="https://github.com/alibaba/Sentinel" target="_blank" rel="noopener">Sentinel</a></strong>：把流量作为切入点，从流量控制、熔断降级、系统负载保护等多个维度保护服务的稳定性。</p><p><strong><a href="https://github.com/alibaba/Nacos" target="_blank" rel="noopener">Nacos</a></strong>：一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。</p><p><strong><a href="https://rocketmq.apache.org/" target="_blank" rel="noopener">RocketMQ</a></strong>：一款开源的分布式消息系统，基于高可用分布式集群技术，提供低延时的、高可靠的消息发布与订阅服务。</p><p><strong><a href="https://github.com/apache/dubbo" target="_blank" rel="noopener">Dubbo</a></strong>：Apache Dubbo™ 是一款高性能 Java RPC 框架。</p><p><strong><a href="https://github.com/seata/seata" target="_blank" rel="noopener">Seata</a></strong>：阿里巴巴开源产品，一个易于使用的高性能微服务分布式事务解决方案。</p>
+          <p><img src="https://imgs.knner.wang/images/logos/nacos.jpg" alt></p><p>因最近要上微服务，采用spring-cloud-alibaba，组件如下：</p><p><a href="https://github.com/alibaba/spring-cloud-alibaba/blob/master/README-zh.md" target="_blank" rel="noopener">https://github.com/alibaba/spring-cloud-alibaba/blob/master/README-zh.md</a></p><p><strong><a href="https://github.com/alibaba/Sentinel" target="_blank" rel="noopener">Sentinel</a></strong>：把流量作为切入点，从流量控制、熔断降级、系统负载保护等多个维度保护服务的稳定性。</p><p><strong><a href="https://github.com/alibaba/Nacos" target="_blank" rel="noopener">Nacos</a></strong>：一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。</p><p><strong><a href="https://rocketmq.apache.org/" target="_blank" rel="noopener">RocketMQ</a></strong>：一款开源的分布式消息系统，基于高可用分布式集群技术，提供低延时的、高可靠的消息发布与订阅服务。</p><p><strong><a href="https://github.com/apache/dubbo" target="_blank" rel="noopener">Dubbo</a></strong>：Apache Dubbo™ 是一款高性能 Java RPC 框架。</p><p><strong><a href="https://github.com/seata/seata" target="_blank" rel="noopener">Seata</a></strong>：阿里巴巴开源产品，一个易于使用的高性能微服务分布式事务解决方案。</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/12/02/install-nacos-cluster-manually.html#more" rel="contents">
@@ -1062,7 +1062,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>因为最近要测试Kubernetes日志收集这块，所以先要了解一下Elasticsearch 集群的手动搭建方式，这里记录一下在虚拟机上安装Elasticsearch Cluster 7.4的方式，并开启Auth认证以及Transport SSL。</p><p><img src="/images/logos/elastic-logo.jpg" alt></p><p><a href="https://www.elastic.co/cn/" target="_blank" rel="noopener">官网</a>    <a href="https://www.elastic.co/cn/downloads/" target="_blank" rel="noopener">下载</a>    <a href="https://www.elastic.co/cn/guide" target="_blank" rel="noopener">Docs</a></p><p>本文采用的环境以及版本：</p><ul>
+          <p>因为最近要测试Kubernetes日志收集这块，所以先要了解一下Elasticsearch 集群的手动搭建方式，这里记录一下在虚拟机上安装Elasticsearch Cluster 7.4的方式，并开启Auth认证以及Transport SSL。</p><p><img src="https://imgs.knner.wang/images/logos/elastic-logo.jpg" alt></p><p><a href="https://www.elastic.co/cn/" target="_blank" rel="noopener">官网</a>    <a href="https://www.elastic.co/cn/downloads/" target="_blank" rel="noopener">下载</a>    <a href="https://www.elastic.co/cn/guide" target="_blank" rel="noopener">Docs</a></p><p>本文采用的环境以及版本：</p><ul>
 <li>一台EC2主机Amazon Linux 2 AMI，本身是基于CentOS 7的。</li>
 <li>通过tar包安装</li>
 <li>Elasticsearch 7.4.2，默认集成JDK（Openjdk 13.0.1）；这里简称ES</li>

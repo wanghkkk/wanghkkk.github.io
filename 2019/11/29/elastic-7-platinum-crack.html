@@ -60,13 +60,13 @@
 <meta property="og:site_name" content="Knner.Wang&#39;s Blog">
 <meta property="og:description" content="在之前的文章中我们分享了安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp;amp; Keystore中，我们已经安装了安全的Elasticsearch，可以在实际的生产环境进行部署了，但是我们可能需要体验一下白金版的其他的特性（LDAP统一认证等）怎么办呢，推荐去官网申请Licence，有效期三十天进行测试，测试符合你的要求后再去购">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;luyten-license-jar.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;luyten-build-jar.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;platinum-lic.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;luyten-license-jar.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;luyten-build-jar.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;platinum-lic.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
 <meta property="og:updated_time" content="2019-11-29T01:58:00.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;luyten-license-jar.jpg">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;elastic-7-platinum-crack&#x2F;luyten-license-jar.jpg">
 
 <link rel="canonical" href="https://knner.wang/2019/11/29/elastic-7-platinum-crack.html">
 
@@ -274,9 +274,9 @@
 <p>然后打开<code>x-pack-core-7.4.2.jar</code>这个文件：</p>
 <p>定位到两个文件：然后点击File–Save As 另存为java源码文件：</p>
 <p><code>org.elasticsearch.license/LicenseVerifier.class</code></p>
-<p><img src="/images/elastic-7-platinum-crack/luyten-license-jar.jpg" alt></p>
+<p><img src="https://imgs.knner.wang/images/elastic-7-platinum-crack/luyten-license-jar.jpg" alt></p>
 <p><code>org.elasticsearch.xpack.core/XPackBuild.class</code></p>
-<p><img src="/images/elastic-7-platinum-crack/luyten-build-jar.jpg" alt></p>
+<p><img src="https://imgs.knner.wang/images/elastic-7-platinum-crack/luyten-build-jar.jpg" alt></p>
 <p>这里拿到两个Java源码文件，如下：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">LicenseVerifier.java</span><br><span class="line">XPackBuild.java</span><br></pre></td></tr></table></figure>
 
@@ -324,7 +324,7 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl -XGET -uelastic http://localhost:9200/_license</span><br><span class="line">Enter host password <span class="keyword">for</span> user <span class="string">'elastic'</span>: </span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"license"</span> : &#123;</span><br><span class="line">    <span class="string">"status"</span> : <span class="string">"active"</span>,</span><br><span class="line">    <span class="string">"uid"</span> : <span class="string">"537458c7-c1dd-43ea-ab69-68es09d80c98"</span>,</span><br><span class="line">    <span class="string">"type"</span> : <span class="string">"platinum"</span>,</span><br><span class="line">    <span class="string">"issue_date"</span> : <span class="string">"2019-11-29T00:00:00.000Z"</span>,</span><br><span class="line">    <span class="string">"issue_date_in_millis"</span> : 1558051200000,</span><br><span class="line">    <span class="string">"expiry_date"</span> : <span class="string">"2068-06-24T14:50:00.999Z"</span>,</span><br><span class="line">    <span class="string">"expiry_date_in_millis"</span> : 2524579200999,</span><br><span class="line">    <span class="string">"max_nodes"</span> : 1000,</span><br><span class="line">    <span class="string">"issued_to"</span> : <span class="string">"pyker"</span>,</span><br><span class="line">    <span class="string">"issuer"</span> : <span class="string">"Web Form"</span>,</span><br><span class="line">    <span class="string">"start_date_in_millis"</span> : 1558051200000</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>登陆Kibana查看一下吧：</p>
-<p><img src="/images/elastic-7-platinum-crack/platinum-lic.jpg" alt></p>
+<p><img src="https://imgs.knner.wang/images/elastic-7-platinum-crack/platinum-lic.jpg" alt></p>
 <blockquote>
 <p>参考：</p>
 <p> <a href="https://www.ipyker.com/2019/03/13/elastic-x-pack" target="_blank" rel="noopener">https://www.ipyker.com/2019/03/13/elastic-x-pack</a> </p>
@@ -332,7 +332,7 @@
 <hr>
 <blockquote>
 <p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
-<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+<p><img src="https://imgs.knner.wang/images/knner/wx.jpg" alt="公众号"></p>
 </blockquote>
 
     </div>

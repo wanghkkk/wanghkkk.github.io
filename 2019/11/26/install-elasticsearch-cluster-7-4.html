@@ -60,17 +60,17 @@
 <meta property="og:site_name" content="Knner.Wang&#39;s Blog">
 <meta property="og:description" content="因为最近要测试Kubernetes日志收集这块，所以先要了解一下Elasticsearch 集群的手动搭建方式，这里记录一下在虚拟机上安装Elasticsearch Cluster 7.4的方式，并开启Auth认证以及Transport SSL。官网    下载    Docs本文采用的环境以及版本： 一台EC2主机Amazon Linux 2 AMI，本身是基于CentOS 7的。 通过tar包">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;elastic-logo.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;elastic-stack-license.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;kibana-login.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;es-basic-license.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;cluster-monitor.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;node-monitor.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;es-head.jpg">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;logos&#x2F;elastic-logo.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;elastic-stack-license.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;kibana-login.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;es-basic-license.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;cluster-monitor.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;node-monitor.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;install-elasticsearch-cluster-7-4&#x2F;es-head.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
 <meta property="og:updated_time" content="2019-12-15T02:43:45.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;logos&#x2F;elastic-logo.jpg">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;imgs.knner.wang&#x2F;images&#x2F;logos&#x2F;elastic-logo.jpg">
 
 <link rel="canonical" href="https://knner.wang/2019/11/26/install-elasticsearch-cluster-7-4.html">
 
@@ -266,7 +266,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>因为最近要测试Kubernetes日志收集这块，所以先要了解一下Elasticsearch 集群的手动搭建方式，这里记录一下在虚拟机上安装Elasticsearch Cluster 7.4的方式，并开启Auth认证以及Transport SSL。</p><p><img src="/images/logos/elastic-logo.jpg" alt></p><p><a href="https://www.elastic.co/cn/" target="_blank" rel="noopener">官网</a>    <a href="https://www.elastic.co/cn/downloads/" target="_blank" rel="noopener">下载</a>    <a href="https://www.elastic.co/cn/guide" target="_blank" rel="noopener">Docs</a></p><p>本文采用的环境以及版本：</p><ul>
+        <p>因为最近要测试Kubernetes日志收集这块，所以先要了解一下Elasticsearch 集群的手动搭建方式，这里记录一下在虚拟机上安装Elasticsearch Cluster 7.4的方式，并开启Auth认证以及Transport SSL。</p><p><img src="https://imgs.knner.wang/images/logos/elastic-logo.jpg" alt></p><p><a href="https://www.elastic.co/cn/" target="_blank" rel="noopener">官网</a>    <a href="https://www.elastic.co/cn/downloads/" target="_blank" rel="noopener">下载</a>    <a href="https://www.elastic.co/cn/guide" target="_blank" rel="noopener">Docs</a></p><p>本文采用的环境以及版本：</p><ul>
 <li>一台EC2主机Amazon Linux 2 AMI，本身是基于CentOS 7的。</li>
 <li>通过tar包安装</li>
 <li>Elasticsearch 7.4.2，默认集成JDK（Openjdk 13.0.1）；这里简称ES</li>
@@ -278,7 +278,7 @@
 
 
 <p><a href="https://www.elastic.co/cn/subscriptions" target="_blank" rel="noopener">参考官网</a>，如下图：</p>
-<p><img src="/images/install-elasticsearch-cluster-7-4/elastic-stack-license.png" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-elasticsearch-cluster-7-4/elastic-stack-license.png" alt></p>
 <p>默认情况下Elastic中的安全功能是被禁用的，那么在本文中，就是采用基础版，自动申请Basic License的，然后分别开启Auth认证，以及Nodes间加密通信SSL。</p>
 <h2 id="安装Elasticsearch"><a href="#安装Elasticsearch" class="headerlink" title="安装Elasticsearch"></a>安装Elasticsearch</h2><p>我这里只有一台EC2主机，需要安装由三台Elasticsearch 组成的集群，所以采用使用不同端口的方式。</p>
 <table>
@@ -854,12 +854,12 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ ./kibana/bin/kibana --help</span><br><span class="line"></span><br><span class="line">  Usage: bin/kibana [command=serve] [options]</span><br><span class="line">  </span><br><span class="line">  Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch.</span><br><span class="line">  </span><br><span class="line">  Commands:</span><br><span class="line">    serve  [options]  Run the kibana server</span><br><span class="line">    help  &lt;command&gt;   Get the help for a specific command</span><br><span class="line">  </span><br><span class="line">  &quot;serve&quot; Options:</span><br><span class="line">  </span><br><span class="line">    -e, --elasticsearch &lt;uri1,uri2&gt;  Elasticsearch instances</span><br><span class="line">    -c, --config &lt;path&gt;              Path to the config file, use multiple --config args to include multiple config files (default: [&quot;/opt/elk74/kibana-7.4.2-linux-x86_64/config/kibana.yml&quot;])</span><br><span class="line">    -p, --port &lt;port&gt;                The port to bind to</span><br><span class="line">    -q, --quiet                      Prevent all logging except errors</span><br><span class="line">    -Q, --silent                     Prevent all logging</span><br><span class="line">    --verbose                        Turns on verbose logging</span><br><span class="line">    -H, --host &lt;host&gt;                The host to bind to</span><br><span class="line">    -l, --log-file &lt;path&gt;            The file to log to</span><br><span class="line">    --plugin-dir &lt;path&gt;              A path to scan for plugins, this can be specified multiple times to specify multiple directories (default: [&quot;/opt/elk74/kibana-7.4.2-linux-x86_64/plugins&quot;,&quot;/opt/elk74/kibana-7.4.2-linux-x86_64/src/legacy/core_plugins&quot;])</span><br><span class="line">    --plugin-path &lt;path&gt;             A path to a plugin which should be included by the server, this can be specified multiple times to specify multiple paths (default: [])</span><br><span class="line">    --plugins &lt;path&gt;                 an alias for --plugin-dir</span><br><span class="line">    --optimize                       Optimize and then stop the server</span><br><span class="line">    -h, --help                       output usage information</span><br></pre></td></tr></table></figure>
 
 <p>访问kibana的IP:5601即可，可以看到登陆界面：</p>
-<p><img src="/images/install-elasticsearch-cluster-7-4/kibana-login.jpg" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-elasticsearch-cluster-7-4/kibana-login.jpg" alt></p>
 <p>输入上面生成的管理员elastic的用户和密码，就可以登陆了，我们查看一下license许可吧：</p>
-<p><img src="/images/install-elasticsearch-cluster-7-4/es-basic-license.jpg" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-elasticsearch-cluster-7-4/es-basic-license.jpg" alt></p>
 <p>查看一下Elasticsearch集群中的节点监控信息，包括CPU，负载，JVM使用率，磁盘空间，可以根据此来修改扩容ES node节点：</p>
-<p><img src="/images/install-elasticsearch-cluster-7-4/cluster-monitor.jpg" alt></p>
-<p><img src="/images/install-elasticsearch-cluster-7-4/node-monitor.jpg" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-elasticsearch-cluster-7-4/cluster-monitor.jpg" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-elasticsearch-cluster-7-4/node-monitor.jpg" alt></p>
 <p>一个使用永不过期的Basic许可的免费License，开启了基本的Auth认证和集群间SSL/TLS 认证的Elasticsearch集群就创建完毕了。</p>
 <p>等等，你有没有想过Kibana的配置文件中使用着明文的用户名密码，这里只能通过LInux的权限进行控制了，有没有更安全的方式呢，有的，就是keystore。</p>
 <h3 id="kibana-keystore-安全配置"><a href="#kibana-keystore-安全配置" class="headerlink" title="kibana keystore 安全配置"></a>kibana keystore 安全配置</h3><p><a href="https://www.elastic.co/guide/en/kibana/7.4/secure-settings.html" target="_blank" rel="noopener">参考官网</a></p>
@@ -891,7 +891,7 @@
 <p>注意：通过这种Chrome 插件方式安装ES Head不需要开启ES集群的CORS跨域配置：</p>
 <p><a href="https://github.com/mobz/elasticsearch-head#enable-cors-in-elasticsearch" target="_blank" rel="noopener">https://github.com/mobz/elasticsearch-head#enable-cors-in-elasticsearch</a></p>
 <p>输入ES集群的连接地址，点击连接，然后输入用户名密码即可：</p>
-<p><img src="/images/install-elasticsearch-cluster-7-4/es-head.jpg" alt></p>
+<p><img src="https://imgs.knner.wang/images/install-elasticsearch-cluster-7-4/es-head.jpg" alt></p>
 <p>到这里，文章已经基本完毕，下面是一些小技巧：</p>
 <h2 id="生产环境中整个集群重启和滚动重启的正确操作"><a href="#生产环境中整个集群重启和滚动重启的正确操作" class="headerlink" title="生产环境中整个集群重启和滚动重启的正确操作"></a>生产环境中整个集群重启和滚动重启的正确操作</h2><p>比如我们后期可能要对整个集群的重启，或者呢，更改一些配置，需要一台一台的重启集群中的每个节点，因为在重启的时候ES集群会自动复制下线节点的shart到其他的节点上，并再平衡node间的shart，会产生很大的IO的，但是这个IO操作是完全没有必要的。</p>
 <p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/restart-cluster.html" target="_blank" rel="noopener">参考官网</a></p>
@@ -906,7 +906,7 @@
 <hr>
 <blockquote>
 <p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
-<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+<p><img src="https://imgs.knner.wang/images/knner/wx.jpg" alt="公众号"></p>
 </blockquote>
 
     </div>
