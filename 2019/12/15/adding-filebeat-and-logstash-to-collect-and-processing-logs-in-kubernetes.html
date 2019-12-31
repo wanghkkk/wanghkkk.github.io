@@ -55,7 +55,7 @@
   <meta name="description" content="在Kubernetes日志收集的系列文章里，我们分部介绍了： 安装生产可用、高安全的Elasticsearch集群+Kibana：安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp;amp; Keystore 安装了Zookeeper &amp;amp; Kafka生产可用的集群：安装配置Zookeeper和Kafka集群 最终的架构图如下所">
 <meta name="keywords" content="filebeat,logstash">
 <meta property="og:type" content="article">
-<meta property="og:title" content="使用filebeat收集，logstash处理kubernetes日志，并收集nginx-ingress json日志">
+<meta property="og:title" content="使用filebeat + kafka + logstash收集处理kubernetes日志，配置收集处理nginx-ingress json日志">
 <meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;12&#x2F;15&#x2F;adding-filebeat-and-logstash-to-collect-and-processing-logs-in-kubernetes.html">
 <meta property="og:site_name" content="Knner.Wang&#39;s Blog">
 <meta property="og:description" content="在Kubernetes日志收集的系列文章里，我们分部介绍了： 安装生产可用、高安全的Elasticsearch集群+Kibana：安装Elasticsearch 7.4集群（开启集群Auth + Transport SSL）以及 Kibana &amp;amp; Keystore 安装了Zookeeper &amp;amp; Kafka生产可用的集群：安装配置Zookeeper和Kafka集群 最终的架构图如下所">
@@ -82,7 +82,7 @@
   };
 </script>
 
-  <title>使用filebeat收集，logstash处理kubernetes日志，并收集nginx-ingress json日志 | Knner.Wang's Blog</title>
+  <title>使用filebeat + kafka + logstash收集处理kubernetes日志，配置收集处理nginx-ingress json日志 | Knner.Wang's Blog</title>
   
 
 
@@ -206,7 +206,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          使用filebeat收集，logstash处理kubernetes日志，并收集nginx-ingress json日志
+          使用filebeat + kafka + logstash收集处理kubernetes日志，配置收集处理nginx-ingress json日志
         </h1>
 
         <div class="post-meta">
@@ -844,7 +844,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://knner.wang/2019/12/15/adding-filebeat-and-logstash-to-collect-and-processing-logs-in-kubernetes.html" title="使用filebeat收集，logstash处理kubernetes日志，并收集nginx-ingress json日志">https://knner.wang/2019/12/15/adding-filebeat-and-logstash-to-collect-and-processing-logs-in-kubernetes.html</a>
+    <a href="https://knner.wang/2019/12/15/adding-filebeat-and-logstash-to-collect-and-processing-logs-in-kubernetes.html" title="使用filebeat + kafka + logstash收集处理kubernetes日志，配置收集处理nginx-ingress json日志">https://knner.wang/2019/12/15/adding-filebeat-and-logstash-to-collect-and-processing-logs-in-kubernetes.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -1098,7 +1098,7 @@ if (document.querySelectorAll('pre.mermaid').length) {
         config: {page: {
             url: "https://knner.wang/2019/12/15/adding-filebeat-and-logstash-to-collect-and-processing-logs-in-kubernetes.html",
             identifier: "2019/12/15/adding-filebeat-and-logstash-to-collect-and-processing-logs-in-kubernetes.html",
-            title: "使用filebeat收集，logstash处理kubernetes日志，并收集nginx-ingress json日志"
+            title: "使用filebeat + kafka + logstash收集处理kubernetes日志，配置收集处理nginx-ingress json日志"
           }
         }
       });
