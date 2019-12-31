@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="上篇文章中介绍了：[服务网格Istio系列]--微服务 Kubernetes Istio关系，这里主要介绍Istio的架构。Istio的工作机制Istio主要分为两部分：控制面和数据面；控制面主要包括Pilot、Mixer、Citadel、Galley等组件； pilot英 &#x2F;ˈpaɪlət&#x2F;  美 &#x2F;ˈpaɪlət&#x2F;  全球(英国)n. 飞行员；领航员adj. 试点的v. 驾驶；领航；试用n.">
+<meta name="keywords" content="istio,servicemesh,microservice,kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[服务网格Istio系列]--Istio架构介绍">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;12&#x2F;28&#x2F;ServiceMesh-Istio-Series--Istio-Architecture.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="上篇文章中介绍了：[服务网格Istio系列]--微服务 Kubernetes Istio关系，这里主要介绍Istio的架构。Istio的工作机制Istio主要分为两部分：控制面和数据面；控制面主要包括Pilot、Mixer、Citadel、Galley等组件； pilot英 &#x2F;ˈpaɪlət&#x2F;  美 &#x2F;ˈpaɪlət&#x2F;  全球(英国)n. 飞行员；领航员adj. 试点的v. 驾驶；领航；试用n.">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-how-working-and-arch.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-Service_version.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-muti-version-service.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-serviceInstance.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-k8s-svc.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-arch.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-pilot.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-pilot-yaml-envoy.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-pilot-discovery.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-mixer.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-mixer-policy.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-citadel.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-inbound-outbound.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-ingress-gateway.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:updated_time" content="2019-12-27T16:00:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Istio-Architecture&#x2F;istio-how-working-and-arch.jpg">
+
+<link rel="canonical" href="https://knner.wang/2019/12/28/ServiceMesh-Istio-Series--Istio-Architecture.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>[服务网格Istio系列]--Istio架构介绍 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">16</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">19</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2019/12/28/ServiceMesh-Istio-Series--Istio-Architecture.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [服务网格Istio系列]--Istio架构介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-28 00:00:00" itemprop="dateCreated datePublished" datetime="2019-12-28T00:00:00+08:00">2019-12-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/" itemprop="url" rel="index">
+                    <span itemprop="name">servicemesh</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/istio/" itemprop="url" rel="index">
+                    <span itemprop="name">istio</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/istio/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/istio/kubernetes/microservice/" itemprop="url" rel="index">
+                    <span itemprop="name">microservice</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2019/12/28/ServiceMesh-Istio-Series--Istio-Architecture.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/28/ServiceMesh-Istio-Series--Istio-Architecture.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>上篇文章中介绍了：<a href="/2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html" title="[服务网格Istio系列]--微服务 Kubernetes Istio关系">[服务网格Istio系列]--微服务 Kubernetes Istio关系</a>，这里主要介绍Istio的架构。</p><h2 id="Istio的工作机制"><a href="#Istio的工作机制" class="headerlink" title="Istio的工作机制"></a>Istio的工作机制</h2><p>Istio主要分为两部分：控制面和数据面；</p><p>控制面主要包括Pilot、Mixer、Citadel、Galley等组件；</p><blockquote>
+<p>pilot<br>英 /ˈpaɪlət/  美 /ˈpaɪlət/  全球(英国)<br>n. 飞行员；领航员<br>adj. 试点的<br>v. 驾驶；领航；试用<br>n. (Pilot)人名；(意、印)皮洛特；(法)皮洛<br>复数 pilots过去式 piloted过去分词 piloted现在分词 piloting第三人称单数 pilots</p>
+<p>mixer<br>英 /ˈmɪksə(r)/  美 /ˈmɪksər/  全球(德国)<br>n. 混合器；搅拌器；[电子] 混频器</p>
+<p>citadel<br>英 /ˈsɪtədəl; ˈsɪtədel/  美 /ˈsɪtədəl,ˈsɪtədel/  全球(美国)<br>n. 城堡；大本营；避难处<br>复数 citadels</p>
+<p>galley<br>英 /ˈɡæli/  美 /ˈɡæli/  全球(英国)<br>n. [船] 船上的厨房；单层甲板的大帆船；活版盘，长条校样<br>n. (Galley)人名；(英)加利；(法、德)加莱<br>复数 galleys</p>
+<p>envoy<br>英 /ˈenvɔɪ/  美 /ˈenvɔɪ/  全球(英国)<br>n. 使者；全权公使<br>复数 envoys</p>
+</blockquote><a id="more"></a>
+
+
+
+<p>数据面由伴随每个应用程序部署的代理程序Envoy组成，执行针对应用程序的治理逻辑。</p>
+<p>下面通过动态场景来了解Istio的工作机制，观察frontend服务对forecast服务进行一次访问时，在Istio内部都发生了什么？</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-how-working-and-arch.jpg" alt></p>
+<h3 id="1-自动注入："><a href="#1-自动注入：" class="headerlink" title="1. 自动注入："></a>1. 自动注入：</h3><p><strong>指在创建应用程序时自动注入Sidecar代理</strong>。在Kubernetes场景下创建Pod时，Kuber-apiserver调用管理面组件的Sidecar-injector服务，自动修改应用程序的描述信息并注入Sidecar。在真正创建Pod时，在创建业务容器的同时在Pod中创建Sidecar容器。</p>
+<h3 id="2-流量拦截"><a href="#2-流量拦截" class="headerlink" title="2. 流量拦截"></a>2. 流量拦截</h3><p><strong>在Pod初始化时设置iptables规则，当有流量到来时，基于配置的iptables规则拦截业务容器的Inbound和Outbound流量到Sidecar容器上</strong>，应用程序感知不到Sidecar的存在，还以原本的方式进行相互访问。如上图，流出frontend服务的流量会被frontend服务侧的Sidecar Envoy拦截，而当流量到达forecast服务时，Inbound流量被forecast侧的Envoy拦截。</p>
+<h3 id="3-服务发现"><a href="#3-服务发现" class="headerlink" title="3. 服务发现"></a>3. 服务发现</h3><p><strong>服务发起方的Envoy调用管理面组件Pilot的服务发现接口获取目标服务的实例列表</strong>，如上图所示，frontend服务侧的Envoy通过Pilot的服务发现接口得到forecast服务各个实例的地址，为访问做准备。</p>
+<h3 id="4-负载均衡"><a href="#4-负载均衡" class="headerlink" title="4. 负载均衡"></a>4. 负载均衡</h3><p><strong>服务发起方的Envoy根据配置的负载均衡策略选择服务实例，并连接对应的实例地址</strong>。如上图所示，数据面的各个Envoy从Pilot中获取forecast服务的负载均衡配置，并执行负载均衡动作。</p>
+<h3 id="5-流量治理"><a href="#5-流量治理" class="headerlink" title="5. 流量治理"></a>5. 流量治理</h3><p><strong>Envoy从Pilot中获取配置的流量规则，在拦截到Inbound和Outbound流量时执行治理逻辑</strong>。如上图，frontend侧的Envoy从Pilot中获取流量治理规则，并根据流量治理规则将不通特性的流量分发到forecast服务的v1或v2版本。</p>
+<h3 id="6-访问安全"><a href="#6-访问安全" class="headerlink" title="6. 访问安全"></a>6. 访问安全</h3><p><strong>在服务访问时通过双方的Envoy进行双向认证和通道加密，并基于服务的身份进行授权管理</strong>。如图，Pilot下发安全相关的配置，在frontend服务和forecast服务的Envoy上自动加载证书和密钥来实现双向认证，其中的证书和密钥由管理面组件Citadel维护。</p>
+<h3 id="7-服务遥测"><a href="#7-服务遥测" class="headerlink" title="7. 服务遥测"></a>7. 服务遥测</h3><p><strong>在服务间通信时，通信双方的Envoy都会连接管理面组件Mixer，上报访问数据，并通过Mixer将数据转发给对应的监控后端</strong>。如图所示，frontend服务对forecast服务的访问监控指标、日志和调用链都可以通过这种方式收集到对应的监控后端。</p>
+<h3 id="8-策略执行"><a href="#8-策略执行" class="headerlink" title="8. 策略执行"></a>8. 策略执行</h3><p><strong>在进行服务访问时，通过Mixer连接后端服务来控制服务间的访问，判断对访问是放行还是拒绝</strong>。如上图，Mixer后端可以对接一个限流服务对从frontend服务到forecast服务的访问进行速率控制。</p>
+<h3 id="9-外部访问"><a href="#9-外部访问" class="headerlink" title="9. 外部访问"></a>9. 外部访问</h3><p><strong>在网格的入口处有一个Envoy扮演入口网关的角色</strong>。如上图，外部服务通过Gateway访问入口服务frontend，对frontend服务的负载均衡和一些流量治理策略都在这个Gateway上执行。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><strong>服务调用双方的Envoy代理拦截流量，并根据管理面的相关配置执行响应的治理动作</strong>。</p>
+<h2 id="Istio的服务模型"><a href="#Istio的服务模型" class="headerlink" title="Istio的服务模型"></a>Istio的服务模型</h2><p>Istio 支持将由服务、服务版本和服务实例构造成的抽象模型映射到不同的平台上。可以认为，Istio的几个资源对象就是基于<strong>Kubernetes的相应资源对象构建的</strong>，加上<strong>部分约束</strong>来满足Istio服务模型的要求。</p>
+<p>Istio 官方对这几个约束的描述如下：</p>
+<ul>
+<li><p><strong>端口命名</strong>：对Istio的服务端口必须进行命名，二期名称只允许是&lt;protocol&gt;[-&lt;suffix&gt;]这种格式：</p>
+<ul>
+<li>&lt;protocol&gt; 可以是tcp、http、http2、https、grpc、tls、mongo、mysql、redis等，Istio根据在端口上定义的协议来提供对应的路由能力。</li>
+<li>[-&lt;suffix&gt;] 后缀，端口名称，可以省略。</li>
+<li>例如：<code>name: http2-forecast</code> 和 <code>name: http</code> 是合法的端口名，但是<code>name: http2forecast</code> 是非法的端口名。</li>
+<li>如果<strong>端口未命名</strong>或者<strong>没有基于这种格式进行命名</strong>，则端口的流量会被当做TCP流量来处理。</li>
+</ul>
+</li>
+<li><p><strong>服务关联</strong>：Pod需要关联到服务，如果一个Pod属于多个Kubernetes服务（Service），则要求不能再同一个端口上使用不同的协议。</p>
+</li>
+<li><p><strong>Deployment使用app和version标签</strong>：建议Kubernetes Deployment显示的包含app和version标签，每个Deployment都需要有一个有业务意义的app标签和一个表示版本的version标签。在分布式追踪时可以通过app标签来补齐上下文信息，还可以通过app和version标签为遥测数据补齐上下文信息。</p>
+</li>
+<li><p><strong>应用的UID</strong>：确认Pods内运行程序的用户ID（UID）不能是1337。</p>
+</li>
+<li><p><strong><code>NET_ADMIN</code>能力</strong>：如果集群中配置了Pod Security Policies，则Pods必须拥有<code>NET_ADMIN</code>的能力，如果你使用Istio CNI Plugin，则此要求不再适用。</p>
+</li>
+</ul>
+<h3 id="Istio的服务-Service"><a href="#Istio的服务-Service" class="headerlink" title="Istio的服务 Service"></a>Istio的服务 Service</h3><p>从逻辑上看，服务是Istio主要管理的资源对象，是一个抽象概念，主要包含HostName和Ports等属性，并指定了Service的域名和端口列表。每个端口都包含端口名称、端口号和端口协议。</p>
+<p>不同的协议有不同的内容，相应的，在Istio中对不同的协议也有不同的治理规则集合。这也是Istio关于端口命名约束的机制层面的原因，具体来讲就是要求将端口的协议通过“-”连接符加在端口名称上。</p>
+<p>从物理层面看，Istio服务的存在形式就是Kubernetes的Service，在启用了Istio的集群中创建Kubernetes的Service时只要满足以上约束，就可以转换为Istio的Service并配置规则进行流量治理。</p>
+<p>Service是Kubernetes的一个核心资源，用户通过一个域名或者虚拟的IP就能访问到后端Pod，避免像用户暴露Pod地址的问题。</p>
+<p>一个简单的Service示例如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">3002</span></span><br><span class="line">    <span class="attr">targetPort:</span> <span class="number">3002</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">forecast</span></span><br></pre></td></tr></table></figure>
+
+<p>解释：</p>
+<p>创建了一个名为foreca的Service，通过一个ClusterIP的地址就可以访问这个Service，指向拥有“app: forecast”标签的Pods。Kubernetes自动创建一个和Service同名的Endpoints对象，Service的Selector会持续的关注属于Service的Pod，结果会被更新到相应的Endpoints对象。</p>
+<p>Istio的Service比较简单，可以看到差别就是要满足Istio服务的约束，并在端口名称上指定协议。在以下实例中指定了forecast的服务的3002端口是HTTP，对这个服务的访问就可以应用HTTP的诸多治理规则：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">3002</span></span><br><span class="line">    <span class="attr">targetPort:</span> <span class="number">3002</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">http</span> <span class="comment"># 这里只指定了&lt;protocol&gt;,而省略了-&lt;suffix&gt;</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">forecast</span></span><br></pre></td></tr></table></figure>
+
+<p>Istio虽然依赖于了Kubernetes的Service定义，但是除了一些约束，在定位上还是有些差别的。在Kubernetes中，一般先通过Deployment创建工作负载，在通过创建Service关联这些工作负载，从而暴露工作负载的接口。因而看上去主体是工作负载，Service只是一种访问方式，某些后台执行的负载若不需要被访问，就不用定义Service。</p>
+<p>在Istio中，Service是治理的对象，是Istio中的核心管理实体，所以在Istio中，Service是一个提供了对外访问能力的执行体，可以将其理解为一个定义了服务的工作负载，没有访问方式的工作负载不是Istio的管理对象，Kubernetes的Service定义就是Istio服务的元数据。</p>
+<h3 id="Istio的服务版本"><a href="#Istio的服务版本" class="headerlink" title="Istio的服务版本"></a>Istio的服务版本</h3><p>在Istio的应用场景中，灰度发布是一个重要的场景，即要求一个Service有多个不同版本的实现。而Kubernetes在语法上不支持一个Deployment上定义多个版本，<strong>在Istio中多个版本的定义是将一个Service关联到多个Deployment，每个Deployment都对应服务的一个版本</strong>：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-Service_version.jpg" alt></p>
+<p>如下示例：forecast-v1和forecast-v2这两个Deployment分别对应服务的两个版本：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast-v1</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">forecast</span></span><br><span class="line">    <span class="attr">version:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">forecast</span></span><br><span class="line">      <span class="attr">version:</span> <span class="string">v1</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">forecast</span></span><br><span class="line">        <span class="attr">version:</span> <span class="string">v1</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">istioweather/forecast:v1</span></span><br><span class="line">        <span class="attr">ports:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">3002</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast-v2</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">forecast</span></span><br><span class="line">    <span class="attr">version:</span> <span class="string">v2</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">forecast</span></span><br><span class="line">      <span class="attr">version:</span> <span class="string">v2</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">forecast</span></span><br><span class="line">        <span class="attr">version:</span> <span class="string">v2</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">istioweather/forecast:v2</span></span><br><span class="line">        <span class="attr">ports:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">3002</span></span><br></pre></td></tr></table></figure>
+
+<p>观察和比较这两个Deployment的描述文件，可以看到：</p>
+<ul>
+<li><p>这两个Deployment都有相同的<code>app: forecast</code> 标签，正式这个标签和Service的标签选择器一致(参考上面的：[Istio的服务 Service](#Istio的服务 Service))，才保证了Service能关联到两个Deployment对应的Pod。</p>
+</li>
+<li><p>都有不同的镜像版本，因此各自创建的Pod也不同；两个Deployment的version标签也不同，分别为v1和v2，表示这是服务的不同版本，这个不同的版本标签用来定义不同的Destination，进行执行不同的路由规则。</p>
+</li>
+</ul>
+<p>下面根据对Service和两个Deployment的如上定义分别创建3个Pod和两个Pod，假设5个Pod都运行在两个不同的Node上。在对Service进行访问时，根据配置的流量规则，可以将不同的流量转发到不同版本的Pod上：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-muti-version-service.jpg" alt></p>
+<h3 id="Istio的服务实例-ServiceInstance"><a href="#Istio的服务实例-ServiceInstance" class="headerlink" title="Istio的服务实例 ServiceInstance"></a>Istio的服务实例 ServiceInstance</h3><p>服务实例是真正处理服务请求的后端，就是监听在相同端口上的具有相同行为的对等后端。服务访问时由代理根据负载均衡策略将流量转发到其中一个后端处理。Istio的ServiceInstance主要包括Endpoint，Service，Labels，AvailabilityZone和ServiceAccount等属性，Endpoint是其中最主要的属性，表示这个实力对应的网络后端(IP: Port)，Service表示这个服务实例归属的服务。</p>
+<p>Istio的服务发现基于Kubernetes构建，Istio的Service对应Kubernetes的Service，Istio的服务实例ServiceInstance对应Kubernetes的Endpoints：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-serviceInstance.jpg" alt></p>
+<p>Kubernetes提供了一个Endpoints对象，这个Endpoints对象的名称和Service的名称相同，它是一个&lt;Pod IP&gt;: &lt;targetPort&gt;列表，负责维护Service后端Pod的变化。上面的例子中，forecast服务对应如下Endpoints对象，包含两个后端Pod，后端地址分别是172.16.0.16和172.16.0.19，当实例数量发生变化时，对应的Subsets列表的后端数量会动态更新；同样，当某个Pod迁移时，Endpoints对象中的后端IP地址也会更新：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Endpoints</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line"><span class="attr">subsets:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">addresses:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">ip:</span> <span class="number">172.16</span><span class="number">.0</span><span class="number">.16</span></span><br><span class="line">    <span class="attr">nodeName:</span> <span class="number">192.168</span><span class="number">.0</span><span class="number">.133</span></span><br><span class="line">    <span class="attr">targetRef:</span></span><br><span class="line">      <span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">forecast-v1-47df577w9d-9sl3</span></span><br><span class="line">      <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">ip:</span> <span class="number">172.16</span><span class="number">.0</span><span class="number">.19</span></span><br><span class="line">    <span class="attr">nodeName:</span> <span class="number">192.168</span><span class="number">.0</span><span class="number">.133</span></span><br><span class="line">    <span class="attr">targetRef:</span></span><br><span class="line">      <span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">forecast-v1-89dd2j92jh-3dg3</span></span><br><span class="line">      <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">http</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">3002</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Istio的主要组件"><a href="#Istio的主要组件" class="headerlink" title="Istio的主要组件"></a>Istio的主要组件</h2><blockquote>
+<p>官方参考：<a href="https://istio.io/docs/ops/deployment/architecture/" target="_blank" rel="noopener">https://istio.io/docs/ops/deployment/architecture/</a></p>
+</blockquote>
+<p>如图所示：是Istio1.1在典型环境下完整组件列表：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-k8s-svc.jpg" alt></p>
+<p>Istio架构：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-arch.jpg" alt></p>
+<p>来自官方的架构说明：</p>
+<p>An Istio service mesh is logically split into a <strong>data plane</strong> and a <strong>control plane</strong>.</p>
+<ul>
+<li>The <strong>data plane</strong> is composed of a set of intelligent proxies (<a href="https://www.envoyproxy.io/" target="_blank" rel="noopener">Envoy</a>) deployed as sidecars. These proxies mediate and control all network communication between microservices along with <a href="https://istio.io/docs/reference/config/policy-and-telemetry/" target="_blank" rel="noopener">Mixer</a>, a general-purpose policy and telemetry hub.数据平面由一组部署为边车的智能代理(Envoy)组成。这些代理负责协调和控制微服务和Mixer之间的所有网络通信，以及一个通用策略和遥测中心。</li>
+<li>The <strong>control plane</strong> manages and configures the proxies to route traffic. Additionally, the control plane configures Mixers to enforce policies and collect telemetry.控制平面管理并将代理配置为路由流量。此外，控制平面配置Mixer来执行策略和收集遥测数据。</li>
+</ul>
+<h3 id="istio-pilot"><a href="#istio-pilot" class="headerlink" title="istio-pilot"></a>istio-pilot</h3><p>官方描述：</p>
+<p>Pilot provides service discovery for the Envoy sidecars, traffic management capabilities for intelligent routing (e.g., A/B tests, canary rollouts, etc.), and resiliency (timeouts, retries, circuit breakers, etc.).</p>
+<p>Pilot converts high level routing rules that control traffic behavior into Envoy-specific configurations, and propagates them to the sidecars at runtime. Pilot abstracts platform-specific service discovery mechanisms and synthesizes them into a standard format that any sidecar conforming with the <a href="https://www.envoyproxy.io/docs/envoy/latest/api/api" target="_blank" rel="noopener">Envoy API</a> can consume.</p>
+<p>服务列表中的istio-pilot是Istio的控制中枢Pilot服务。如果把数据面的Envoy也看做一种Agent，则Pilot类似传统C/S架构中的服务端Master，下发指令控制客户端完成业务功能。和传统的微服务架构对比，Pilot至少涵盖服务注册中心和Config Server等管理组件的功能。</p>
+<p>如下图，Pilot直接从运行平台提取数据并将其构造或转换成Istio的服务发现模型，因此Pilot只有服务发现功能，无需进行服务注册。这种抽象模型解耦了Pilot和底层平台的不同实现，可支持Kubernetes、Consul等平台。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-pilot.jpg" alt></p>
+<p>出了<strong>服务发现</strong>，Pilot更重要的一个功能是<strong>向数据面下发规则</strong>，包括VirtualService、DestinationRule、Gateway、ServiceEntry等流量治理规则，也包括认证授权等安全规则。Pilot负责将各种规则转换成Envoy可识别的格式，通过标准的xDS协议发给Envoy，指导Envoy完成动作。在通信上，Envoy通过gRPC流式订阅Pilot的配置资源，如下，Pilot将VirtualService表达的路由规则分发到Envoy上，Envoy根据该路由规则进行流量转发。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-pilot-yaml-envoy.jpg" alt></p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-pilot-discovery.jpg" alt></p>
+<ol>
+<li>The platform starts a new instance of a service which notifies its platform adapter.</li>
+<li>The platform adapter registers the instance with the Pilot abstract model.</li>
+<li><strong>Pilot</strong> distributes traffic rules and configurations to the Envoy proxies to account for the change.</li>
+</ol>
+<h3 id="istio-telemetry"><a href="#istio-telemetry" class="headerlink" title="istio-telemetry"></a>istio-telemetry</h3><blockquote>
+<p>telemetry<br>英 /təˈlemətri/  美 /təˈlemətri/  全球(美国)<br>n. [自] 遥测技术；遥感勘测；自动测量记录传导</p>
+</blockquote>
+<p>istio-telemetry是专门用于手机遥测数据的Mixer服务组件。在部署上，Istio控制面部署了两个Mixer组件：istio-telemery和istio-policy，分别处理遥测数据的收集和策略的执行，两个组件的镜像时相同的，都是：“/istio/mixer”。</p>
+<p>Mixer是Istio独有的一种设计，不同于Pilot，在其他平台上总能找到类似功能的服务组件。从调用实机上来说，<strong>Pilot管理的是配置数据</strong>，<strong>在配置改变时和数据面交互即可</strong>；然而，对于Mixer来说，在<strong>服务间交互</strong>时Envoy都会对Mixer进行一次调用，因此这是一种实时管理。当然，在实现上通过Mixer和Proxy上使用缓存机制，可保证不用每次进行数据面请求时都和Mixer交互。</p>
+<p>如下图：当<strong>网格中的两个服务间有调用发生时</strong>，服务的代理Envoy就会上报遥测数据给istio-telemetry服务组件，istio-telemetry服务组件则根据配置将生成访问Metric等数据分发给后端的遥测服务。数据面代理通过Report接口上报数据时访问数据会被批量上报。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-mixer.jpg" alt></p>
+<p>在架构上，Mixer作为中介来解耦数据面和不同后端的对接，已提供灵活性和扩展能力。运维人员可以动态配置各种遥测后端，来收集指定的服务运行数据。</p>
+<h3 id="istio-policy"><a href="#istio-policy" class="headerlink" title="istio-policy"></a>istio-policy</h3><p>istio-topicy是另一个Mixer服务，和istio-telemetry基本上是完全相同的机制和流程，如下图，<strong>数据面在转发服务的请求前</strong>，调用istio-policy的Check接口检查是否允许访问，<strong>Mixer根据配置将请求转发到对应的Adapter做对应检查</strong>，给代理返回允许还是拒绝访问。可以对接如配额、授权、黑白名单等不同的控制后端，对服务间的访问进行可扩展的控制。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-mixer-policy.jpg" alt></p>
+<p>Mixer组件官方介绍：</p>
+<p><a href="https://istio.io/docs/reference/config/policy-and-telemetry/" target="_blank" rel="noopener">Mixer</a> is a platform-independent component. Mixer enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services. The proxy extracts request level <a href="https://istio.io/docs/reference/config/policy-and-telemetry/mixer-overview/#attributes" target="_blank" rel="noopener">attributes</a>, and sends them to Mixer for evaluation. You can find more information on this attribute extraction and policy evaluation in our <a href="https://istio.io/docs/reference/config/policy-and-telemetry/mixer-overview/#configuration-model" target="_blank" rel="noopener">Mixer Configuration documentation</a>.</p>
+<p>Mixer includes a flexible plugin model. This model enables Istio to interface with a variety of host environments and infrastructure backends. Thus, Istio abstracts the Envoy proxy and Istio-managed services from these details.</p>
+<p>所有的上报属性，参考：<a href="https://istio.io/docs/reference/config/policy-and-telemetry/attribute-vocabulary/" target="_blank" rel="noopener">https://istio.io/docs/reference/config/policy-and-telemetry/attribute-vocabulary/</a></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Name</td>
+<td>Type</td>
+<td>Description</td>
+<td>Kubernetes Example</td>
+</tr>
+<tr>
+<td><code>source.uid</code></td>
+<td>string</td>
+<td>Platform-specific unique identifier for the source workload instance.</td>
+<td><code>kubernetes://redis-master-2353460263-1ecey.my-namespace</code></td>
+</tr>
+<tr>
+<td><code>source.ip</code></td>
+<td>ip_address</td>
+<td>Source workload instance IP address.</td>
+<td><code>10.0.0.117</code></td>
+</tr>
+<tr>
+<td><code>source.labels</code></td>
+<td>map[string, string]</td>
+<td>A map of key-value pairs attached to the source instance.</td>
+<td>version =&gt; v1</td>
+</tr>
+<tr>
+<td><code>source.name</code></td>
+<td>string</td>
+<td>Source workload instance name.</td>
+<td><code>redis-master-2353460263-1ecey</code></td>
+</tr>
+<tr>
+<td><code>source.namespace</code></td>
+<td>string</td>
+<td>Source workload instance namespace.</td>
+<td><code>my-namespace</code></td>
+</tr>
+<tr>
+<td><code>source.principal</code></td>
+<td>string</td>
+<td>Authority under which the source workload instance is running.</td>
+<td><code>service-account-foo</code></td>
+</tr>
+<tr>
+<td><code>source.owner</code></td>
+<td>string</td>
+<td>Reference to the workload controlling the source workload instance.</td>
+<td><code>kubernetes://apis/extensions/v1beta1/namespaces/istio-system/deployments/istio-policy</code></td>
+</tr>
+<tr>
+<td><code>source.workload.uid</code></td>
+<td>string</td>
+<td>Unique identifier of the source workload.</td>
+<td><code>istio://istio-system/workloads/istio-policy</code></td>
+</tr>
+<tr>
+<td><code>source.workload.name</code></td>
+<td>string</td>
+<td>Source workload name.</td>
+<td><code>istio-policy</code></td>
+</tr>
+<tr>
+<td><code>source.workload.namespace</code></td>
+<td>string</td>
+<td>Source workload namespace.</td>
+<td><code>istio-system</code></td>
+</tr>
+<tr>
+<td><code>destination.uid</code></td>
+<td>string</td>
+<td>Platform-specific unique identifier for the server instance.</td>
+<td><code>kubernetes://my-svc-234443-5sffe.my-namespace</code></td>
+</tr>
+<tr>
+<td><code>destination.ip</code></td>
+<td>ip_address</td>
+<td>Server IP address.</td>
+<td><code>10.0.0.104</code></td>
+</tr>
+<tr>
+<td><code>destination.port</code></td>
+<td>int64</td>
+<td>The recipient port on the server IP address.</td>
+<td><code>8080</code></td>
+</tr>
+<tr>
+<td><code>destination.labels</code></td>
+<td>map[string, string]</td>
+<td>A map of key-value pairs attached to the server instance.</td>
+<td>version =&gt; v2</td>
+</tr>
+<tr>
+<td><code>destination.name</code></td>
+<td>string</td>
+<td>Destination workload instance name.</td>
+<td><code>istio-telemetry-2359333</code></td>
+</tr>
+<tr>
+<td><code>destination.namespace</code></td>
+<td>string</td>
+<td>Destination workload instance namespace.</td>
+<td><code>istio-system</code></td>
+</tr>
+<tr>
+<td><code>destination.principal</code></td>
+<td>string</td>
+<td>Authority under which the destination workload instance is running.</td>
+<td><code>service-account</code></td>
+</tr>
+<tr>
+<td><code>destination.owner</code></td>
+<td>string</td>
+<td>Reference to the workload controlling the destination workload instance.</td>
+<td><code>kubernetes://apis/extensions/v1beta1/namespaces/istio-system/deployments/istio-telemetry</code></td>
+</tr>
+<tr>
+<td><code>destination.workload.uid</code></td>
+<td>string</td>
+<td>Unique identifier of the destination workload.</td>
+<td><code>istio://istio-system/workloads/istio-telemetry</code></td>
+</tr>
+<tr>
+<td><code>destination.workload.name</code></td>
+<td>string</td>
+<td>Destination workload name.</td>
+<td><code>istio-telemetry</code></td>
+</tr>
+<tr>
+<td><code>destination.workload.namespace</code></td>
+<td>string</td>
+<td>Destination workload namespace.</td>
+<td><code>istio-system</code></td>
+</tr>
+<tr>
+<td><code>destination.container.name</code></td>
+<td>string</td>
+<td>Name of the destination workload instance’s container.</td>
+<td><code>mixer</code></td>
+</tr>
+<tr>
+<td><code>destination.container.image</code></td>
+<td>string</td>
+<td>Image of the destination workload instance’s container.</td>
+<td><code>gcr.io/istio-testing/mixer:0.8.0</code></td>
+</tr>
+<tr>
+<td><code>destination.service.host</code></td>
+<td>string</td>
+<td>Destination host address.</td>
+<td><code>istio-telemetry.istio-system.svc.cluster.local</code></td>
+</tr>
+<tr>
+<td><code>destination.service.uid</code></td>
+<td>string</td>
+<td>Unique identifier of the destination service.</td>
+<td><code>istio://istio-system/services/istio-telemetry</code></td>
+</tr>
+<tr>
+<td><code>destination.service.name</code></td>
+<td>string</td>
+<td>Destination service name.</td>
+<td><code>istio-telemetry</code></td>
+</tr>
+<tr>
+<td><code>destination.service.namespace</code></td>
+<td>string</td>
+<td>Destination service namespace.</td>
+<td><code>istio-system</code></td>
+</tr>
+<tr>
+<td><code>origin.ip</code></td>
+<td>ip_address</td>
+<td>IP address of the proxy client, e.g. origin for the ingress proxies.</td>
+<td><code>127.0.0.1</code></td>
+</tr>
+<tr>
+<td><code>request.headers</code></td>
+<td>map[string, string]</td>
+<td>HTTP request headers with lowercase keys. For gRPC, its metadata will be here.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.id</code></td>
+<td>string</td>
+<td>An ID for the request with statistically low probability of collision.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.path</code></td>
+<td>string</td>
+<td>The HTTP URL path including query string</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.url_path</code></td>
+<td>string</td>
+<td>The path part of HTTP URL, with query string being stripped</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.query_params</code></td>
+<td>map[string, string]</td>
+<td>A map of query parameters extracted from the HTTP URL.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.host</code></td>
+<td>string</td>
+<td>HTTP/1.x host header or HTTP/2 authority header.</td>
+<td><code>redis-master:3337</code></td>
+</tr>
+<tr>
+<td><code>request.method</code></td>
+<td>string</td>
+<td>The HTTP method.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.reason</code></td>
+<td>string</td>
+<td>The request reason used by auditing systems.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.referer</code></td>
+<td>string</td>
+<td>The HTTP referer header.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.scheme</code></td>
+<td>string</td>
+<td>URI Scheme of the request</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.size</code></td>
+<td>int64</td>
+<td>Size of the request in bytes. For HTTP requests this is equivalent to the Content-Length header.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.total_size</code></td>
+<td>int64</td>
+<td>Total size of HTTP request in bytes, including request headers, body and trailers.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.time</code></td>
+<td>timestamp</td>
+<td>The timestamp when the destination receives the request. This should be equivalent to Firebase “now”.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>request.useragent</code></td>
+<td>string</td>
+<td>The HTTP User-Agent header.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>response.headers</code></td>
+<td>map[string, string]</td>
+<td>HTTP response headers with lowercase keys.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>response.size</code></td>
+<td>int64</td>
+<td>Size of the response body in bytes</td>
+<td></td>
+</tr>
+<tr>
+<td><code>response.total_size</code></td>
+<td>int64</td>
+<td>Total size of HTTP response in bytes, including response headers and body.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>response.time</code></td>
+<td>timestamp</td>
+<td>The timestamp when the destination produced the response.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>response.duration</code></td>
+<td>duration</td>
+<td>The amount of time the response took to generate.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>response.code</code></td>
+<td>int64</td>
+<td>The response’s HTTP status code.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>response.grpc_status</code></td>
+<td>string</td>
+<td>The response’s gRPC status.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>response.grpc_message</code></td>
+<td>string</td>
+<td>The response’s gRPC status message.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>connection.id</code></td>
+<td>string</td>
+<td>An ID for a TCP connection with statistically low probability of collision.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>connection.event</code></td>
+<td>string</td>
+<td>Status of a TCP connection, its value is one of “open”, “continue” and “close”.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>connection.received.bytes</code></td>
+<td>int64</td>
+<td>Number of bytes received by a destination service on a connection since the last Report() for a connection.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>connection.received.bytes_total</code></td>
+<td>int64</td>
+<td>Total number of bytes received by a destination service during the lifetime of a connection.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>connection.sent.bytes</code></td>
+<td>int64</td>
+<td>Number of bytes sent by a destination service on a connection since the last Report() for a connection.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>connection.sent.bytes_total</code></td>
+<td>int64</td>
+<td>Total number of bytes sent by a destination service during the lifetime of a connection.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>connection.duration</code></td>
+<td>duration</td>
+<td>The total amount of time a connection has been open.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>connection.mtls</code></td>
+<td>boolean</td>
+<td>Indicates whether a request is received over a mutual TLS enabled downstream connection.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>connection.requested_server_name</code></td>
+<td>string</td>
+<td>The requested server name (SNI) of the connection</td>
+<td></td>
+</tr>
+<tr>
+<td><code>context.protocol</code></td>
+<td>string</td>
+<td>Protocol of the request or connection being proxied.</td>
+<td><code>tcp</code></td>
+</tr>
+<tr>
+<td><code>context.time</code></td>
+<td>timestamp</td>
+<td>The timestamp of Mixer operation.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>context.reporter.kind</code></td>
+<td>string</td>
+<td>Contextualizes the reported attribute set. Set to <code>inbound</code> for the server-side calls from sidecars and <code>outbound</code> for the client-side calls from sidecars and gateways</td>
+<td><code>inbound</code></td>
+</tr>
+<tr>
+<td><code>context.reporter.uid</code></td>
+<td>string</td>
+<td>Platform-specific identifier of the attribute reporter.</td>
+<td><code>kubernetes://my-svc-234443-5sffe.my-namespace</code></td>
+</tr>
+<tr>
+<td><code>context.proxy_error_code</code></td>
+<td>string</td>
+<td>Additional details about the response or connection from proxy. In case of Envoy, see <code>%RESPONSE_FLAGS%</code> in <a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log#configuration" target="_blank" rel="noopener">Envoy Access Log</a> for more detail</td>
+<td><code>UH</code></td>
+</tr>
+<tr>
+<td><code>api.service</code></td>
+<td>string</td>
+<td>The public service name. This is different than the in-mesh service identity and reflects the name of the service exposed to the client.</td>
+<td><code>my-svc.com</code></td>
+</tr>
+<tr>
+<td><code>api.version</code></td>
+<td>string</td>
+<td>The API version.</td>
+<td><code>v1alpha1</code></td>
+</tr>
+<tr>
+<td><code>api.operation</code></td>
+<td>string</td>
+<td>Unique string used to identify the operation. The id is unique among all operations described in a specific &lt;service, version&gt;.</td>
+<td><code>getPetsById</code></td>
+</tr>
+<tr>
+<td><code>api.protocol</code></td>
+<td>string</td>
+<td>The protocol type of the API call. Mainly for monitoring/analytics. Note that this is the frontend protocol exposed to the client, not the protocol implemented by the backend service.</td>
+<td><code>http</code>, <code>https</code>, or <code>grpc</code></td>
+</tr>
+<tr>
+<td><code>request.auth.principal</code></td>
+<td>string</td>
+<td>The authenticated principal of the request. This is a string of the issuer (<code>iss</code>) and subject (<code>sub</code>) claims within a JWT concatenated with “/” with a percent-encoded subject value. This attribute may come from the peer or the origin in the Istio authentication policy, depending on the binding rule defined in the Istio authentication policy.</td>
+<td><code>issuer@foo.com/sub@foo.com</code></td>
+</tr>
+<tr>
+<td><code>request.auth.audiences</code></td>
+<td>string</td>
+<td>The intended audience(s) for this authentication information. This should reflect the audience (<code>aud</code>) claim within a JWT.</td>
+<td><code>aud1</code></td>
+</tr>
+<tr>
+<td><code>request.auth.presenter</code></td>
+<td>string</td>
+<td>The authorized presenter of the credential. This value should reflect the optional Authorized Presenter (<code>azp</code>) claim within a JWT or the OAuth2 client id.</td>
+<td>123456789012.my-svc.com</td>
+</tr>
+<tr>
+<td><code>request.auth.claims</code></td>
+<td>map[string, string]</td>
+<td>all raw string claims from the <code>origin</code> JWT</td>
+<td><code>iss</code>: <code>issuer@foo.com</code>, <code>sub</code>: <code>sub@foo.com</code>, <code>aud</code>: <code>aud1</code></td>
+</tr>
+<tr>
+<td><code>request.api_key</code></td>
+<td>string</td>
+<td>The API key used for the request.</td>
+<td>abcde12345</td>
+</tr>
+<tr>
+<td><code>check.error_code</code></td>
+<td>int64</td>
+<td>The error <a href="https://github.com/google/protobuf/blob/master/src/google/protobuf/stubs/status.h" target="_blank" rel="noopener">code</a> for Mixer Check call.</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>check.error_message</code></td>
+<td>string</td>
+<td>The error message for Mixer Check call.</td>
+<td>Could not find the resource</td>
+</tr>
+<tr>
+<td><code>check.cache_hit</code></td>
+<td>boolean</td>
+<td>Indicates whether Mixer check call hits local cache.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>quota.cache_hit</code></td>
+<td>boolean</td>
+<td>Indicates whether Mixer quota call hits local cache.</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="istio-citadel"><a href="#istio-citadel" class="headerlink" title="istio-citadel"></a>istio-citadel</h3><p>官方介绍：</p>
+<p><a href="https://istio.io/docs/concepts/security/" target="_blank" rel="noopener">Citadel</a> enables strong service-to-service and end-user authentication with built-in identity and credential management. You can use Citadel to upgrade unencrypted traffic in the service mesh. Using Citadel, operators can enforce policies based on service identity rather than on relatively unstable layer 3 or layer 4 network identifiers. Starting from release 0.5, you can use <a href="https://istio.io/docs/concepts/security/#authorization" target="_blank" rel="noopener">Istio’s authorization feature</a> to control who can access your services.</p>
+<p>istio-citadel是Istio核心安全组件，提供了自动生成、分发、转换与撤销密钥和证书功能。<strong>Citadel一直监听Kube-apiserver，以Secret的形式为每个服务都生成证书密钥，并在Pod创建时挂载到Pod上，代理容器使用这些文件来做服务身份认证</strong>，进而代理两端服务实现双向TLS认证、通道加密、访问授权等安全功能，这样用户就不用在代码里维护证书密钥了。如下图：frontend服务对forecast服务的访问用到了HTTP方式，通过配置即可对服务增加认证功能，双方的Envoy会建立双向认证的TLS通道，从而在服务间启用双认证的HTTPS。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-citadel.jpg" alt></p>
+<h3 id="istio-galley"><a href="#istio-galley" class="headerlink" title="istio-galley"></a>istio-galley</h3><p>官方介绍：</p>
+<p>Galley is Istio’s configuration validation, ingestion, processing and distribution component. It is responsible for insulating the rest of the Istio components from the details of obtaining user configuration from the underlying platform (e.g. Kubernetes).</p>
+<p>istio-galley并不直接向数据面提供业务能力，而是<strong>在控制面上向其他组件提供支持</strong>。Galley作为负责配置管理的组件，验证配置信息的格式和内容的正确性，并将这些配置信息提供给管理面的Pilot和Mixer服务使用，这样其他服务组件只用和Galley打交道，从而与底层平台解耦。在新版本的Galley的作用越来越核心。</p>
+<h3 id="istio-sidecar-injector"><a href="#istio-sidecar-injector" class="headerlink" title="istio-sidecar-injector"></a>istio-sidecar-injector</h3><p>istio-sidcar-injector是负责<strong>自动注入的组件</strong>，只要开启了自动注入，在Pod创建时就会自动调用Istio-sidecar-injector向Pod中注入Sidecar容器。</p>
+<p>在Kubernetes环境下，根据自动注入配置，Kuber-apiserver在兰街道Pod创建的请求时，会调用自动注入服务istio-sidecar-injector生生Sidecar容器的描述并将其插入原Pod的定义中，这样，在创建Pod内除了包括业务容器，还包括Sidecar容器。这个注入过程对用户是透明的，用户使用原方式创建工作负载。</p>
+<h3 id="istio-proxy"><a href="#istio-proxy" class="headerlink" title="istio-proxy"></a>istio-proxy</h3><p>Envoy、Sidecar、Proxy等术语有时混着用，都表示<strong>Istio数据面的轻量代理</strong>。但关注Pod的详细信息，会发现这个容器的正式名字是istio-proxy，不是通用的Envoy镜像，而是叠加了Istio的Proxy功能的一个扩展版本。另外，在istio-proxy容器中除了有Envoy，还有一个pilot-agent的守护进程。未来如果能在istio-proxy中提供Mixer的部分能力，则将是一个非常紧凑的设计。</p>
+<p>Envoy使用C++开发的非常有影响力的轻量级高性能开源服务代理。作为服务网格的数据面，Envoy提供了动态服务发现、负载均衡、TLS、HTTP/2及gRPC代理、熔断器、健康检查、流量拆分、灰度发布、故障注入等功能。大部分治理能力最终都落实到Envoy的实现上。</p>
+<p>在Istio中，规则的描述对象都是类似forecast服务的呗访问者，但是真正的规则执行位置对于不同类型的动作可能不同，可能在被访问服务的Sidecar兰街道Inbound流量时执行，也可能在访问者的Sidecar在拦截Outbound流量时执行，一般后者（Outbound）巨多。当给forecast服务定义流量规则时，所有访问forecast服务的Sidecar都收到规则，并且执行相同的治理逻辑，从而对目标服务执行一致的治理。如下图列出常用的服务访问治理规则和其执行位置。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-inbound-outbound.jpg" alt></p>
+<h3 id="istio-ingressgateway"><a href="#istio-ingressgateway" class="headerlink" title="istio-ingressgateway"></a>istio-ingressgateway</h3><p>istio-ingressgateway就是<strong>入口处的Gateway</strong>，从网格外访问网格内的服务就是通过这个Gateway进行的。istio-ingressgateway比较特别，是一个Loadbalancer类型的Service，不同于其他服务组件只有一两个端口，istio-ingressgateway开放了一组端口，这些就是网格内服务的外部访问端口，如下图，网格入口网关istio-ingressgateway的负载和网格内的Sidecar是同样的执行体，也和网格内的其他Sidecar一样从Pilot处接收流量规则并执行。以为入口处的流量都走这个服务，会有较大的并发，并可能出现流量峰值，所以需要评估流量来规划规格和实例数。Istio通过一个特有的资源对象Gateway来配置对外的协议、端口等。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Istio-Architecture/istio-ingress-gateway.jpg" alt></p>
+<h3 id="其他组件"><a href="#其他组件" class="headerlink" title="其他组件"></a>其他组件</h3><p>除了以Istio为前缀的以上几个Istio自由的组件，在集群中一般还安装Jaeger-agent、Jaeger-collector、Jaeger-query、Kiali、Prometheus、Tracing、Zipkin组件，这些组件提供了Istio的调用链、监控等功能，可以选择安装来完成完整的服务监控管理功能。</p>
+<blockquote>
+<p>来自：云原生服务网格Istio：原理、实践、架构与源码解析书籍，本文只作为读书笔记记录，版权属于原作者。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+        <div class="reward-container">
+  <div>如有疏忽错误欢迎在留言区评论指正，如果对您有所帮助欢迎点击下方进行打赏。</div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/wechatpay.jpg" alt="Knner.Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/alipay.jpg" alt="Knner.Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2019/12/28/ServiceMesh-Istio-Series--Istio-Architecture.html" title="[服务网格Istio系列]--Istio架构介绍">https://knner.wang/2019/12/28/ServiceMesh-Istio-Series--Istio-Architecture.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/istio/" rel="tag"># istio</a>
+              <a href="/tags/servicemesh/" rel="tag"># servicemesh</a>
+              <a href="/tags/microservice/" rel="tag"># microservice</a>
+              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html" rel="next" title="[服务网格Istio系列]--微服务 Kubernetes Istio关系">
+                  <i class="fa fa-chevron-left"></i> [服务网格Istio系列]--微服务 Kubernetes Istio关系
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio的工作机制"><span class="nav-number">1.</span> <span class="nav-text">Istio的工作机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-自动注入："><span class="nav-number">1.1.</span> <span class="nav-text">1. 自动注入：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-流量拦截"><span class="nav-number">1.2.</span> <span class="nav-text">2. 流量拦截</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-服务发现"><span class="nav-number">1.3.</span> <span class="nav-text">3. 服务发现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-负载均衡"><span class="nav-number">1.4.</span> <span class="nav-text">4. 负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-流量治理"><span class="nav-number">1.5.</span> <span class="nav-text">5. 流量治理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-访问安全"><span class="nav-number">1.6.</span> <span class="nav-text">6. 访问安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-服务遥测"><span class="nav-number">1.7.</span> <span class="nav-text">7. 服务遥测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-策略执行"><span class="nav-number">1.8.</span> <span class="nav-text">8. 策略执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-外部访问"><span class="nav-number">1.9.</span> <span class="nav-text">9. 外部访问</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">1.10.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio的服务模型"><span class="nav-number">2.</span> <span class="nav-text">Istio的服务模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Istio的服务-Service"><span class="nav-number">2.1.</span> <span class="nav-text">Istio的服务 Service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Istio的服务版本"><span class="nav-number">2.2.</span> <span class="nav-text">Istio的服务版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Istio的服务实例-ServiceInstance"><span class="nav-number">2.3.</span> <span class="nav-text">Istio的服务实例 ServiceInstance</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio的主要组件"><span class="nav-number">3.</span> <span class="nav-text">Istio的主要组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#istio-pilot"><span class="nav-number">3.1.</span> <span class="nav-text">istio-pilot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#istio-telemetry"><span class="nav-number">3.2.</span> <span class="nav-text">istio-telemetry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#istio-policy"><span class="nav-number">3.3.</span> <span class="nav-text">istio-policy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#istio-citadel"><span class="nav-number">3.4.</span> <span class="nav-text">istio-citadel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#istio-galley"><span class="nav-number">3.5.</span> <span class="nav-text">istio-galley</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#istio-sidecar-injector"><span class="nav-number">3.6.</span> <span class="nav-text">istio-sidecar-injector</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#istio-proxy"><span class="nav-number">3.7.</span> <span class="nav-text">istio-proxy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#istio-ingressgateway"><span class="nav-number">3.8.</span> <span class="nav-text">istio-ingressgateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他组件"><span class="nav-number">3.9.</span> <span class="nav-text">其他组件</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备19058691号 </a>
+      <img src="/images/knner/ga-icon.png" style="display: inline-block;"><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=null" rel="noopener" target="_blank">null </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang 版权所有</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: {page: {
+            url: "https://knner.wang/2019/12/28/ServiceMesh-Istio-Series--Istio-Architecture.html",
+            identifier: "2019/12/28/ServiceMesh-Istio-Series--Istio-Architecture.html",
+            title: "[服务网格Istio系列]--Istio架构介绍"
+          }
+        }
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://knner.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    (function() {
+      var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+      if (offsetTop <= 0) {
+        // load directly when there's no a scrollbar
+        window.addEventListener('load', loadComments, false);
+      } else {
+        var disqus_scroll = () => {
+          // offsetTop may changes because of manually resizing browser window or lazy loading images.
+          var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+          var scrollTop = window.scrollY;
+
+          // pre-load comments a bit? (margin or anything else)
+          if (offsetTop - scrollTop < 60) {
+            window.removeEventListener('scroll', disqus_scroll);
+            loadComments();
+          }
+        };
+        window.addEventListener('scroll', disqus_scroll);
+      }
+    })();
+  
+</script>
+
+</body>
+</html>
