@@ -53,7 +53,7 @@
 </script>
 
   <meta name="description" content="上篇文章中介绍了：[服务网格Istio系列]--微服务 Kubernetes Istio关系，这里主要介绍Istio的架构。Istio的工作机制Istio主要分为两部分：控制面和数据面；控制面主要包括Pilot、Mixer、Citadel、Galley等组件； pilot英 &#x2F;ˈpaɪlət&#x2F;  美 &#x2F;ˈpaɪlət&#x2F;  全球(英国)n. 飞行员；领航员adj. 试点的v. 驾驶；领航；试用n.">
-<meta name="keywords" content="istio,servicemesh,microservice,kubernetes">
+<meta name="keywords" content="kubernetes,istio,servicemesh,microservice">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[服务网格Istio系列]--Istio架构介绍">
 <meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2019&#x2F;12&#x2F;28&#x2F;ServiceMesh-Istio-Series--Istio-Architecture.html">
@@ -168,7 +168,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">19</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">21</span></a>
 
   </li>
         <li class="menu-item menu-item-about">
@@ -404,6 +404,7 @@
 <p><a href="https://istio.io/docs/reference/config/policy-and-telemetry/" target="_blank" rel="noopener">Mixer</a> is a platform-independent component. Mixer enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services. The proxy extracts request level <a href="https://istio.io/docs/reference/config/policy-and-telemetry/mixer-overview/#attributes" target="_blank" rel="noopener">attributes</a>, and sends them to Mixer for evaluation. You can find more information on this attribute extraction and policy evaluation in our <a href="https://istio.io/docs/reference/config/policy-and-telemetry/mixer-overview/#configuration-model" target="_blank" rel="noopener">Mixer Configuration documentation</a>.</p>
 <p>Mixer includes a flexible plugin model. This model enables Istio to interface with a variety of host environments and infrastructure backends. Thus, Istio abstracts the Envoy proxy and Istio-managed services from these details.</p>
 <p>所有的上报属性，参考：<a href="https://istio.io/docs/reference/config/policy-and-telemetry/attribute-vocabulary/" target="_blank" rel="noopener">https://istio.io/docs/reference/config/policy-and-telemetry/attribute-vocabulary/</a></p>
+<p>这些属性可以作为流量治理的条件使用。</p>
 <table>
 <thead>
 <tr>
@@ -953,10 +954,10 @@
 
       <footer class="post-footer">
           <div class="post-tags">
+              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
               <a href="/tags/istio/" rel="tag"># istio</a>
               <a href="/tags/servicemesh/" rel="tag"># servicemesh</a>
               <a href="/tags/microservice/" rel="tag"># microservice</a>
-              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
           </div>
 
         
@@ -971,6 +972,9 @@
             <span class="post-nav-divider"></span>
 
             <div class="post-nav-prev post-nav-item">
+                <a href="/2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html" rel="prev" title="[服务网格Istio系列]--非侵入的流量管理-1">
+                  [服务网格Istio系列]--非侵入的流量管理-1 <i class="fa fa-chevron-right"></i>
+                </a>
             </div>
           </div>
       </footer>
@@ -1032,7 +1036,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-count">21</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

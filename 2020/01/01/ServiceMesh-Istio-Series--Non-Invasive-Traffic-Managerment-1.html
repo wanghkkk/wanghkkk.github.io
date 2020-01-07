@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="在之前的文章中介绍了：[服务网格Istio系列]--Istio架构介绍 和 [服务网格Istio系列]--微服务 Kubernetes Istio关系，这里主要介绍Istio的非侵入的流量管理。Istio流量治理的原理流量治理是一个非常宽泛的话题，例如： 动态修改服务访问的负载均衡策略，比如根据某个请求特性做会话保持； 同一个服务有两个版本在线，将一部分流量切到某个版本上； 对服务进行保护，例如显">
+<meta name="keywords" content="kubernetes,istio,servicemesh,microservice">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[服务网格Istio系列]--非侵入的流量管理-1">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2020&#x2F;01&#x2F;01&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="在之前的文章中介绍了：[服务网格Istio系列]--Istio架构介绍 和 [服务网格Istio系列]--微服务 Kubernetes Istio关系，这里主要介绍Istio的非侵入的流量管理。Istio流量治理的原理流量治理是一个非常宽泛的话题，例如： 动态修改服务访问的负载均衡策略，比如根据某个请求特性做会话保持； 同一个服务有两个版本在线，将一部分流量切到某个版本上； 对服务进行保护，例如显">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-pilot-mgr-traf.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;normal-lb.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;service-ds-service-reg.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-lb.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;k8s-lb.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;all-svc-error.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;rongduanqi-status.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;rongduanqi-chanel.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;hystrix-func.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-connect-poll.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-error-check.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-hystrix-comp.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-error-injecte-503.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-error-injecte-time.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;blue-green.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;AB-test.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;jinsique.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;huidu-1.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;kubernetes-huidu-2.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-huidu.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-huidu-header.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-gw.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;k8s-svc-loadbalancer.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;k8s-ingress.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-gw-2.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;external-svc-db.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;open-service-broker-api.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-serviceentry-external-svc.jpg">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:updated_time" content="2019-12-20T16:00:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-pilot-mgr-traf.jpg">
+
+<link rel="canonical" href="https://knner.wang/2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>[服务网格Istio系列]--非侵入的流量管理-1 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">16</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">21</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [服务网格Istio系列]--非侵入的流量管理-1
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-01 00:00:00" itemprop="dateCreated datePublished" datetime="2020-01-01T00:00:00+08:00">2020-01-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-21 00:00:00" itemprop="dateModified" datetime="2019-12-21T00:00:00+08:00">2019-12-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/" itemprop="url" rel="index">
+                    <span itemprop="name">servicemesh</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/istio/" itemprop="url" rel="index">
+                    <span itemprop="name">istio</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/istio/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/servicemesh/istio/kubernetes/microservice/" itemprop="url" rel="index">
+                    <span itemprop="name">microservice</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在之前的文章中介绍了：<a href="/2019/12/28/ServiceMesh-Istio-Series--Istio-Architecture.html" title="[服务网格Istio系列]--Istio架构介绍">[服务网格Istio系列]--Istio架构介绍</a> 和 <a href="/2019/12/27/ServiceMesh-Istio-Series--microservice-kubernetes-istio-relation.html" title="[服务网格Istio系列]--微服务 Kubernetes Istio关系">[服务网格Istio系列]--微服务 Kubernetes Istio关系</a>，这里主要介绍Istio的非侵入的流量管理。</p><h3 id="Istio流量治理的原理"><a href="#Istio流量治理的原理" class="headerlink" title="Istio流量治理的原理"></a>Istio流量治理的原理</h3><p>流量治理是一个非常宽泛的话题，例如：</p><ul>
+<li>动态修改服务访问的负载均衡策略，比如根据某个请求特性做会话保持；</li>
+<li>同一个服务有两个版本在线，将一部分流量切到某个版本上；</li>
+<li>对服务进行保护，例如显示并发连接数、限制请求数、隔离故障服务实例等；</li>
+<li>动态修改服务中的内容，或者模拟一个服务运行故障等；</li>
+</ul><p>在Istio中实现这些服务治理功能时无需修改任何应用的代码。较之微服务的SDK方式，Istio以一种更轻便、透明的方式向用户提供这些功能。只要应用运行在Istio的基础是设施上，就可以使用这些治理能力。</p><a id="more"></a>
+
+
+
+<p>一句话总结Istio流量治理的目标：以基础设施的方式提供给用户非侵入的流量治理功能，用户只需要关注自己的业务逻辑开发，无需关注服务访问管理。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-pilot-mgr-traf.jpg" alt></p>
+<p>控制面会经过如下流程：</p>
+<ol>
+<li>管理员通过命令行或者API创建流量规则；</li>
+<li>Pilot将流量规则转换为Envoy的标准格式；</li>
+<li>Pilot将规则下发到Envoy；</li>
+</ol>
+<p>在数据面会经过如下流程：</p>
+<ol>
+<li>Envoy拦截Pod上本地容器的Inbound和Outbound流量</li>
+<li>在流量经过Envoy时执行对应的流量规则，对流量进行治理；</li>
+</ol>
+<h3 id="负载均衡"><a href="#负载均衡" class="headerlink" title="负载均衡"></a>负载均衡</h3><p>服务调用方使用一个服务名发起访问的时候找到一个合适的后端，把流量导过去。</p>
+<p>如下图：传统的负载均衡一般是在服务端提供的，例如，用浏览器访问一个WEB网站时，一般在网站入口处有一个负载均衡器来做请求的汇聚和转发。服务的虚拟IP和后端实例一般是通过静态配置文件维护的，负载均衡器通过健康检查保证客户端的请求呗路由到健康的后端实例上。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/normal-lb.jpg" alt></p>
+<p>在微服务的场景下，负载均衡一般和服务发现配合使用，每个服务都有多个对等的服务实例，需要有一种机制将请求的服务名解析到服务实例地址上。服务发现负责从服务名解析一组服务实例的列表，负载均衡负责从中选择一个实例。</p>
+<p>如下图所示，不管是SDK的微服务架构，还是Istio这样的Service Mesh架构，服务发现和负载均衡的工作流程都是类似的：</p>
+<ol>
+<li>服务注册。各服务将服务名和服务实例的对应信息注册到服务注册中心。</li>
+<li>服务发现。在客户端发起服务访问时，以同步或者异步的方式从注册中心获取服务对应的实例列表。</li>
+<li>负载均衡。根据配置的负载均衡算法从实例列表中选择一个服务实例。</li>
+</ol>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/service-ds-service-reg.jpg" alt></p>
+<p>Istio的负载均衡正式其中的一个具体应用。在Istio中，Pilot服务维护服务发现数据，Pilot将服务发现数据通过Envoy的标准接口下发给数据面的Envoy，Envoy则根据配置的负载均衡策略选择一个实例转发请求。Istio当前支持的负载均衡算法包括：轮询、随即和最小连接数算法。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-lb.jpg" alt></p>
+<p>在Kubernetes上支持Service的重要组件Kube-proxy，实际上也是运行在工作节点的一个网络代理的负载均衡器，它实现了Service模型，默认通过轮询等方式把Service访问转发到后端实例Pod上，如下图：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/k8s-lb.jpg" alt></p>
+<h3 id="服务熔断"><a href="#服务熔断" class="headerlink" title="服务熔断"></a>服务熔断</h3><p>熔断器在生活中一般指可以自动操作的电气开关，用来保护电路不会因为电流过载或者短路而受损，典型的动作是在检测到故障后马上中断电流。</p>
+<p>熔断器这个概念眼神到计算机世界中指的是故障检测和处理逻辑，防止临时故障或者意外导致系统<strong>整体不可用</strong>，最典型的应用场景就是<strong>防止网络和服务调用故障级联发生</strong>，限制故障的影响范围，防止付账蔓延导致系统整体性能下降或雪崩。</p>
+<p>如下图所示为级联故障示例，可以看出在4个服务间有调用关系，如果后端服务recommendation由于各种原因导致不可用，则前端服务forecast和frontend都会受影响。在这个过程中，若单个服务的故障蔓延到其他服务，就会影响整个系统的运行，所以需要让故障服务快速失败，让调用方服务forecast和frontend知道后端服务recommendation出现问题，并立即进行故障处理。这时，非常小概率发生的事情对整个系统的影响都足够大。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/all-svc-error.jpg" alt></p>
+<p>关于熔断的设计，Martin Fowler有一个静电的文章：<a href="https://martinfowler.com/bliki/CircuitBreaker.html，其中描述的熔断主要应用于微服务场景下的分布式调用中：在远程调用时，请求在超时前一直挂起，会导致请求链路上的级联故障和资源耗尽；熔断器封装了被保护的逻辑，监控调用是否失败，当连续调用失败的数量超过阀值时，熔断器就会跳闸，在跳闸后的一定时间段内，所有调用远程服务的尝试豆浆立刻返回失败；同时，熔断器设置了一个定时器，当计时到期时，允许有限数量的测试请求通过；如果这些请求成功，则熔断器恢复正常操作；如果这些请求失败，则维持断路状态。状态机制如下：" target="_blank" rel="noopener">https://martinfowler.com/bliki/CircuitBreaker.html，其中描述的熔断主要应用于微服务场景下的分布式调用中：在远程调用时，请求在超时前一直挂起，会导致请求链路上的级联故障和资源耗尽；熔断器封装了被保护的逻辑，监控调用是否失败，当连续调用失败的数量超过阀值时，熔断器就会跳闸，在跳闸后的一定时间段内，所有调用远程服务的尝试豆浆立刻返回失败；同时，熔断器设置了一个定时器，当计时到期时，允许有限数量的测试请求通过；如果这些请求成功，则熔断器恢复正常操作；如果这些请求失败，则维持断路状态。状态机制如下：</a></p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/rongduanqi-status.jpg" alt></p>
+<p>解释：</p>
+<ul>
+<li>熔断关闭：熔断器处于关闭状态，服务可以访问。熔断器维护了访问失败的计数器，若服务方式失败则加一；</li>
+<li>熔断开启：熔断器处于开启状态，服务不可访问，若有服务访问则立即出错。</li>
+<li>熔断半开启：熔断器处于半开启状态，允许对服务尝试请求，若服务访问成功则说明故障已经得到解决，否则说明故障依然存在。</li>
+</ul>
+<p>序号表示状态流转，如下：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/rongduanqi-chanel.jpg" alt></p>
+<p>Martin这个状态机成为后面很多系统实现的设计指导，包括最著名的Hystrix。</p>
+<h4 id="Hystrix熔断"><a href="#Hystrix熔断" class="headerlink" title="Hystrix熔断"></a>Hystrix熔断</h4><p>Hystrix是Netflix提供的众多服务治理工具集中的一个，在形态上是一个Java库，后来多在Spring Cloud中配合其他微服务治理工具集一起使用。</p>
+<p>Hystrix的主要功能包括：</p>
+<ul>
+<li>阻断级联失败，防止雪崩；</li>
+<li>提供延迟和失败保护；</li>
+<li>快速失败并即时恢复；</li>
+<li>对每个服务调用都进行隔离；</li>
+<li>对每个服务都维护一个连接池，在连接池满时直接拒绝访问；</li>
+<li>配置熔断阀值，对服务访问直接走失败处理Fallback逻辑，可以定义失败处理逻辑；</li>
+<li>在熔断生效后，在设定的时间后探测是否恢复，若恢复则关闭熔断；</li>
+<li>提供实时监控、告警和操作控制。</li>
+</ul>
+<p>Hystrix的熔断机制基本上与Martin的熔断机制一致。在实现上，如下图所示，Hystrix将要保护的过程封装在一个 HystrixCommand 中，将熔断功能应用到调用的方法上，并监视对该方法的失败调用，当失败次数达到阈值时，后续调用自动失败并被转到一个Fallback方法上。在 HystrixCommand 中封装的要保护的方法并不要求是一个对远端服务的请求，可以是任何需要保护的过程。每个 HystrixCommand都可以被设置一个 Fallback方法，用户可以写代码定义Fallback方法的处理逻辑。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/hystrix-func.jpg" alt></p>
+<p>在 Hystrix 的资源隔离方式中除了提供了熔断，还提供了对线程池的管理，减少和限制了单个服务故障对整个系统的影响，提高了整个系统的弹性。在使用上，不管是直接使用Netflix的工具集还是Spring Cloud中的包装，都建议在代码中写熔断处理逻辑，有针对性地进行处理，但侵入了业务代码，这也是与 Istio 比较大的差别。<br>业界一直以 Hystrix 作为熔断的实现模板，尤其是基于 Spring Cloud。但遗憾的是，Hystrix 在 1.5.18版本后就停止开发和代码合入，转为维护状态，其替代者是不太知名的Resilience4J。</p>
+<h4 id="Istio熔断"><a href="#Istio熔断" class="headerlink" title="Istio熔断"></a>Istio熔断</h4><p>云原生场景下的服务调用关系更加复杂，前文提到的若干问题也更加严峻，Istio提供了一套非侵入的熔断能力来应对这种挑战。与Hystrix类似，在Istio中也提供了连接池和故障实例隔离的能力，只是概念术语稍有不同：前者在Istio 的配置中叫作连接池管理，后者叫作异常点检测，分别对应 Envoy的熔断和异常点检测。</p>
+<p>解决的问题：</p>
+<ol>
+<li>在Istio中通过限制某个客户端对目标服务的连接数、访问请求数等，避免对一个服务的过量访问，如果超过配置的阀值，则快速断路请求。还会限制重试次数，避免重试次数过多导致系统压力变大并加剧故障的传播。</li>
+<li>如果某个服务实例频繁超时或者报错，则将该实例隔离，避免影响整个服务。</li>
+</ol>
+<p>以上两个应用场景正好对应连接池管理和异常实例格式功能。Istio的连接池管理工作机制对TCP提供了最大连接数、连接超时时间管理方式，对HTTP提供了最大请求数、最大等待数、最大重试次数、每连接最大请求数等管理方式，他控制客户端对目标服务的连接和访问，在超过配置时快速拒绝。</p>
+<p>如下图，通过Istio的连接池管理可以控制frontend服务对目标服务forecast的请求：</p>
+<ol>
+<li>当frontend服务对目标服务forecast的请求不超过配置的最大连接数时，放行；</li>
+<li>放frontend对forecast的请求不过配置的最大等待请求数时，进入连接池等待；</li>
+<li>当frontend对forecast超过配置的最大等待请求数时，直接拒绝。</li>
+</ol>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-connect-poll.jpg" alt></p>
+<p>Istio提供的异常点检查机制动态的将实例从负载均衡池中移除，当连接的错误数超过配置的阀值时，后端实例会被移除。异常点检查在实现上对每个上游服务都进行跟踪，对于HTTP服务，如果有主机返回了连续的5XX，则会被踢出服务池；而对于TCP服务，如果到目标服务的连接超时和失败，则都会被记为出错。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-error-check.jpg" alt></p>
+<p>另外，被移除的实例在一段时间之后，还会被加回来再次尝试访问，如果可以访问成功，则认为实例正常；如果访问不成功，则实例不正常，重新被逐出，后面驱逐的时间等于一个基础时间乘以驱逐的次数。这样，如果一个实例经过以上过程的多次尝试访问一直不可用，则下次会被隔离更久的时间。Istio的这个流程也是基于Martin的熔断模型设计和实现的，不同之处在于这里没有熔断半开状态，熔断器要打开多长时间取决于失败的次数。</p>
+<p>另，在 Istio 中可以控制驱逐比例，即有多少比例的服务实例在不满足要求时被驱逐。当有太多实例被移除时，就会进入恐慌模式，这时会忽略负载均衡池上实例的健康标记，仍然会向所有实例发送请求，从而保证一个服务的整体可用性。</p>
+<p>Istio和Hystrix的熔断进行对比。Istio实现的熔断器其实是一个黑盒，和业务没有耦合，不涉及代码，只要是对服务访问，保护就可以用，配置比较简单直接。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-hystrix-comp.jpg" alt></p>
+<p>熔断功能本来就是叠加上去的服务保护，并不能完全替代代码中的异常处理。业务代码本来也应该做好各种异常处理，在发生异常的时候通知调用方的代码或者最终用户。</p>
+<p>Istio 的熔断能力是对业务透明的，不影响也不关心业务代码的写法。当 Hystrix 开发的服务运行在Istio环境时，两种熔断机制叠加在一起。在故障场景下，如果Hystrix和Istio两种规则同时存在，则严格的规则先生效。当然，不推荐采用这种做法，建议业务代码处理好业务，把治理的事情交给Istio来做。</p>
+<h3 id="故障注入"><a href="#故障注入" class="headerlink" title="故障注入"></a>故障注入</h3><p>故障注入是一个种评估系统可用性的有效方式，最早在硬件场景下将电路板短路，来观察对系统的影响，在软件场景下也是使用一种手段故意在待测试的系统中引入故障，从而测试其健壮性和应对故障的能力，例如异常处理、故障恢复等。只有当系统的所有服务都经过故障测试且具备容错能力时，整个应用才健壮可靠。</p>
+<p>故障注入从方法上来说有编译期故障注入和运行期故障注入，前者要通过修改代码来模拟故障，后者在运行阶段触发故障。在分布式系统中，比较常用的方式是在网络协议栈中注入对应协议的故障，干预服务间的调用，不用修改业务代码。Istio的故障注入就是这样一种机制来实现，但不是在底层网络层破坏数据包，而是在网格中对特定的应用层协议进行故障注入，虽然在网络访问阶段进行注入，但其作用于应用层。这样，基于Istio的故障注入就可以模拟出应用的故障场景了。如下图，可以对某种请求注入一个指定的HTTP Code，这样，对于访问的客户端来说，就跟服务端发生异常一样。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-error-injecte-503.jpg" alt></p>
+<p>还可以注入一个指定的延迟，这样客户端看到的就跟服务端真的响应慢一样，我们无须为了达到这种效果在服务端的代码里填一段sleep(500)：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-error-injecte-time.jpg" alt></p>
+<p>实际上，在 Istio 的故障注入中可以对故障的条件进行各种设置，例如只对某种特定请求注入故障，其他请求仍然正常。</p>
+<h3 id="灰度发布-Blue-Green-Release"><a href="#灰度发布-Blue-Green-Release" class="headerlink" title="灰度发布 Blue Green Release"></a>灰度发布 Blue Green Release</h3><p>在新版本上线时，不管是在技术上考虑产品的稳定性等因素，还是在商业上考虑新版本被用户接受的程度，直接将老版本全部升级是非常有风险的。所以一般的做法是，新老版本同时在线，新版本只切分少量流量出来，在确认新版本没有问题后，再逐步加大流量比例。这正是灰度发布要解决的问题。其核心是能配置一定的流量策略，将用户在同一个访问入口的流量导到不同的版本上。有如下几种典型场景。</p>
+<h4 id="蓝绿发布-Blue-Green-Release"><a href="#蓝绿发布-Blue-Green-Release" class="headerlink" title="蓝绿发布 Blue Green Release"></a>蓝绿发布 Blue Green Release</h4><p>主要思路如下图，让新版本部署在另一套独立的资源上，在新版本可用后<strong>将所有流量都从老版本切到新版本上来</strong>。当新版本工作正常时，删除老版本；当新版本工作有问题时，快速切回到老版本，因此蓝绿发布看上去更像一种热部署方式。在新老版本都可用时，升级切换和回退的速度都可以非常快，但快速切换的代价是要配置冗余的资源，即有两倍的原有资源，分别部署新老版本。另外，由于流量是全量切换的，所有如果新版本有问题，则所有的用户都受影响，单比蛮力发布在一套资源上重新安装新版本导致用户的访问全部中断，效果要好很多。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/blue-green.jpg" alt></p>
+<h4 id="AB测试-ABTest"><a href="#AB测试-ABTest" class="headerlink" title="AB测试 ABTest"></a>AB测试 ABTest</h4><p>对于有一定规模的产品，在上线新特性时都比较谨慎，一般都需要经过一轮AB测试。在AB测试里面比较重要的是对评价的规划：要规划什么样的用户访问，采集什么样的指标，尤其是，指标的选取是与业务强先关的复杂过程，所以一般都有一个平台在支撑，包括业务指标埋点、收集和评价。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/AB-test.jpg" alt></p>
+<h4 id="金丝雀发布-canary-Release"><a href="#金丝雀发布-canary-Release" class="headerlink" title="金丝雀发布 canary Release"></a>金丝雀发布 canary Release</h4><p>金丝雀发布就比较直接，上线一个新版本，从老版本中切出一部分线上流量到新版本来判定新版本在生产环境中的实际表现。就像把一个金丝雀塞到瓦斯井里一样，探测这个新版在环境中是否可用。先让一小部分用户尝试新版本，在观察到新版本没有问题后再增加切换的比例，知道全部切换完成，是一个渐变，尝试的过程。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/jinsique.jpg" alt></p>
+<p>灰度发布，就是要支持对流量的管理。能否提供灵活的流量策略是判断基础设施灰度发布支持能力的重要指标。</p>
+<p>灰度发布技术上的核心要求是要提供一种机制满足多版本同时在线，并能够灵活配置规则给不同的版本分配流量，可以采用以下几种方式。</p>
+<h4 id="基于负载均衡器的灰度发布"><a href="#基于负载均衡器的灰度发布" class="headerlink" title="基于负载均衡器的灰度发布"></a>基于负载均衡器的灰度发布</h4><p>比较传统的灰度发布方式是是在入口的负载均衡器上配置流量策略，证方式要求负载均衡器必须支持相应的流量策略，并且只能对入口的服务做灰度发布，不支持对后端服务单独做灰度发布。如下图，可以子啊负载均衡器上配置规则对frontend服务进行灰度发布，但是没有地方给forecast服务配置分流策略，因此无法对forecast服务做灰度发布。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/huidu-1.jpg" alt></p>
+<h4 id="基于Kubernetes的灰度发布"><a href="#基于Kubernetes的灰度发布" class="headerlink" title="基于Kubernetes的灰度发布"></a>基于Kubernetes的灰度发布</h4><p>在Kubernetes环境下可以基于Pod的数量比例分配流量，如下图，forecast服务的两个版本v2和v1分别有两个和三个实例，当流量被均衡的分发到每个实例上时，前者可以得到40%的流量，后者可以得到60%的流量，从而达到流量在两个版本间分配的效果。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/kubernetes-huidu-2.jpg" alt></p>
+<p>给v1和v2版本设置对应比例的Pod数量，依靠Kuber-proxy把流量均衡的分发到目标后端，可以解决一个服务的多个版本分配流量的问题，但是限制非常明显：</p>
+<ul>
+<li>要求分配的流量比例必须和Pod数量成比例，如上图，当前的Pod比例不支持得到3:7的流量比例；</li>
+<li>另外，这种方式不支持根据请求的内容累分配流量，比如要求Chrome浏览器发来的请求和IE浏览器发来的请求分别访问不同的版本。</li>
+</ul>
+<p>Istio叠加在Kubernetes上，从机制上可以提供比Kubernetes更细的服务控制粒度及更强的服务管理能力。</p>
+<h4 id="基于Istio的灰度发布"><a href="#基于Istio的灰度发布" class="headerlink" title="基于Istio的灰度发布"></a>基于Istio的灰度发布</h4><p>Istio本身并没有关于灰度发布的规则定义，灰度发布只是流量治理规则的一种典型应用，在进行灰度发布时，只要写个简单的流量管理配置即可。Istio在每个Pod里都注入了一个Envoy，因而只要在控制面配置分流策略，对目标服务发起访问的每个Envoy便都可以执行流量策略，完成灰度发布功能。</p>
+<p>如下图示例，对recommendation服务进行灰度发布，配置20%的流量到v2版本，保留80%的流量在v1版本。通过Istio控制面Pilot下发配置到数据面的各个Envoy，调用recommendation服务的两个服务frontend和forecast都会执行相同的策略，对recommendation服务发起的请求会被各自的Envoy拦截并执行同样的分流策略。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-huidu.jpg" alt></p>
+<p>在Istio中除了支持这种基于流量比例的策略，还支持非常灵活的基于请求内容的灰度策略，比如某个特性是专门为Mac操作系统开发的，则在该版本的流量策略中需要匹配请求放的操作系统。浏览器、请求的Headers等请求内容在Istio中都可以作为灰度发布的特性条件，如下图，根据Header的内容请求分发到不同的版本上。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-huidu-header.jpg" alt></p>
+<h3 id="服务访问入口"><a href="#服务访问入口" class="headerlink" title="服务访问入口"></a>服务访问入口</h3><p>一组服务组合在一起可以完成一个独立的业务能力，一般都会有一个入口服务，从外部可以访问，主要是接受外部的请求并将其转发到后端的服务，有时还可以定义通用的过滤器在入口处做权限、限流等功能。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-gw.jpg" alt></p>
+<h4 id="Kubernetes服务的访问入口"><a href="#Kubernetes服务的访问入口" class="headerlink" title="Kubernetes服务的访问入口"></a>Kubernetes服务的访问入口</h4><p>在Kubernetes中可以将服务发不成Loadbalancer类型的Service，通过一个外部端口就能够访问到集群中的指定服务，如下图，从外部近来的流量不用经过过滤和多余处理，就被直接转发到服务上。这种方式直接，简单，在云平台上部署的服务一般都可以依赖云厂商提供的Loadbalancer来实现。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/k8s-svc-loadbalancer.jpg" alt></p>
+<p>Kubernetes支持另一种Ingress方式专门针对七层协议，Ingress作为一个总的入口，根据七层协议中的路径将服务指向不同的后端服务，如下图，在weather.com这个域名下可以发布两个服务，forecast服务被发布在weather.com/forecast上，advertisement服务被发布在weather.com/advertisement上，这时只需要用到一个外部地址：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/k8s-ingress.jpg" alt></p>
+<p>其中，ingress是一套规则定义，将描述某个域名的特定路径的请求转发到集群指定的Service后端上。Ingress Controller作为Kubernetes的一个控制器，监听Kuber-apiserver的Ingress对应的后端服务，实时获取后端Service和Endpoints等的变化，结合Ingress配置的规则动态更新负载均衡器的路由配置。</p>
+<h4 id="Istio服务访问入口"><a href="#Istio服务访问入口" class="headerlink" title="Istio服务访问入口"></a>Istio服务访问入口</h4><p>如下图，在Istio中通过Gateway访问网格内的服务。这个Gateway和其他网格内的Sidecar一样，也是一个Envoy，从Istio的控制面接收配置，统一执行配置的规则。Gateway一般发布为Loadbalancer类型的Service，接收外部访问，执行治理，TLS终止等管理逻辑，并将请求转发给内部的服务。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-gw-2.jpg" alt></p>
+<p>网格入口的配置通过定义一个Gateway的资源对象描述，定义将一个外部访问映射到一组内部服务上。在 Istio 0.8版本之前正是使用本节介绍的 Kubernetes的 Ingress来描述服务访问入口的，因为Ingress七层的功能限制，Istio在0.8版本的V1alpha3流量规则中引入了Gateway资源对象，只定义接入点。Gateway只做四层到六层的端口、TLS配置等基本功能，VirtualService则定义七层路由等丰富内容。就这样复用了VirtualService，外部及内部的访问规则都使用VirtualService来描述。</p>
+<h3 id="外部接入服务治理"><a href="#外部接入服务治理" class="headerlink" title="外部接入服务治理"></a>外部接入服务治理</h3><p>如下图，4个服务组成一个应用，后端依赖一个数据库服务，这就需要一种机制能够将数据库服务接入并治理。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/external-svc-db.jpg" alt></p>
+<p>关于这种第三方服务的管理，专门有一种Open Service Broker API来实现第三方软件的服务化，这种API通过定义Catalog、Provisioning、Updating、Binding、Unbinding等标准接口接入服务，在和Kubernetes结合的场景下，使用Service Catalog的扩展机制可以方便地在集群中管理云服务商提供的第三方服务，如图所示。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/open-service-broker-api.jpg" alt></p>
+<p>对一个数据库访问进行管理，比对两个纯粹的内部服务访问进行管理更重要。在Istio中通过一个<code>ServiceEntry</code>的资源对象将网格外的服务注册到网格上，然后像对网格内的普通服务一样对网格外的服务进行治理。</p>
+<p>在Pilot中创建一个<code>ServiceEntry</code>，配置后端数据库服务的访问信息，在Istio的服务发现上就会维护这个服务的记录，并对该服务配置规则进行治理，从forecast服务想数据库发起的访问在经过Envoy时就会被拦截并进行治理。</p>
+<p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-serviceentry-external-svc.jpg" alt></p>
+<p>ServiceEntry是 Istio 中对网格外的服务的推荐使用方式，当然也可以选择不做治理，直接让网格内的服务访问网格外的服务。</p>
+<p>在大多数时候，在访问网格外的服务时，通过网格内服务的 Sidecar 就可以执行治理功能，但有时需要有一个专门的Egress Gateway来支持，如上面的例子所示。出于对安全或者网络规划的考虑，要求网格内所有外发的流量都必须经过这样一组专用节点，需要定义一个Egress Gateway并分配Egress节点，将所有的出口流量都转发到Gateway上进行管理。</p>
+<blockquote>
+<p>来自：云原生服务网格Istio：原理、实践、架构与源码解析书籍，本文只作为读书笔记记录，版权属于原作者。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+        <div class="reward-container">
+  <div>如有疏忽错误欢迎在留言区评论指正，如果对您有所帮助欢迎点击下方进行打赏。</div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/wechatpay.jpg" alt="Knner.Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/alipay.jpg" alt="Knner.Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html" title="[服务网格Istio系列]--非侵入的流量管理-1">https://knner.wang/2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+              <a href="/tags/istio/" rel="tag"># istio</a>
+              <a href="/tags/servicemesh/" rel="tag"># servicemesh</a>
+              <a href="/tags/microservice/" rel="tag"># microservice</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/12/28/ServiceMesh-Istio-Series--Istio-Architecture.html" rel="next" title="[服务网格Istio系列]--Istio架构介绍">
+                  <i class="fa fa-chevron-left"></i> [服务网格Istio系列]--Istio架构介绍
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2020/01/02/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-2.html" rel="prev" title="[服务网格Istio系列]--非侵入的流量管理-2">
+                  [服务网格Istio系列]--非侵入的流量管理-2 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Istio流量治理的原理"><span class="nav-number">1.</span> <span class="nav-text">Istio流量治理的原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#负载均衡"><span class="nav-number">2.</span> <span class="nav-text">负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务熔断"><span class="nav-number">3.</span> <span class="nav-text">服务熔断</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Hystrix熔断"><span class="nav-number">3.1.</span> <span class="nav-text">Hystrix熔断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Istio熔断"><span class="nav-number">3.2.</span> <span class="nav-text">Istio熔断</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#故障注入"><span class="nav-number">4.</span> <span class="nav-text">故障注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#灰度发布-Blue-Green-Release"><span class="nav-number">5.</span> <span class="nav-text">灰度发布 Blue Green Release</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#蓝绿发布-Blue-Green-Release"><span class="nav-number">5.1.</span> <span class="nav-text">蓝绿发布 Blue Green Release</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AB测试-ABTest"><span class="nav-number">5.2.</span> <span class="nav-text">AB测试 ABTest</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#金丝雀发布-canary-Release"><span class="nav-number">5.3.</span> <span class="nav-text">金丝雀发布 canary Release</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于负载均衡器的灰度发布"><span class="nav-number">5.4.</span> <span class="nav-text">基于负载均衡器的灰度发布</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于Kubernetes的灰度发布"><span class="nav-number">5.5.</span> <span class="nav-text">基于Kubernetes的灰度发布</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于Istio的灰度发布"><span class="nav-number">5.6.</span> <span class="nav-text">基于Istio的灰度发布</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务访问入口"><span class="nav-number">6.</span> <span class="nav-text">服务访问入口</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Kubernetes服务的访问入口"><span class="nav-number">6.1.</span> <span class="nav-text">Kubernetes服务的访问入口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Istio服务访问入口"><span class="nav-number">6.2.</span> <span class="nav-text">Istio服务访问入口</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#外部接入服务治理"><span class="nav-number">7.</span> <span class="nav-text">外部接入服务治理</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备19058691号 </a>
+      <img src="/images/knner/ga-icon.png" style="display: inline-block;"><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010802030660" rel="noopener" target="_blank">11010802030660 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang 版权所有</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: {page: {
+            url: "https://knner.wang/2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html",
+            identifier: "2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html",
+            title: "[服务网格Istio系列]--非侵入的流量管理-1"
+          }
+        }
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://knner.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    (function() {
+      var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+      if (offsetTop <= 0) {
+        // load directly when there's no a scrollbar
+        window.addEventListener('load', loadComments, false);
+      } else {
+        var disqus_scroll = () => {
+          // offsetTop may changes because of manually resizing browser window or lazy loading images.
+          var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+          var scrollTop = window.scrollY;
+
+          // pre-load comments a bit? (margin or anything else)
+          if (offsetTop - scrollTop < 60) {
+            window.removeEventListener('scroll', disqus_scroll);
+            loadComments();
+          }
+        };
+        window.addEventListener('scroll', disqus_scroll);
+      }
+    })();
+  
+</script>
+
+</body>
+</html>
