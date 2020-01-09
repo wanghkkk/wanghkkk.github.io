@@ -52,13 +52,13 @@
   };
 </script>
 
-  <meta name="description" content="继续上篇文章：[服务网格Istio系列]--非侵入的流量管理-1Istio路由规则配置：VirtualServiceVirtualService 是Istio流量治理的一个核心配置，可以说是Istio流量治理中最重要，最复杂的规则。路由规则配置示例示例：apiVersion: networking.istio.io&#x2F;v1alpha3kind: VirtualServicemetadata:  na">
-<meta name="keywords" content="kubernetes,istio,servicemesh,microservice">
+  <meta name="description" content="继续上篇文章：[服务网格Istio系列]--非侵入的流量管理-1Istio路由规则配置：VirtualServiceVirtualService 是Istio流量治理的一个核心配置，可以说是Istio流量治理中最重要，最复杂的规则。 官网参考：https:&#x2F;&#x2F;istio.io&#x2F;docs&#x2F;reference&#x2F;config&#x2F;networking&#x2F;virtual-service&#x2F;#VirtualServ">
+<meta name="keywords" content="istio,servicemesh,microservice,kubernetes">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[服务网格Istio系列]--非侵入的流量管理-2">
 <meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2020&#x2F;01&#x2F;02&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-2.html">
 <meta property="og:site_name" content="Knner.Wang&#39;s Blog">
-<meta property="og:description" content="继续上篇文章：[服务网格Istio系列]--非侵入的流量管理-1Istio路由规则配置：VirtualServiceVirtualService 是Istio流量治理的一个核心配置，可以说是Istio流量治理中最重要，最复杂的规则。路由规则配置示例示例：apiVersion: networking.istio.io&#x2F;v1alpha3kind: VirtualServicemetadata:  na">
+<meta property="og:description" content="继续上篇文章：[服务网格Istio系列]--非侵入的流量管理-1Istio路由规则配置：VirtualServiceVirtualService 是Istio流量治理的一个核心配置，可以说是Istio流量治理中最重要，最复杂的规则。 官网参考：https:&#x2F;&#x2F;istio.io&#x2F;docs&#x2F;reference&#x2F;config&#x2F;networking&#x2F;virtual-service&#x2F;#VirtualServ">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-VirtualService-yaml.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-VirtualService-yaml-1.png">
@@ -78,6 +78,7 @@
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;virtualservice-example1.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;forecast-fuza-route.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;muti-version-route.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;VirtualService-mind.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;source-code-restful-api.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;DestinationRule.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;DestinationRule.trafficPolicy.png">
@@ -89,6 +90,7 @@
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;DestinationRule-subset.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;muti-version-route-expmple.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;DestinationRule-tls.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;DestinationRule-mind.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-gateway.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;gateway-virtualservice-hosts.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;gateway-example-http-http.png">
@@ -97,13 +99,14 @@
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;gateway-example-http-https-2.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;gateway-example-http-https-in&amp;out.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;gateway-example-comp.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;Gateway-mind.jpg">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;serviceentry.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;serviceentry-example1.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;Egress-gateway.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;Sidecar.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-liuliangzhili-zongjie.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
-<meta property="og:updated_time" content="2020-01-01T16:00:00.000Z">
+<meta property="og:updated_time" content="2020-01-07T16:00:00.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment&#x2F;istio-VirtualService-yaml.png">
 
@@ -257,6 +260,13 @@
 
               <time title="创建时间：2020-01-02 00:00:00" itemprop="dateCreated datePublished" datetime="2020-01-02T00:00:00+08:00">2020-01-02</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-01-08 00:00:00" itemprop="dateModified" datetime="2020-01-08T00:00:00+08:00">2020-01-08</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -312,7 +322,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>继续上篇文章：<a href="/2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html" title="[服务网格Istio系列]--非侵入的流量管理-1">[服务网格Istio系列]--非侵入的流量管理-1</a></p><h2 id="Istio路由规则配置：VirtualService"><a href="#Istio路由规则配置：VirtualService" class="headerlink" title="Istio路由规则配置：VirtualService"></a>Istio路由规则配置：VirtualService</h2><p><code>VirtualService</code> 是Istio流量治理的一个核心配置，可以说是Istio流量治理中最重要，最复杂的规则。</p><h3 id="路由规则配置示例"><a href="#路由规则配置示例" class="headerlink" title="路由规则配置示例"></a>路由规则配置示例</h3><p>示例：</p><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">headers:</span></span><br><span class="line">        <span class="attr">location:</span></span><br><span class="line">          <span class="attr">exact:</span> <span class="string">north</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">      <span class="attr">host:</span> <span class="string">forecast</span></span><br><span class="line">      <span class="attr">subset:</span> <span class="string">v2</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">      <span class="attr">host:</span> <span class="string">forecast</span></span><br><span class="line">      <span class="attr">subset:</span> <span class="string">v1</span></span><br></pre></td></tr></table></figure><a id="more"></a>
+        <p>继续上篇文章：<a href="/2020/01/01/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment-1.html" title="[服务网格Istio系列]--非侵入的流量管理-1">[服务网格Istio系列]--非侵入的流量管理-1</a></p><h2 id="Istio路由规则配置：VirtualService"><a href="#Istio路由规则配置：VirtualService" class="headerlink" title="Istio路由规则配置：VirtualService"></a>Istio路由规则配置：VirtualService</h2><p><code>VirtualService</code> 是Istio流量治理的一个核心配置，可以说是Istio流量治理中最重要，最复杂的规则。</p><blockquote>
+<p>官网参考：<a href="https://istio.io/docs/reference/config/networking/virtual-service/#VirtualService" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#VirtualService</a></p>
+</blockquote><h3 id="路由规则配置示例"><a href="#路由规则配置示例" class="headerlink" title="路由规则配置示例"></a>路由规则配置示例</h3><p>示例：</p><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">headers:</span></span><br><span class="line">        <span class="attr">location:</span></span><br><span class="line">          <span class="attr">exact:</span> <span class="string">north</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">      <span class="attr">host:</span> <span class="string">forecast</span></span><br><span class="line">      <span class="attr">subset:</span> <span class="string">v2</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">      <span class="attr">host:</span> <span class="string">forecast</span></span><br><span class="line">      <span class="attr">subset:</span> <span class="string">v1</span></span><br></pre></td></tr></table></figure><a id="more"></a>
+
 
 
 
@@ -322,8 +335,8 @@
 <p><code>VirtualService</code>描述了一个具体的服务对象，在该服务内包含了对流量的各种处理，其主体是一个服务而不是一组规则。</p>
 <p><code>VirtualService</code>中的一些术语如下：</p>
 <ul>
-<li>Service：服务。</li>
-<li>Service Version：服务版本。</li>
+<li>Service：服务。服务应用程序行为的单元，绑定到服务注册表中的唯一名称。服务由多个endpoints组成，由运行在pod、容器、vm等上的工作负载实例实现。</li>
+<li>Service Version：服务版本，一般是服务的子集。</li>
 <li>Source：发起调用的服务</li>
 <li>Host：服务调用方连接和调用<strong>目标服务时使用的地址</strong></li>
 </ul>
@@ -343,12 +356,62 @@
 <li>服务只在网格外部访问的。配置要关联的Gateway，表示对应的Gateway进来的流量执行在这个<code>VirtualService</code>上定义的流量规则。</li>
 <li>在网格内核网格外都需要访问的。这里要给这个数组字段至少写两个元素，一个是外部访问的Gateway，另一个是保留关键字<code>mesh</code>。</li>
 </ol>
-<h4 id="http"><a href="#http" class="headerlink" title="http"></a>http</h4><p>是一个与HTTPRoute类型的路由集合，用于处理HTTP的流量。</p>
-<h4 id="tls"><a href="#tls" class="headerlink" title="tls"></a>tls</h4><p>是一个TLSRoute类型的路由集合，用于处理非终结的TLS和HTTPS的流量。</p>
-<h4 id="tcp"><a href="#tcp" class="headerlink" title="tcp"></a>tcp</h4><p>是一个TCPRoute类型的路由集合，用于处理TCP的流量，应用于所有其他非HTTP和TLS端口的流量。如果在<code>VirtualService</code>中对HTTPS和TLS没有定义对应的TLSRoute，则所有流量都被当成TCP流量来处理，都会走到TCP路由集合上。</p>
-<p>以上3个字段（http、tls、tcp）在定义上都是数组，可以定义多个元素；在使用上都是一个有序列表，在应用时请求匹配的第一个规则生效。</p>
+<h4 id="http"><a href="#http" class="headerlink" title="http"></a>http</h4><p>是一个与HTTPRoute类型的路由集合，列表形式，用于处理HTTP的流量。</p>
+<h4 id="tls"><a href="#tls" class="headerlink" title="tls"></a>tls</h4><p>是一个TLSRoute类型的路由集合，列表形式，用于处理非终结的TLS和HTTPS的流量。</p>
+<h4 id="tcp"><a href="#tcp" class="headerlink" title="tcp"></a>tcp</h4><p>是一个TCPRoute类型的路由集合，列表形式，用于处理TCP的流量，应用于所有其他非HTTP和TLS端口的流量。如果在<code>VirtualService</code>中对HTTPS和TLS没有定义对应的TLSRoute，则所有流量都被当成TCP流量来处理，都会走到TCP路由集合上。</p>
+<p>以上3个字段（http、tls、tcp）在定义上都是数组（列表形式），可以定义多个元素；在使用上都是一个有序列表，在应用时请求匹配的第一个规则生效。</p>
 <p>注意：VirtualService中的<strong>路由规则是一个数组</strong>，在应用时匹配的第1个规则生效就跳出，不会检查后面的规则。</p>
 <h4 id="exportTo"><a href="#exportTo" class="headerlink" title="exportTo"></a>exportTo</h4><p>用于控制<code>VirtualService</code>跨命名空间的可见性，这样就可以控制一个在命名空间下定义的<code>VirtualService</code>是否可以被其他命名空间下的Sidecar和Gateway使用了。如果未赋值，则默认全局可见。点“.”表示仅应用到当前命名空间，星号“<em>”表示应用到所有命名空间。在Istio中只支持“.”和“\</em>”这两种配置。</p>
+<p>一级字段官网解释：VirtualService.</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#VirtualService" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#VirtualService</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hosts</code></td>
+<td><code>string[]</code></td>
+<td>The destination hosts to which traffic is being sent. Could be a DNS name with wildcard prefix or an IP address. Depending on the platform, short-names can also be used instead of a FQDN (i.e. has no dots in the name). In such a scenario, the FQDN of the host would be derived based on the underlying platform.A single VirtualService can be used to describe all the traffic properties of the corresponding hosts, including those for multiple HTTP and TCP ports. Alternatively, the traffic properties of a host can be defined using more than one VirtualService, with certain caveats. Refer to the <a href="https://istio.io/docs/ops/best-practices/traffic-management/#split-virtual-services" target="_blank" rel="noopener">Operations Guide</a> for details.<em>Note for Kubernetes users</em>: When short names are used (e.g. “reviews” instead of “reviews.default.svc.cluster.local”), Istio will interpret the short name based on the namespace of the rule, not the service. A rule in the “default” namespace containing a host “reviews” will be interpreted as “reviews.default.svc.cluster.local”, irrespective of the actual namespace associated with the reviews service. <em>To avoid potential misconfigurations, it is recommended to always use fully qualified domain names over short names.</em>The hosts field applies to both HTTP and TCP services. Service inside the mesh, i.e., those found in the service registry, must always be referred to using their alphanumeric names. IP addresses are allowed only for services defined via the Gateway.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>gateways</code></td>
+<td><code>string[]</code></td>
+<td>The names of gateways and sidecars that should apply these routes. A single VirtualService is used for sidecars inside the mesh as well as for one or more gateways. The selection condition imposed by this field can be overridden using the source field in the match conditions of protocol-specific routes. The reserved word <code>mesh</code> is used to imply all the sidecars in the mesh. When this field is omitted, the default gateway (<code>mesh</code>) will be used, which would apply the rule to all sidecars in the mesh. If a list of gateway names is provided, the rules will apply only to the gateways. To apply the rules to both gateways and sidecars, specify <code>mesh</code> as one of the gateway names.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>http</code></td>
+<td><code>HTTPRoute[]</code></td>
+<td>An ordered list of route rules for HTTP traffic. HTTP routes will be applied to platform service ports named ‘http-<em>’/‘http2-</em>’/‘grpc-*’, gateway ports with protocol HTTP/HTTP2/GRPC/ TLS-terminated-HTTPS and service entry ports using HTTP/HTTP2/GRPC protocols. The first rule matching an incoming request is used.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>tls</code></td>
+<td><code>TLSRoute[]</code></td>
+<td>An ordered list of route rule for non-terminated TLS &amp; HTTPS traffic. Routing is typically performed using the SNI value presented by the ClientHello message. TLS routes will be applied to platform service ports named ‘https-<em>’, ‘tls-</em>’, unterminated gateway ports using HTTPS/TLS protocols (i.e. with “passthrough” TLS mode) and service entry ports using HTTPS/TLS protocols. The first rule matching an incoming request is used. NOTE: Traffic ‘https-<em>’ or ‘tls-</em>’ ports without associated virtual service will be treated as opaque TCP traffic.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>tcp</code></td>
+<td><code>TCPRoute[]</code></td>
+<td>An ordered list of route rules for opaque TCP traffic. TCP routes will be applied to any port that is not a HTTP or TLS port. The first rule matching an incoming request is used.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>exportTo</code></td>
+<td><code>string[]</code></td>
+<td>A list of namespaces to which this virtual service is exported. Exporting a virtual service allows it to be used by sidecars and gateways defined in other namespaces. This feature provides a mechanism for service owners and mesh administrators to control the visibility of virtual services across namespace boundaries.If no namespaces are specified then the virtual service is exported to all namespaces by default.The value “.” is reserved and defines an export to the same namespace that the virtual service is declared in. Similarly the value “<em>” is reserved and defines an export to all namespaces.NOTE: in the current release, the <code>exportTo</code> value is restricted to “.” or “</em>” (i.e., the current namespace or all namespaces).</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h3 id="HTTP路由-HTTPRoute-VirtualService-http"><a href="#HTTP路由-HTTPRoute-VirtualService-http" class="headerlink" title="HTTP路由 HTTPRoute VirtualService.http."></a>HTTP路由 HTTPRoute VirtualService.http.</h3><p><code>VirtualService</code>中的http是一个HTTPRoute类型的路由集合，用于处理HTTP的流量。</p>
 <ul>
 <li>服务的端口协议是HTTP、HTTP2、GRPC，即在服务的端口名中包含http-、http2-、grpc-等。</li>
@@ -363,6 +426,93 @@
 <blockquote>
 <p>authority<br>英 /ɔːˈθɒrəti/  美 /əˈθɔːrəti/  全球(加拿大)<br>n. 权威；权力；当局<br>复数 authorities</p>
 </blockquote>
+<p>HTTPRoute字段官网解释：VirtualService.http</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#HTTPRoute" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#HTTPRoute</a></p>
+</blockquote>
+<p>Describes match conditions and actions for routing HTTP/1.1, HTTP2, and gRPC traffic. See VirtualService for usage examples.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>The name assigned to the route for debugging purposes. The route’s name will be concatenated with the match’s name and will be logged in the access logs for requests matching this route/match.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>match</code></td>
+<td><code>HTTPMatchRequest[]</code></td>
+<td>Match conditions to be satisfied for the rule to be activated. All conditions inside a single match block have AND semantics, while the list of match blocks have OR semantics. The rule is matched if any one of the match blocks succeed.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>route</code></td>
+<td><code>HTTPRouteDestination[]</code></td>
+<td>A http rule can either redirect or forward (default) traffic. The forwarding target can be one of several versions of a service (see glossary in beginning of document). Weights associated with the service version determine the proportion of traffic it receives.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>redirect</code></td>
+<td><code>HTTPRedirect</code></td>
+<td>A http rule can either redirect or forward (default) traffic. If traffic passthrough option is specified in the rule, route/redirect will be ignored. The redirect primitive can be used to send a HTTP 301 redirect to a different URI or Authority.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>rewrite</code></td>
+<td><code>HTTPRewrite</code></td>
+<td>Rewrite HTTP URIs and Authority headers. Rewrite cannot be used with Redirect primitive. Rewrite will be performed before forwarding.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td><code>Duration</code></td>
+<td>Timeout for HTTP requests.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>retries</code></td>
+<td><code>HTTPRetry</code></td>
+<td>Retry policy for HTTP requests.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>fault</code></td>
+<td><code>HTTPFaultInjection</code></td>
+<td>Fault injection policy to apply on HTTP traffic at the client side. Note that timeouts or retries will not be enabled when faults are enabled on the client side.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>mirror</code></td>
+<td><code>Destination</code></td>
+<td>Mirror HTTP traffic to a another destination in addition to forwarding the requests to the intended destination. Mirrored traffic is on a best effort basis where the sidecar/gateway will not wait for the mirrored cluster to respond before returning the response from the original destination. Statistics will be generated for the mirrored destination.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>mirrorPercent</code></td>
+<td><code>UInt32Value</code></td>
+<td>Percentage of the traffic to be mirrored by the <code>mirror</code> field. If this field is absent, all the traffic (100%) will be mirrored. Max value is 100.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>corsPolicy</code></td>
+<td><code>CorsPolicy</code></td>
+<td>Cross-Origin Resource Sharing policy (CORS). Refer to <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS" target="_blank" rel="noopener">CORS</a> for further details about cross origin resource sharing.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>headers</code></td>
+<td><code>Headers</code></td>
+<td>Header manipulation rules</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h4 id="HTTP匹配规则-HTTPMatchRequest-VirtualService-http-match"><a href="#HTTP匹配规则-HTTPMatchRequest-VirtualService-http-match" class="headerlink" title="HTTP匹配规则 HTTPMatchRequest VirtualService.http.match."></a>HTTP匹配规则 HTTPMatchRequest VirtualService.http.match.</h4><p>位置：</p>
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/httproute-match.png" alt></p>
 <p>在HTTPRoute中最重要的字段是条件字段match，为一个HTTPMatchRequest类型的<strong>数组</strong>，表示HTTP请求满足的条件，支持将HTTP属性如：uri、method、authority、port等作为条件来匹配请求。一个URI的完整格式是：URI=scheme:[//authority]path[?query][#fragment]，如下所示：</p>
@@ -398,6 +548,109 @@
             <p>注意1：在HTTPRoute的匹配条件中，每个HTTPMatchRequest中的诸多属性都是“与”逻辑，几个HTTPMatchRequest元素间的关系是“或”逻辑。</p><p>注意2：在<code>VirtualService</code>中match字段都是数组类型。HTTPMatchRequest中的诸多属性如uri、headers、method等是“与”逻辑，而数组中几个元素的关系是“或”逻辑。</p><p>例如：match包含两个HTTPMatchRequest元素，其条件的语义是：headers中的source取值为north，<strong>并且</strong>uri以/advertisement开头的请求，<strong>或者</strong>uri以/forecast开头的请求。</p><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="string">match</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">headers:</span></span><br><span class="line">      <span class="attr">source:</span></span><br><span class="line">        <span class="attr">exact:</span> <span class="string">north</span></span><br><span class="line">    <span class="attr">uri:</span></span><br><span class="line">      <span class="attr">prefix:</span> <span class="string">"/advertisement/"</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">uri:</span></span><br><span class="line">      <span class="attr">prefix:</span> <span class="string">"/forecast/"</span></span><br></pre></td></tr></table></figure>
           </div>
 
+<p>match 官网说明：</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#HTTPMatchRequest" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#HTTPMatchRequest</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>The name assigned to a match. The match’s name will be concatenated with the parent route’s name and will be logged in the access logs for requests matching this route.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>uri</code></td>
+<td><code>StringMatch</code></td>
+<td>URI to match values are case-sensitive and formatted as follows:<code>exact: &quot;value&quot;</code> for exact string match<code>prefix: &quot;value&quot;</code> for prefix-based match<code>regex: &quot;value&quot;</code> for ECMAscript style regex-based match<strong>Note:</strong> Case-insensitive matching could be enabled via the <code>ignore_uri_case</code> flag.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>scheme</code></td>
+<td><code>StringMatch</code></td>
+<td>URI Scheme values are case-sensitive and formatted as follows:<code>exact: &quot;value&quot;</code> for exact string match<code>prefix: &quot;value&quot;</code> for prefix-based match<code>regex: &quot;value&quot;</code> for ECMAscript style regex-based match</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>method</code></td>
+<td><code>StringMatch</code></td>
+<td>HTTP Method values are case-sensitive and formatted as follows:<code>exact: &quot;value&quot;</code> for exact string match<code>prefix: &quot;value&quot;</code> for prefix-based match<code>regex: &quot;value&quot;</code> for ECMAscript style regex-based match</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>authority</code></td>
+<td><code>StringMatch</code></td>
+<td>HTTP Authority values are case-sensitive and formatted as follows:<code>exact: &quot;value&quot;</code> for exact string match<code>prefix: &quot;value&quot;</code> for prefix-based match<code>regex: &quot;value&quot;</code> for ECMAscript style regex-based match</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>headers</code></td>
+<td><code>map</code></td>
+<td>The header keys must be lowercase and use hyphen as the separator, e.g. <em>x-request-id</em>.Header values are case-sensitive and formatted as follows:<code>exact: &quot;value&quot;</code> for exact string match<code>prefix: &quot;value&quot;</code> for prefix-based match<code>regex: &quot;value&quot;</code> for ECMAscript style regex-based match<strong>Note:</strong> The keys <code>uri</code>, <code>scheme</code>, <code>method</code>, and <code>authority</code> will be ignored.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td><code>uint32</code></td>
+<td>Specifies the ports on the host that is being addressed. Many services only expose a single port or label ports with the protocols they support, in these cases it is not required to explicitly select the port.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>sourceLabels</code></td>
+<td><code>map</code></td>
+<td>One or more labels that constrain the applicability of a rule to workloads with the given labels. If the VirtualService has a list of gateways specified at the top, it must include the reserved gateway <code>mesh</code> for this field to be applicable.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>queryParams</code></td>
+<td><code>map</code></td>
+<td>Query parameters for matching.Ex: - For a query parameter like “?key=true”, the map key would be “key” and the string match could be defined as <code>exact: &quot;true&quot;</code>. - For a query parameter like “?key”, the map key would be “key” and the string match could be defined as <code>exact: &quot;&quot;</code>. - For a query parameter like “?key=123”, the map key would be “key” and the string match could be defined as <code>regex: &quot;\d+$&quot;</code>. Note that this configuration will only match values like “123” but not “a123” or “123a”.<strong>Note:</strong> <code>prefix</code> matching is currently not supported.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>ignoreUriCase</code></td>
+<td><code>bool</code></td>
+<td>Flag to specify whether the URI matching should be case-insensitive.<strong>Note:</strong> The case will be ignored only in the case of <code>exact</code> and <code>prefix</code> URI matches.</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p><code>StringMatch</code> 如下：</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>exact</code></td>
+<td><code>string (oneof)</code></td>
+<td>exact string match</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>prefix</code></td>
+<td><code>string (oneof)</code></td>
+<td>prefix-based match</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>regex</code></td>
+<td><code>string (oneof)</code></td>
+<td>ECMAscript style regex-based match</td>
+<td>Yes</td>
+</tr>
+</tbody></table>
 <h4 id="HTTP路由目标-HTTPRouteDestination-VirtualService-http-route"><a href="#HTTP路由目标-HTTPRouteDestination-VirtualService-http-route" class="headerlink" title="HTTP路由目标 HTTPRouteDestination VirtualService.http.route."></a>HTTP路由目标 HTTPRouteDestination VirtualService.http.route.</h4><p>位置：</p>
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/httproute-httproutedestination.png" alt></p>
 <p>HTTPRoute上的route字段是一个HTTPRouteDestination类型的数组，表示满足条件的<strong>流量目标</strong>。</p>
@@ -439,6 +692,160 @@
 </ul>
 </li>
 </ol>
+<p>route 官网说明：</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#HTTPRouteDestination" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#HTTPRouteDestination</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>destination</code></td>
+<td><code>Destination</code></td>
+<td>Destination uniquely identifies the instances of a service to which the request/connection should be forwarded to.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>weight</code></td>
+<td><code>int32</code></td>
+<td>The proportion of traffic to be forwarded to the service version. (0-100). Sum of weights across destinations SHOULD BE == 100. If there is only one destination in a rule, the weight value is assumed to be 100.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>headers</code></td>
+<td><code>Headers</code></td>
+<td>Header manipulation rules</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>removeResponseHeaders</code></td>
+<td><code>string[]</code></td>
+<td>Use of <code>remove_response_header</code> is deprecated. Use the <code>headers</code> field instead.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>appendResponseHeaders</code></td>
+<td><code>map</code></td>
+<td>Use of <code>append_response_headers</code> is deprecated. Use the <code>headers</code> field instead.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>removeRequestHeaders</code></td>
+<td><code>string[]</code></td>
+<td>Use of <code>remove_request_headers</code> is deprecated. Use the <code>headers</code> field instead.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>appendRequestHeaders</code></td>
+<td><code>map</code></td>
+<td>Use of <code>append_request_headers</code> is deprecated. Use the <code>headers</code> field instead.</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p><code>Destination</code> 字段：</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>host</code></td>
+<td><code>string</code></td>
+<td>The name of a service from the service registry. Service names are looked up from the platform’s service registry (e.g., Kubernetes services, Consul services, etc.) and from the hosts declared by <a href="https://istio.io/docs/reference/config/networking/service-entry/#ServiceEntry" target="_blank" rel="noopener">ServiceEntry</a>. Traffic forwarded to destinations that are not found in either of the two, will be dropped.<em>Note for Kubernetes users</em>: When short names are used (e.g. “reviews” instead of “reviews.default.svc.cluster.local”), Istio will interpret the short name based on the namespace of the rule, not the service. A rule in the “default” namespace containing a host “reviews will be interpreted as “reviews.default.svc.cluster.local”, irrespective of the actual namespace associated with the reviews service. <em>To avoid potential misconfigurations, it is recommended to always use fully qualified domain names over short names.</em></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>subset</code></td>
+<td><code>string</code></td>
+<td>The name of a subset within the service. Applicable only to services within the mesh. The subset must be defined in a corresponding DestinationRule.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td><code>PortSelector</code></td>
+<td>Specifies the port on the host that is being addressed. If a service exposes only a single port it is not required to explicitly select the port.</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p><code>PortSelector</code> 字段：</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>number</code></td>
+<td><code>uint32</code></td>
+<td>Valid port number</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p>Headers字段：</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>request</code></td>
+<td><code>HeaderOperations</code></td>
+<td>Header manipulation rules to apply before forwarding a request to the destination service</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>response</code></td>
+<td><code>HeaderOperations</code></td>
+<td>Header manipulation rules to apply before returning a response to the caller</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p><code>HeaderOperations</code>字段</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>set</code></td>
+<td><code>map</code></td>
+<td>Overwrite the headers specified by key with the given values</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>add</code></td>
+<td><code>map</code></td>
+<td>Append the given values to the headers specified by keys (will create a comma-separated list of values)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>remove</code></td>
+<td><code>string[]</code></td>
+<td>Remove a the specified headers</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h4 id="HTTP重定向-HTTPRedirect-VirtualService-http-redirect"><a href="#HTTP重定向-HTTPRedirect-VirtualService-http-redirect" class="headerlink" title="HTTP重定向 HTTPRedirect VirtualService.http.redirect."></a>HTTP重定向 HTTPRedirect VirtualService.http.redirect.</h4><p>通过HTTPRedirect可以<strong>发送一个301重定向的应答</strong>给<strong>服务调用方</strong>,简单讲就是从一个URL到另一个URL的永久重定向。</p>
 <p>如下图：用户输入一个URL，通过HTTPRedirect可以将其跳转到另一个URL。比较常见的场景：有一个在线网站，网址变了，通过这样的重定向，可以在用户输入老地址时跳转到新地址：</p>
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/httpredirect.png" alt></p>
@@ -452,8 +859,39 @@
 <p>需要注意的是：这里使用HTTPRedirect的uri配置会<strong>替换原请求中的完整PATH</strong>，而不是匹配条件上的uri部分，如下所示：对forecast服务所有前缀是<code>/advertisement</code>的请求都会被重定向到new-forecast的<code>/recommendation/activity</code>地址：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uri:</span></span><br><span class="line">        <span class="attr">prefix:</span> <span class="string">/advertisement</span></span><br><span class="line">    <span class="attr">redirect:</span></span><br><span class="line">      <span class="attr">uri:</span> <span class="string">/recommendation/activity</span></span><br><span class="line">      <span class="attr">authority:</span> <span class="string">new-forecast</span></span><br></pre></td></tr></table></figure>
 
-
-
+<p>redirect 官网解释：</p>
+<p>HTTPRedirect can be used to send a 301 redirect response to the caller, where the Authority/Host and the URI in the response can be swapped with the specified values. For example, the following rule redirects requests for /v1/getProductRatings API on the ratings service to /v1/bookRatings provided by the bookratings service.</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#HTTPRedirect" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#HTTPRedirect</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>uri</code></td>
+<td><code>string</code></td>
+<td>On a redirect, overwrite the Path portion of the URL with this value. Note that the entire path will be replaced, irrespective of the request URI being matched as an exact path or prefix.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>authority</code></td>
+<td><code>string</code></td>
+<td>On a redirect, overwrite the Authority/Host portion of the URL with this value.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>redirectCode</code></td>
+<td><code>uint32</code></td>
+<td>On a redirect, Specifies the HTTP status code to use in the redirect response. The default response code is MOVED_PERMANENTLY (301).</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h4 id="HTTP重写-HTTPRewrite-VirtualService-http-rewrite"><a href="#HTTP重写-HTTPRewrite-VirtualService-http-rewrite" class="headerlink" title="HTTP重写 HTTPRewrite VirtualService.http.rewrite."></a>HTTP重写 HTTPRewrite VirtualService.http.rewrite.</h4><p>通过HTTP重写可以在将请求转发给目标服务钱修改HTTP请求中指定部分的内容，流程如下图。不同于重定向对用户可见，比如浏览器地址栏里的地址会变成重定向的地址，HTTP重写对最终用户是不可见的，因为是在服务端进行的。</p>
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/httprewrite.png" alt></p>
 <p>和HTTPRedirect相同，重写HTTPRewrite也包括两个字段：</p>
@@ -465,8 +903,32 @@
 <p>如下图，前缀匹配<code>/advertisement</code>的请求，其请求uri中的这部分前缀会被<code>/recommendation/activity</code>替换：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uri:</span></span><br><span class="line">        <span class="attr">prefix:</span> <span class="string">/advertisement</span></span><br><span class="line">    <span class="attr">rewrite:</span></span><br><span class="line">      <span class="attr">uri:</span> <span class="string">/recommendation/activity</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">forecast</span></span><br></pre></td></tr></table></figure>
 
-
-
+<p>rewrite 字段 官网说明：</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#HTTPRewrite" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#HTTPRewrite</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>uri</code></td>
+<td><code>string</code></td>
+<td>rewrite the path (or the prefix) portion of the URI with this value. If the original URI was matched based on prefix, the value provided in this field will replace the corresponding matched prefix.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>authority</code></td>
+<td><code>string</code></td>
+<td>rewrite the Authority/Host header with this value.</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h4 id="HTTP重试-HTTPRetry-VirtualService-http-retries"><a href="#HTTP重试-HTTPRetry-VirtualService-http-retries" class="headerlink" title="HTTP重试 HTTPRetry VirtualService.http.retries."></a>HTTP重试 HTTPRetry VirtualService.http.retries.</h4><p>HTTP重试是解决很多请求异常最直接，最简单的办法。尤其是在工作环境比较复杂的场景下，可提高总体的服务质量。但重试使用不当也会有问题，最糟糕的情况是重试一直不成功，反而增加了总的延迟和性能开销。所以，根据系统运行环境、服务自身特点，配置适当的重试规则显得尤为重要。</p>
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/httpretry.png" alt></p>
 <p>HTTPRetry可以定义请求失败时的重试策略。重试策略包括重试次数、超时、重试条件等：</p>
@@ -492,15 +954,72 @@
 <p>如下示例，forecast服务配置了一个重试策略，在“5xx, connect-failure”条件下进行最多5次的重试，每次重试的超时时间是3秒：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">forecast</span></span><br><span class="line">    <span class="attr">retries:</span></span><br><span class="line">      <span class="attr">attempts:</span> <span class="number">5</span></span><br><span class="line">      <span class="attr">perTryTimeout:</span> <span class="string">3s</span></span><br><span class="line">      <span class="attr">retryOn:</span> <span class="string">5xx,connect-failure</span></span><br></pre></td></tr></table></figure>
 
-
-
+<p>retries 字段 官网说明：</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#HTTPRetry" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#HTTPRetry</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>attempts</code></td>
+<td><code>int32</code></td>
+<td>Number of retries for a given request. The interval between retries will be determined automatically (25ms+). Actual number of retries attempted depends on the httpReqTimeout.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>perTryTimeout</code></td>
+<td><code>Duration</code></td>
+<td>Timeout per retry attempt for a given request. format: 1h/1m/1s/1ms. MUST BE &gt;=1ms.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>retryOn</code></td>
+<td><code>string</code></td>
+<td>Specifies the conditions under which retry takes place. One or more policies can be specified using a ‘,’ delimited list. See the <a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on" target="_blank" rel="noopener">retry policies</a> and <a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-grpc-on" target="_blank" rel="noopener">gRPC retry policies</a> for more details.</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h4 id="HTTP流量镜像-Mirror-VirtualService-http-mirror"><a href="#HTTP流量镜像-Mirror-VirtualService-http-mirror" class="headerlink" title="HTTP流量镜像 Mirror VirtualService.http.mirror."></a>HTTP流量镜像 Mirror VirtualService.http.mirror.</h4><p>HTTP流量镜像指的是在将流量转发到原目标地址的同时将流量给另一个目标地址镜像一份。如下图，把生产系统中宝贵的时间流量镜像一份到另一个系统上，完全不会对生产系统产生影响，这里只镜像了一份流量，数据面代理制需关注原来转发的流量就可以，不用等待镜像目标地址的返回。</p>
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/mirror.png" alt></p>
 <p>配置如下：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">forecast</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v1</span></span><br><span class="line">    <span class="attr">mirror:</span></span><br><span class="line">      <span class="attr">host:</span> <span class="string">forecast</span></span><br><span class="line">      <span class="attr">subset:</span> <span class="string">v2</span></span><br></pre></td></tr></table></figure>
 
-
-
+<p>mirror 字段下面等同于destination：</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>host</code></td>
+<td><code>string</code></td>
+<td>The name of a service from the service registry. Service names are looked up from the platform’s service registry (e.g., Kubernetes services, Consul services, etc.) and from the hosts declared by <a href="https://istio.io/docs/reference/config/networking/service-entry/#ServiceEntry" target="_blank" rel="noopener">ServiceEntry</a>. Traffic forwarded to destinations that are not found in either of the two, will be dropped.<em>Note for Kubernetes users</em>: When short names are used (e.g. “reviews” instead of “reviews.default.svc.cluster.local”), Istio will interpret the short name based on the namespace of the rule, not the service. A rule in the “default” namespace containing a host “reviews will be interpreted as “reviews.default.svc.cluster.local”, irrespective of the actual namespace associated with the reviews service. <em>To avoid potential misconfigurations, it is recommended to always use fully qualified domain names over short names.</em></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>subset</code></td>
+<td><code>string</code></td>
+<td>The name of a subset within the service. Applicable only to services within the mesh. The subset must be defined in a corresponding DestinationRule.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td><code>PortSelector</code></td>
+<td>Specifies the port on the host that is being addressed. If a service exposes only a single port it is not required to explicitly select the port.</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h4 id="HTTP故障注入-HTTPFaultInjection-VirtualService-http-fault"><a href="#HTTP故障注入-HTTPFaultInjection-VirtualService-http-fault" class="headerlink" title="HTTP故障注入 HTTPFaultInjection VirtualService.http.fault."></a>HTTP故障注入 HTTPFaultInjection VirtualService.http.fault.</h4><p>在HTTP上做故障注入和Redirect、Rewrite、Retry没有太多差别，都是修改HTTP请求或者应答的内容。<strong>在使用故障注入时不能启用超时和重试</strong>。</p>
 <p>通过delay和abort两个字段配置延时和中止两种故障，分别表示Proxy延迟转发HTTP请求和中止HTTP请求：</p>
 <ul>
@@ -526,11 +1045,82 @@
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">......</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">forecast</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v2</span></span><br><span class="line">    <span class="attr">fault:</span></span><br><span class="line">      <span class="attr">abort:</span></span><br><span class="line">        <span class="attr">percentage:</span></span><br><span class="line">          <span class="attr">value:</span> <span class="number">1.5</span></span><br><span class="line">        <span class="attr">httpStatus:</span> <span class="number">500</span></span><br></pre></td></tr></table></figure>
 
 
-
 </li>
 </ul>
 </li>
 </ul>
+<p>fault 字段官方说明：</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#HTTPFaultInjection" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#HTTPFaultInjection</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>delay</code></td>
+<td><code>Delay</code></td>
+<td>Delay requests before forwarding, emulating various failures such as network issues, overloaded upstream service, etc.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>abort</code></td>
+<td><code>Abort</code></td>
+<td>Abort Http request attempts and return error codes back to downstream service, giving the impression that the upstream service is faulty.</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p>Delay 字段：</p>
+<table>
+<thead>
+<tr>
+<th><code>fixedDelay</code></th>
+<th><code>Duration (oneof)</code></th>
+<th>Add a fixed delay before forwarding the request. Format: 1h/1m/1s/1ms. MUST be &gt;=1ms.</th>
+<th>Yes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>percentage</code></td>
+<td><code>Percent</code></td>
+<td>Percentage of requests on which the delay will be injected.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>percent</code></td>
+<td><code>int32</code></td>
+<td>Percentage of requests on which the delay will be injected (0-100). Use of integer <code>percent</code> value is deprecated. Use the double <code>percentage</code> field instead.</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p>About 字段：</p>
+<table>
+<thead>
+<tr>
+<th><code>httpStatus</code></th>
+<th><code>int32 (oneof)</code></th>
+<th>HTTP status code to use to abort the Http request.</th>
+<th>Yes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>percentage</code></td>
+<td><code>Percent</code></td>
+<td>Percentage of requests to be aborted with the error code provided.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>percent</code></td>
+<td><code>int32</code></td>
+<td>Percentage of requests to be aborted with the error code provided (0-100). Use of integer <code>percent</code> value is deprecated. Use the double <code>percentage</code> field instead.</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h4 id="HTTP跨域资源共享-CorsPolicy-VirtualService-http-corsPolicy"><a href="#HTTP跨域资源共享-CorsPolicy-VirtualService-http-corsPolicy" class="headerlink" title="HTTP跨域资源共享 CorsPolicy VirtualService.http.corsPolicy."></a>HTTP跨域资源共享 CorsPolicy VirtualService.http.corsPolicy.</h4><p>当一个资源向该资源所在服务器的不同域发起请求时，就会产生一个跨域的HTTP请求，出于安全原因，浏览器会限制从脚本发起的跨域HTTP请求。通过跨域资源共享CORS（Cross Origin Resource Sharing）机制可允许Web应用服务器进行跨域访问控制，是跨域数据传输安全进行。在实现上是在HTTP Header中追加一些额外的信息来通知浏览器准许以上访问。</p>
 <p>在<code>VirtualService</code>中可以对满足条件的请求配置跨域资源共享：</p>
 <ul>
@@ -544,8 +1134,56 @@
 <p>我们给forecast服务配置跨域策略，允许源自news.com的GET方法的请求的访问：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">forecast</span></span><br><span class="line">    <span class="attr">corsPolicy:</span></span><br><span class="line">      <span class="attr">allowOrigin:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">news.com</span></span><br><span class="line">      <span class="attr">allowMethods:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">GET</span></span><br><span class="line">      <span class="attr">maxAge:</span> <span class="string">"2d"</span></span><br></pre></td></tr></table></figure>
 
-
-
+<p>corsPolicy 字段官网说明：</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#CorsPolicy" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#CorsPolicy</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>allowOrigin</code></td>
+<td><code>string[]</code></td>
+<td>The list of origins that are allowed to perform CORS requests. The content will be serialized into the Access-Control-Allow-Origin header. Wildcard * will allow all origins.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>allowMethods</code></td>
+<td><code>string[]</code></td>
+<td>List of HTTP methods allowed to access the resource. The content will be serialized into the Access-Control-Allow-Methods header.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>allowHeaders</code></td>
+<td><code>string[]</code></td>
+<td>List of HTTP headers that can be used when requesting the resource. Serialized to Access-Control-Allow-Headers header.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>exposeHeaders</code></td>
+<td><code>string[]</code></td>
+<td>A white list of HTTP headers that the browsers are allowed to access. Serialized into Access-Control-Expose-Headers header.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>maxAge</code></td>
+<td><code>Duration</code></td>
+<td>Specifies how long the results of a preflight request can be cached. Translates to the <code>Access-Control-Max-Age</code> header.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>allowCredentials</code></td>
+<td><code>BoolValue</code></td>
+<td>Indicates whether the caller is allowed to send the actual request (not the preflight) using credentials. Translates to <code>Access-Control-Allow-Credentials</code> header.</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h3 id="TLS路由-TLSRoute-VirtualService-tls"><a href="#TLS路由-TLSRoute-VirtualService-tls" class="headerlink" title="TLS路由 TLSRoute VirtualService.tls."></a>TLS路由 TLSRoute VirtualService.tls.</h3><p>在<code>VirtualService</code>中，tls是一种TLSRoute类型的路由集合，用于处理非终结的TLS和HTTPS流量，选择SNI（Server Name Indication，客户端在TLS握手阶段建立连接使用的服务Hostname）做路由选择。TLSRoute应用场景如下：</p>
 <blockquote>
 <p>Indication<br>英 /ˌɪndɪˈkeɪʃn/  美 /ˌɪndɪˈkeɪʃn/  全球(美国)<br>n. 指示，指出；迹象；象征<br>复数 indications</p>
@@ -562,6 +1200,32 @@
 <p>可以通过HTTPS方式从外部访问weather应用内部的两个HTTPS服务frontend和recommendation，访问目标端口是443并且SNI是frontend.weather.com的请求会被转发到frontend服务上，访问目标端口443并且SNI是recommendation.weather.com的请求会被转发到recommendation服务上。</p>
 <h4 id="TLSRoute规则解析"><a href="#TLSRoute规则解析" class="headerlink" title="TLSRoute规则解析"></a>TLSRoute规则解析</h4><p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/tlsroute.png" alt></p>
 <p>规则逻辑是将满足一定条件的流量转发到对应的后端。匹配条件是TLSMatchAttributes，路由规则目标是RouteDestination。</p>
+<p>tls 字段官方说明：</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#TLSRoute" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#TLSRoute</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>match</code></td>
+<td><code>TLSMatchAttributes[]</code></td>
+<td>Match conditions to be satisfied for the rule to be activated. All conditions inside a single match block have AND semantics, while the list of match blocks have OR semantics. The rule is matched if any one of the match blocks succeed.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>route</code></td>
+<td><code>RouteDestination[]</code></td>
+<td>The destination to which the connection should be forwarded to.</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h4 id="TLS匹配规则-TLSMatchAttributes-VirtualService-tls-match"><a href="#TLS匹配规则-TLSMatchAttributes-VirtualService-tls-match" class="headerlink" title="TLS匹配规则 TLSMatchAttributes VirtualService.tls.match"></a>TLS匹配规则 TLSMatchAttributes VirtualService.tls.match</h4><p>在TLSRoute中，match字段是一个TLSMatchAttributes类型的数组，表示TLS的匹配条件，从以下几个方面描述一个TLS服务的请求特性。</p>
 <ul>
 <li>sniHosts：必选字段，用来匹配TLS请求的SNI。SNI的值必须是<strong>VirtualService的Hosts的子集</strong>。</li>
@@ -573,13 +1237,107 @@
 <p>sniHosts和destinationSubnets是TLS特有的，port、sourceLabels和gateways属性同HTTP的条件定义，一般的用法匹配port和sniHosts，配置如下：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">tls:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">match:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">443</span></span><br><span class="line">    <span class="attr">sniHosts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">frontend.weather.com</span></span><br></pre></td></tr></table></figure>
 
-
-
+<p>tls.match 官方说明：</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#TLSMatchAttributes" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#TLSMatchAttributes</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sniHosts</code></td>
+<td><code>string[]</code></td>
+<td>SNI (server name indicator) to match on. Wildcard prefixes can be used in the SNI value, e.g., *.com will match foo.example.com as well as example.com. An SNI value must be a subset (i.e., fall within the domain) of the corresponding virtual serivce’s hosts.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>destinationSubnets</code></td>
+<td><code>string[]</code></td>
+<td>IPv4 or IPv6 ip addresses of destination with optional subnet. E.g., a.b.c.d/xx form or just a.b.c.d.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td><code>uint32</code></td>
+<td>Specifies the port on the host that is being addressed. Many services only expose a single port or label ports with the protocols they support, in these cases it is not required to explicitly select the port.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>sourceLabels</code></td>
+<td><code>map</code></td>
+<td>One or more labels that constrain the applicability of a rule to workloads with the given labels. If the VirtualService has a list of gateways specified at the top, it should include the reserved gateway <code>mesh</code> in order for this field to be applicable.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>gateways</code></td>
+<td><code>string[]</code></td>
+<td>Names of gateways where the rule should be applied to. Gateway names at the top of the VirtualService (if any) are overridden. The gateway match is independent of sourceLabels.</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h4 id="TLS四层路由目标-RouteDestination-VirtualService-tls-route"><a href="#TLS四层路由目标-RouteDestination-VirtualService-tls-route" class="headerlink" title="TLS四层路由目标 RouteDestination VirtualService.tls.route"></a>TLS四层路由目标 RouteDestination VirtualService.tls.route</h4><p>TLS的路由目标通过RouteDestination来描述转发的目的地址，这是一个四层路由转发地址，包含两个必须属性destination和weight。</p>
 <ul>
 <li>destination：表示满足条件的流量的目标。</li>
 <li>weight：表示切分的流量比例。</li>
 </ul>
+<p>tls.route 官方说明：</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>destination</code></td>
+<td><code>Destination</code></td>
+<td>Destination uniquely identifies the instances of a service to which the request/connection should be forwarded to.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>weight</code></td>
+<td><code>int32</code></td>
+<td>The proportion of traffic to be forwarded to the service version. If there is only one destination in a rule, all traffic will be routed to it irrespective of the weight.</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p> tls.route.destination.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>host</code></td>
+<td><code>string</code></td>
+<td>The name of a service from the service registry. Service names are looked up from the platform’s service registry (e.g., Kubernetes services, Consul services, etc.) and from the hosts declared by <a href="https://istio.io/docs/reference/config/networking/service-entry/#ServiceEntry" target="_blank" rel="noopener">ServiceEntry</a>. Traffic forwarded to destinations that are not found in either of the two, will be dropped.<em>Note for Kubernetes users</em>: When short names are used (e.g. “reviews” instead of “reviews.default.svc.cluster.local”), Istio will interpret the short name based on the namespace of the rule, not the service. A rule in the “default” namespace containing a host “reviews will be interpreted as “reviews.default.svc.cluster.local”, irrespective of the actual namespace associated with the reviews service. <em>To avoid potential misconfigurations, it is recommended to always use fully qualified domain names over short names.</em></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>subset</code></td>
+<td><code>string</code></td>
+<td>The name of a subset within the service. Applicable only to services within the mesh. The subset must be defined in a corresponding DestinationRule.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td><code>PortSelector</code></td>
+<td>Specifies the port on the host that is being addressed. If a service exposes only a single port it is not required to explicitly select the port.</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h3 id="TCP路由-TCPRoute-VirtualService-tcp"><a href="#TCP路由-TCPRoute-VirtualService-tcp" class="headerlink" title="TCP路由 TCPRoute VirtualService.tcp."></a>TCP路由 TCPRoute VirtualService.tcp.</h3><p>所有不满足以上HTTP和TLS条件的流量都会应用TCP流量规则。</p>
 <h4 id="TCPRoute配置示例"><a href="#TCPRoute配置示例" class="headerlink" title="TCPRoute配置示例"></a>TCPRoute配置示例</h4><p>如下：将来自frontend服务23003端口的流量转发到inner-forecast服务的3003端口：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">tcp:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">23303</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">inner-forecast</span></span><br><span class="line">        <span class="attr">port:</span></span><br><span class="line">          <span class="attr">number:</span> <span class="number">3003</span></span><br></pre></td></tr></table></figure>
@@ -596,8 +1354,99 @@
 <p>这几个字段和TLSMatchAttributes对应的字段意义相同，以下基于端口和源工作负载描述TCP流量的典型实例：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">tcp:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">match:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">sourceLabels:</span></span><br><span class="line">      <span class="attr">group:</span> <span class="string">beta</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">23003</span></span><br></pre></td></tr></table></figure>
 
-
-
+<p>tcp.match 字段官方说明：</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#L4MatchAttributes" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#L4MatchAttributes</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>destinationSubnets</code></td>
+<td><code>string[]</code></td>
+<td>IPv4 or IPv6 ip addresses of destination with optional subnet. E.g., a.b.c.d/xx form or just a.b.c.d.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td><code>uint32</code></td>
+<td>Specifies the port on the host that is being addressed. Many services only expose a single port or label ports with the protocols they support, in these cases it is not required to explicitly select the port.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>sourceLabels</code></td>
+<td><code>map</code></td>
+<td>One or more labels that constrain the applicability of a rule to workloads with the given labels. If the VirtualService has a list of gateways specified at the top, it should include the reserved gateway <code>mesh</code> in order for this field to be applicable.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>gateways</code></td>
+<td><code>string[]</code></td>
+<td>Names of gateways where the rule should be applied to. Gateway names at the top of the VirtualService (if any) are overridden. The gateway match is independent of sourceLabels.</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p>tcp.route 字段官方说明：</p>
+<blockquote>
+<p><a href="https://istio.io/docs/reference/config/networking/virtual-service/#RouteDestination" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/virtual-service/#RouteDestination</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>destination</code></td>
+<td><code>Destination</code></td>
+<td>Destination uniquely identifies the instances of a service to which the request/connection should be forwarded to.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>weight</code></td>
+<td><code>int32</code></td>
+<td>The proportion of traffic to be forwarded to the service version. If there is only one destination in a rule, all traffic will be routed to it irrespective of the weight.</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p>Destination 字段，等同于上面的Destination字段。</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>host</code></td>
+<td><code>string</code></td>
+<td>The name of a service from the service registry. Service names are looked up from the platform’s service registry (e.g., Kubernetes services, Consul services, etc.) and from the hosts declared by <a href="https://istio.io/docs/reference/config/networking/service-entry/#ServiceEntry" target="_blank" rel="noopener">ServiceEntry</a>. Traffic forwarded to destinations that are not found in either of the two, will be dropped.<em>Note for Kubernetes users</em>: When short names are used (e.g. “reviews” instead of “reviews.default.svc.cluster.local”), Istio will interpret the short name based on the namespace of the rule, not the service. A rule in the “default” namespace containing a host “reviews will be interpreted as “reviews.default.svc.cluster.local”, irrespective of the actual namespace associated with the reviews service. <em>To avoid potential misconfigurations, it is recommended to always use fully qualified domain names over short names.</em></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>subset</code></td>
+<td><code>string</code></td>
+<td>The name of a subset within the service. Applicable only to services within the mesh. The subset must be defined in a corresponding DestinationRule.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td><code>PortSelector</code></td>
+<td>Specifies the port on the host that is being addressed. If a service exposes only a single port it is not required to explicitly select the port.</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h3 id="三种协议路由规则的对比"><a href="#三种协议路由规则的对比" class="headerlink" title="三种协议路由规则的对比"></a>三种协议路由规则的对比</h3><p>VirtualService在http、tls和tcp这三个字段上分别定义了应用于HTTP、TLS和TCP三种协议的路由规则。从规则构成上都是先定义一组匹配条件，然后对满足条件的流量执行对应的操作。因为协议的内容不同，路由规则匹配的条件不同，所以可执行的操作也不同。如下表所示对比了三种路由规则，从各个维度来看，HTTP路由规则的内容最丰富，TCP路由规则的内容最少，这也符合协议分层的设计。</p>
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/http-tls-tcp-comp.png" alt></p>
 <h3 id="VirtualService的典型应用"><a href="#VirtualService的典型应用" class="headerlink" title="VirtualService的典型应用"></a>VirtualService的典型应用</h3><h4 id="多个服务的组合"><a href="#多个服务的组合" class="headerlink" title="多个服务的组合"></a>多个服务的组合</h4><p><code>VirtualService</code>是一个广义的Service，如下配置：将一个weather应用的多个服务组装成一个大的虚拟服务。根据访问路径不同，对weather服务的访问会被转发到不同的内部服务上：</p>
@@ -629,6 +1478,9 @@
 
 <p>效果如下图：</p>
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/muti-version-route.png" alt></p>
+<h3 id="VirtualService-字段-思维导图"><a href="#VirtualService-字段-思维导图" class="headerlink" title="VirtualService 字段 思维导图"></a>VirtualService 字段 思维导图</h3><p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/VirtualService-mind.jpg" alt></p>
+<p>图片右键在新窗口打开，或者复制图片路径，可以查看原图。</p>
+<p><a href="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/VirtualService-mind.html">点击这里</a>，查看思维导图网页版，可以查看字段的解释说明，可以保存该网页到本地。</p>
 <h2 id="Istio目标规则配置：DestinationRule"><a href="#Istio目标规则配置：DestinationRule" class="headerlink" title="Istio目标规则配置：DestinationRule"></a>Istio目标规则配置：DestinationRule</h2><p>在上面的VirtualService中，路由的目标对象Destination中大多包含表示Service子集的subset字段，这个服务子集就是通过DestinationRule定义的。</p>
 <h4 id="DestinationRule配置示例"><a href="#DestinationRule配置示例" class="headerlink" title="DestinationRule配置示例"></a>DestinationRule配置示例</h4><p>如下，定义了forecast服务的两个版本子集v1和v2，并且两个版本分别配置了随机和轮询的负载均衡策略：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">DestinationRule</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">host:</span> <span class="string">forecast</span></span><br><span class="line">  <span class="attr">subsets:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">v2</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">version:</span> <span class="string">v2</span></span><br><span class="line">    <span class="attr">trafficPolicy:</span></span><br><span class="line">      <span class="attr">loadBalancer:</span></span><br><span class="line">        <span class="attr">simple:</span> <span class="string">ROUND_ROBIN</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">v1</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">version:</span> <span class="string">v1</span></span><br><span class="line">    <span class="attr">trafficPolicy:</span></span><br><span class="line">      <span class="attr">loadBalancer:</span></span><br><span class="line">        <span class="attr">simple:</span> <span class="string">RANDOM</span></span><br></pre></td></tr></table></figure>
@@ -783,7 +1635,11 @@
 
 <p>frontend服务对forecast服务的访问会自动启用双向认证，对forecast服务和frontend服务的代码都无须修改，而且对双方的证书密钥也无须维护。</p>
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/DestinationRule-tls.png" alt></p>
+<h3 id="DestinationRule-思维导图"><a href="#DestinationRule-思维导图" class="headerlink" title="DestinationRule 思维导图"></a>DestinationRule 思维导图</h3><p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/DestinationRule-mind.jpg" alt></p>
+<p>图片右键在新窗口打开，或者复制图片路径，可以查看原图。</p>
+<p><a href="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/DestinationRule-mind.html">点击这里</a>，查看思维导图网页版，可以查看字段的解释说明，可以保存该网页到本地。</p>
 <h2 id="Istio服务网关配置：Gateway"><a href="#Istio服务网关配置：Gateway" class="headerlink" title="Istio服务网关配置：Gateway"></a>Istio服务网关配置：Gateway</h2><p>Gateway在网格边缘接收外部访问，并将流量转发到网格内的服务。Istio通过Gateway将网格内的服务发布成外部可访问的服务，还可以通过Gateway配置外部访问的端口、协议及与内部服务的映射关系。</p>
+<p>Gateway规范描述了负载均衡器的L4-L6属性。然后，可以将VirtualService绑定到网关，以控制到达特定主机或网关端口的流量的转发。</p>
 <h3 id="Gateway配置示例"><a href="#Gateway配置示例" class="headerlink" title="Gateway配置示例"></a>Gateway配置示例</h3><p>示例：通过HTTP的80端口访问网格内的服务：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Gateway</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">istio-gateway</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">weather</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">ingress-gateway</span></span><br><span class="line">  <span class="attr">servers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">port:</span></span><br><span class="line">      <span class="attr">number:</span> <span class="number">80</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">http</span></span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">http</span></span><br><span class="line">    <span class="attr">hosts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">weather.com</span></span><br></pre></td></tr></table></figure>
 
@@ -798,14 +1654,19 @@
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/istio-gateway.png" alt></p>
 <p>在Gateway上定义了如下两个关键字段：</p>
 <ul>
-<li>selector：必选字段，表示Gateway负载，为入口处的Envoy运行的Pod的标签，通过这个标签来找到执行Gateway规则的Envoy。推荐Gateway的规则定义和Gateway的Envoy负载在同一个命名空间下。</li>
+<li>selector：必选字段，表示Gateway负载，<strong>为入口处的Envoy运行的Pod的标签</strong>，通过这个标签来找到执行Gateway规则的Envoy。标签的选择范围被限定到Gateway配置所在的命名空间，换句话说，Gateway的规则定义和Gateway的Envoy负载必须在同一个命名空间下。</li>
 <li>servers：必选字段，表示开放的服务列表，是Gateway的关键内容信息，是一个<strong>数组</strong>，每个元素都是Server类型。</li>
 </ul>
 <h4 id="后端服务Server-Gateway-servers"><a href="#后端服务Server-Gateway-servers" class="headerlink" title="后端服务Server Gateway.servers."></a>后端服务Server Gateway.servers.</h4><p>Server在结构上真正定义了服务的访问入口，可通过port、hosts、defaultEndpoint和tls来描述。</p>
 <ol>
-<li><p>port：必选字段，描述服务在哪个端口对外开放，是对外监听的端口。</p>
+<li><p>port：必选字段，描述服务在哪个端口对外开放，是对<strong>外监听的端口</strong>。</p>
+<ol>
+<li>number：端口号</li>
+<li>protocol：协议，MUST BE one of HTTP|HTTPS|GRPC|HTTP2|MONGO|TCP|TLS</li>
+<li>name：名称</li>
+</ol>
 </li>
-<li><p>hosts：必选字段，为Gateway发布的服务地址，是一个FQDN域名，可以支持左侧通配符来进行模糊匹配。另外，Istio 1.1支持在这个字段中加入命名空间条件来匹配特定命名空间下的VirtualService。如果设置了命名空间，则会匹配该命名空间下的VirtualService，如果未包含命名空间，则会尝试匹配所有的命名空间。常用于HTTP服务，也可以是TCP或者HTTPS。</p>
+<li><p>hosts：必选字段，<strong>为Gateway发布的服务地址</strong>，通常适用于HTTP、HTTPS服务，同样适用于使用了SNI的TLS的TCP服务。是一个FQDN域名，可以支持左侧通配符来进行模糊匹配。另外，Istio 1.1支持在这个字段中加入命名空间条件来匹配特定命名空间下的VirtualService（格式：namespace/host）。如果设置了命名空间，则会匹配该命名空间下的VirtualService，如果未包含命名空间，则会尝试匹配所有的命名空间。namespace可以是“.”或者“*”，分别表示当前命名空间和所有命名空间。</p>
 <p>注意：在Istio 1.1的Gateway中支持在hosts匹配时使用命名空间的过滤条件。</p>
 </li>
 </ol>
@@ -824,7 +1685,7 @@
 <h4 id="TLS选项-TLSOptions-Gateway-servers-tls"><a href="#TLS选项-TLSOptions-Gateway-servers-tls" class="headerlink" title="TLS选项 TLSOptions Gateway.servers.tls"></a>TLS选项 TLSOptions Gateway.servers.tls</h4><p>tls是与安全服务接口相关，属性如下：</p>
 <ul>
 <li>httpsRedirect：是否要做HTTP重定向，在这个布尔属性启用时，负载均衡器会给所有HTTP连接都发送一个301的重定向，要求使用HTTPS。</li>
-<li>mode：在配置的外部端口上使用TLS模式时，可以取PASSTHROUGH、SIMPLE、MUTUAL、AUTO_PASSTHROUGH这4中模式。</li>
+<li>mode：在配置的外部端口上使用TLS模式时，可以取PASSTHROUGH、SIMPLE、MUTUAL、AUTO_PASSTHROUGH、ISTIO_MUTUAL这5中模式。</li>
 <li>serverCertificate：服务端证书路径，当模式是SIMPLE和MUTUAL时必须指定，配置得单向和双向认证场景下用到的服务端证书。</li>
 <li>privateKey：服务端密钥的路径。当模式是SIMPLE和MUTUAL时必须指定，配置得单向和双向认证场景下用到的服务端私钥。</li>
 <li>caCertificate：CA证书路径。档模式是MUTUAL时指定，在双向认证场景下配置在Gateway上验证客户端的证书。</li>
@@ -834,6 +1695,236 @@
 <li>maxProtocolVersion：TLS协议的最大版本。</li>
 <li>cipherSuites：指定的加密套件，默认使用Envoy支持的加密套件。</li>
 </ul>
+<h4 id="Gateway字段属性，官网摘录"><a href="#Gateway字段属性，官网摘录" class="headerlink" title="Gateway字段属性，官网摘录"></a>Gateway字段属性，官网摘录</h4><blockquote>
+<p>参考：<a href="https://istio.io/docs/reference/config/networking/gateway" target="_blank" rel="noopener">https://istio.io/docs/reference/config/networking/gateway</a></p>
+</blockquote>
+<h5 id="一级字段：Gateway"><a href="#一级字段：Gateway" class="headerlink" title="一级字段：Gateway."></a>一级字段：Gateway.</h5><p>Gateway describes a load balancer operating at the edge of the mesh receiving incoming or outgoing HTTP/TCP connections.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>servers</code></td>
+<td><code>Server[]</code></td>
+<td>A list of server specifications.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>selector</code></td>
+<td><code>map</code></td>
+<td>One or more labels that indicate a specific set of pods/VMs on which this gateway configuration should be applied. The scope of label search is restricted to the configuration namespace in which the the resource is present. In other words, the Gateway resource must reside in the same namespace as the gateway workload instance.</td>
+<td>Yes</td>
+</tr>
+</tbody></table>
+<h5 id="Gateway-servers"><a href="#Gateway-servers" class="headerlink" title="Gateway.servers."></a>Gateway.servers.</h5><p><code>Server</code> describes the properties of the proxy on a given load balancer port. </p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>port</code></td>
+<td><code>Port</code></td>
+<td>The Port on which the proxy should listen for incoming connections.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>hosts</code></td>
+<td><code>string[]</code></td>
+<td>One or more hosts exposed by this gateway. While typically applicable to HTTP services, it can also be used for TCP services using TLS with SNI. A host is specified as a <code>dnsName</code> with an optional <code>namespace/</code> prefix. The <code>dnsName</code> should be specified using FQDN format, optionally including a wildcard character in the left-most component (e.g., <code>prod/*.example.com</code>). Set the <code>dnsName</code> to <code>*</code> to select all <code>VirtualService</code> hosts from the specified namespace (e.g.,<code>prod/*</code>).The <code>namespace</code> can be set to <code>*</code> or <code>.</code>, representing any or the current namespace, respectively. For example, <code>*/foo.example.com</code> selects the service from any available namespace while <code>./foo.example.com</code> only selects the service from the namespace of the sidecar. The default, if no <code>namespace/</code> is specified, is <code>*/</code>, that is, select services from any namespace. Any associated <code>DestinationRule</code> in the selected namespace will also be used.A <code>VirtualService</code> must be bound to the gateway and must have one or more hosts that match the hosts specified in a server. The match could be an exact match or a suffix match with the server’s hosts. For example, if the server’s hosts specifies <code>*.example.com</code>, a <code>VirtualService</code> with hosts <code>dev.example.com</code> or <code>prod.example.com</code> will match. However, a <code>VirtualService</code> with host <code>example.com</code> or <code>newexample.com</code> will not match.NOTE: Only virtual services exported to the gateway’s namespace (e.g., <code>exportTo</code> value of <code>*</code>) can be referenced. Private configurations (e.g., <code>exportTo</code> set to <code>.</code>) will not be available. Refer to the <code>exportTo</code> setting in <code>VirtualService</code>, <code>DestinationRule</code>, and <code>ServiceEntry</code> configurations for details.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>tls</code></td>
+<td><code>TLSOptions</code></td>
+<td>Set of TLS related options that govern the server’s behavior. Use these options to control if all http requests should be redirected to https, and the TLS modes to use.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>defaultEndpoint</code></td>
+<td><code>string</code></td>
+<td>The loopback IP endpoint or Unix domain socket to which traffic should be forwarded to by default. Format should be <code>127.0.0.1:PORT</code> or <code>unix:///path/to/socket</code> or <code>unix://@foobar</code> (Linux abstract namespace).</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<h5 id="Gateway-servers-port"><a href="#Gateway-servers-port" class="headerlink" title="Gateway.servers.port."></a>Gateway.servers.port.</h5><p>Port describes the properties of a specific port of a service.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>number</code></td>
+<td><code>uint32</code></td>
+<td>A valid non-negative integer port number.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>protocol</code></td>
+<td><code>string</code></td>
+<td>The protocol exposed on the port. MUST BE one of HTTP|HTTPS|GRPC|HTTP2|MONGO|TCP|TLS. TLS implies the connection will be routed based on the SNI header to the destination without terminating the TLS connection.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>Label assigned to the port.</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<h5 id="Gateway-servers-tls"><a href="#Gateway-servers-tls" class="headerlink" title="Gateway.servers.tls."></a>Gateway.servers.tls.</h5><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>httpsRedirect</code></td>
+<td><code>bool</code></td>
+<td>If set to true, the load balancer will send a 301 redirect for all http connections, asking the clients to use HTTPS.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td><code>TLSmode</code></td>
+<td>Optional: Indicates whether connections to this port should be secured using TLS. The value of this field determines how TLS is enforced.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>serverCertificate</code></td>
+<td><code>string</code></td>
+<td>REQUIRED if mode is <code>SIMPLE</code> or <code>MUTUAL</code>. The path to the file holding the server-side TLS certificate to use.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>privateKey</code></td>
+<td><code>string</code></td>
+<td>REQUIRED if mode is <code>SIMPLE</code> or <code>MUTUAL</code>. The path to the file holding the server’s private key.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>caCertificates</code></td>
+<td><code>string</code></td>
+<td>REQUIRED if mode is <code>MUTUAL</code>. The path to a file containing certificate authority certificates to use in verifying a presented client side certificate.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>credentialName</code></td>
+<td><code>string</code></td>
+<td>The credentialName stands for a unique identifier that can be used to identify the serverCertificate and the privateKey. The credentialName appended with suffix “-cacert” is used to identify the CaCertificates associated with this server. Gateway workloads capable of fetching credentials from a remote credential store such as Kubernetes secrets, will be configured to retrieve the serverCertificate and the privateKey using credentialName, instead of using the file system paths specified above. If using mutual TLS, gateway workload instances will retrieve the CaCertificates using credentialName-cacert. The semantics of the name are platform dependent. In Kubernetes, the default Istio supplied credential server expects the credentialName to match the name of the Kubernetes secret that holds the server certificate, the private key, and the CA certificate (if using mutual TLS). Set the <code>ISTIO_META_USER_SDS</code> metadata variable in the gateway’s proxy to enable the dynamic credential fetching feature.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>subjectAltNames</code></td>
+<td><code>string[]</code></td>
+<td>A list of alternate names to verify the subject identity in the certificate presented by the client.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>verifyCertificateSpki</code></td>
+<td><code>string[]</code></td>
+<td>An optional list of base64-encoded SHA-256 hashes of the SKPIs of authorized client certificates. Note: When both verify<em>certificate</em>hash and verify<em>certificate</em>spki are specified, a hash matching either value will result in the certificate being accepted.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>verifyCertificateHash</code></td>
+<td><code>string[]</code></td>
+<td>An optional list of hex-encoded SHA-256 hashes of the authorized client certificates. Both simple and colon separated formats are acceptable. Note: When both verify<em>certificate</em>hash and verify<em>certificate</em>spki are specified, a hash matching either value will result in the certificate being accepted.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>minProtocolVersion</code></td>
+<td><code>TLSProtocol</code></td>
+<td>Optional: Minimum TLS protocol version.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>maxProtocolVersion</code></td>
+<td><code>TLSProtocol</code></td>
+<td>Optional: Maximum TLS protocol version.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>cipherSuites</code></td>
+<td><code>string[]</code></td>
+<td>Optional: If specified, only support the specified cipher list. Otherwise default to the default cipher list supported by Envoy.</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<h5 id="Gateway-servers-tls-mode"><a href="#Gateway-servers-tls-mode" class="headerlink" title="Gateway.servers.tls.mode."></a>Gateway.servers.tls.mode.</h5><p>TLS modes enforced by the proxy</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>PASSTHROUGH</code></td>
+<td>The SNI string presented by the client will be used as the match criterion in a VirtualService TLS route to determine the destination service from the service registry.</td>
+</tr>
+<tr>
+<td><code>SIMPLE</code></td>
+<td>Secure connections with standard TLS semantics.</td>
+</tr>
+<tr>
+<td><code>MUTUAL</code></td>
+<td>Secure connections to the downstream using mutual TLS by presenting server certificates for authentication.</td>
+</tr>
+<tr>
+<td><code>AUTO_PASSTHROUGH</code></td>
+<td>Similar to the passthrough mode, except servers with this TLS mode do not require an associated VirtualService to map from the SNI value to service in the registry. The destination details such as the service/subset/port are encoded in the SNI value. The proxy will forward to the upstream (Envoy) cluster (a group of endpoints) specified by the SNI value. This server is typically used to provide connectivity between services in disparate L3 networks that otherwise do not have direct connectivity between their respective endpoints. Use of this mode assumes that both the source and the destination are using Istio mTLS to secure traffic.</td>
+</tr>
+<tr>
+<td><code>ISTIO_MUTUAL</code></td>
+<td>Secure connections from the downstream using mutual TLS by presenting server certificates for authentication. Compared to Mutual mode, this mode uses certificates, representing gateway workload identity, generated automatically by Istio for mTLS authentication. When this mode is used, all other fields in <code>TLSOptions</code> should be empty.</td>
+</tr>
+</tbody></table>
+<h5 id="Gateway-servers-tls-minProtocolVersion-or-Gateway-servers-tls-maxProtocolVersion"><a href="#Gateway-servers-tls-minProtocolVersion-or-Gateway-servers-tls-maxProtocolVersion" class="headerlink" title="Gateway.servers.tls.minProtocolVersion or Gateway.servers.tls.maxProtocolVersion"></a>Gateway.servers.tls.minProtocolVersion or Gateway.servers.tls.maxProtocolVersion</h5><p>TLS protocol versions.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>TLS_AUTO</code></td>
+<td>Automatically choose the optimal TLS version.</td>
+</tr>
+<tr>
+<td><code>TLSV1_0</code></td>
+<td>TLS version 1.0</td>
+</tr>
+<tr>
+<td><code>TLSV1_1</code></td>
+<td>TLS version 1.1</td>
+</tr>
+<tr>
+<td><code>TLSV1_2</code></td>
+<td>TLS version 1.2</td>
+</tr>
+<tr>
+<td><code>TLSV1_3</code></td>
+<td>TLS version 1.3</td>
+</tr>
+</tbody></table>
 <h4 id="Gateway的典型应用"><a href="#Gateway的典型应用" class="headerlink" title="Gateway的典型应用"></a>Gateway的典型应用</h4><h5 id="将网格内的HTTP服务发布为HTTP外部服务"><a href="#将网格内的HTTP服务发布为HTTP外部服务" class="headerlink" title="将网格内的HTTP服务发布为HTTP外部服务"></a>将网格内的HTTP服务发布为HTTP外部服务</h5><p>在上面的配置：<a href="#Gateway配置示例">Gateway配置示例</a> 介绍了将一个内部的HTTP服务通过Gateway发布出去的典型场景，如下图所示，外部服务通过域名<code>http://weather.com</code>访问到应用的入口服务frontend。VirtualService本身定义了frontend服务从内部和外部访问同样的路由规则，即根据内容的不同，将请求路由到v2版本或v1版本，这里的Gateway的协议是HTTP。</p>
 <p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/gateway-example-http-http.png" alt></p>
 <h5 id="将网格内的HTTPS服务发布为HTTPS外部服务"><a href="#将网格内的HTTPS服务发布为HTTPS外部服务" class="headerlink" title="将网格内的HTTPS服务发布为HTTPS外部服务"></a>将网格内的HTTPS服务发布为HTTPS外部服务</h5><p>将网格内的HTTPS服务通过HTTPS协议发布。这样在浏览器端中输入<code>https://weather.com</code>就可以访问到这个服务。</p>
@@ -873,8 +1964,9 @@
 
 
 
-
-
+<h3 id="Gateway-思维导图"><a href="#Gateway-思维导图" class="headerlink" title="Gateway 思维导图"></a>Gateway 思维导图</h3><p><img src="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/Gateway-mind.jpg" alt></p>
+<p>图片右键在新窗口打开，或者复制图片路径，可以查看原图。</p>
+<p><a href="/images/ServiceMesh-Istio-Series--Non-Invasive-Traffic-Managerment/Gateway-mind.html">点击这里</a>，查看思维导图网页版，可以查看字段的解释说明，可以保存该网页到本地。</p>
 <h2 id="Istio外部服务配置：ServiceEntry"><a href="#Istio外部服务配置：ServiceEntry" class="headerlink" title="Istio外部服务配置：ServiceEntry"></a>Istio外部服务配置：ServiceEntry</h2><p>将网格外的服务加入到网格中，通过ServiceEntry方式，就像网格内的服务一样进行管理。在实际上就是把外部服务加入Istio的服务发现，这些外部服务因为各种原因不能直接注册到网格中。</p>
 <h3 id="ServiceEntry配置示例"><a href="#ServiceEntry配置示例" class="headerlink" title="ServiceEntry配置示例"></a>ServiceEntry配置示例</h3><p>通过ServiceEntry包装了一个对<a href="http://www.weatherdb.com外部服务的访问。在网格内是一个完整应用，对外提供weather服务，单某些数据来自另一个开放数据服务www.weatherdb.com，通过如下配置就可以对开放数据服务的访问进行治理：" target="_blank" rel="noopener">www.weatherdb.com外部服务的访问。在网格内是一个完整应用，对外提供weather服务，单某些数据来自另一个开放数据服务www.weatherdb.com，通过如下配置就可以对开放数据服务的访问进行治理：</a></p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceEntry</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">weather-external</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">www.weatherdb.com</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">number:</span> <span class="number">80</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">http</span></span><br><span class="line">    <span class="attr">protocol:</span> <span class="string">HTTP</span></span><br><span class="line">  <span class="attr">resolution:</span> <span class="string">DNS</span></span><br><span class="line">  <span class="attr">location:</span> <span class="string">MESH_EXTERNAL</span></span><br></pre></td></tr></table></figure>
@@ -1046,10 +2138,10 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
               <a href="/tags/istio/" rel="tag"># istio</a>
               <a href="/tags/servicemesh/" rel="tag"># servicemesh</a>
               <a href="/tags/microservice/" rel="tag"># microservice</a>
+              <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
           </div>
 
         
@@ -1112,7 +2204,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio路由规则配置：VirtualService"><span class="nav-number">1.</span> <span class="nav-text">Istio路由规则配置：VirtualService</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#路由规则配置示例"><span class="nav-number">1.1.</span> <span class="nav-text">路由规则配置示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#路由规则定义"><span class="nav-number">1.2.</span> <span class="nav-text">路由规则定义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hosts"><span class="nav-number">1.2.1.</span> <span class="nav-text">hosts</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gateways"><span class="nav-number">1.2.2.</span> <span class="nav-text">gateways</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#http"><span class="nav-number">1.2.3.</span> <span class="nav-text">http</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tls"><span class="nav-number">1.2.4.</span> <span class="nav-text">tls</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp"><span class="nav-number">1.2.5.</span> <span class="nav-text">tcp</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#exportTo"><span class="nav-number">1.2.6.</span> <span class="nav-text">exportTo</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP路由-HTTPRoute-VirtualService-http"><span class="nav-number">1.3.</span> <span class="nav-text">HTTP路由 HTTPRoute VirtualService.http.</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTPRoute规则解析"><span class="nav-number">1.3.1.</span> <span class="nav-text">HTTPRoute规则解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP匹配规则-HTTPMatchRequest-VirtualService-http-match"><span class="nav-number">1.3.2.</span> <span class="nav-text">HTTP匹配规则 HTTPMatchRequest VirtualService.http.match.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP路由目标-HTTPRouteDestination-VirtualService-http-route"><span class="nav-number">1.3.3.</span> <span class="nav-text">HTTP路由目标 HTTPRouteDestination VirtualService.http.route.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP重定向-HTTPRedirect-VirtualService-http-redirect"><span class="nav-number">1.3.4.</span> <span class="nav-text">HTTP重定向 HTTPRedirect VirtualService.http.redirect.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP重写-HTTPRewrite-VirtualService-http-rewrite"><span class="nav-number">1.3.5.</span> <span class="nav-text">HTTP重写 HTTPRewrite VirtualService.http.rewrite.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP重试-HTTPRetry-VirtualService-http-retries"><span class="nav-number">1.3.6.</span> <span class="nav-text">HTTP重试 HTTPRetry VirtualService.http.retries.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP流量镜像-Mirror-VirtualService-http-mirror"><span class="nav-number">1.3.7.</span> <span class="nav-text">HTTP流量镜像 Mirror VirtualService.http.mirror.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP故障注入-HTTPFaultInjection-VirtualService-http-fault"><span class="nav-number">1.3.8.</span> <span class="nav-text">HTTP故障注入 HTTPFaultInjection VirtualService.http.fault.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP跨域资源共享-CorsPolicy-VirtualService-http-corsPolicy"><span class="nav-number">1.3.9.</span> <span class="nav-text">HTTP跨域资源共享 CorsPolicy VirtualService.http.corsPolicy.</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS路由-TLSRoute-VirtualService-tls"><span class="nav-number">1.4.</span> <span class="nav-text">TLS路由 TLSRoute VirtualService.tls.</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TLSRoute配置示例"><span class="nav-number">1.4.1.</span> <span class="nav-text">TLSRoute配置示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TLSRoute规则解析"><span class="nav-number">1.4.2.</span> <span class="nav-text">TLSRoute规则解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TLS匹配规则-TLSMatchAttributes-VirtualService-tls-match"><span class="nav-number">1.4.3.</span> <span class="nav-text">TLS匹配规则 TLSMatchAttributes VirtualService.tls.match</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TLS四层路由目标-RouteDestination-VirtualService-tls-route"><span class="nav-number">1.4.4.</span> <span class="nav-text">TLS四层路由目标 RouteDestination VirtualService.tls.route</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP路由-TCPRoute-VirtualService-tcp"><span class="nav-number">1.5.</span> <span class="nav-text">TCP路由 TCPRoute VirtualService.tcp.</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TCPRoute配置示例"><span class="nav-number">1.5.1.</span> <span class="nav-text">TCPRoute配置示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TCPRoute规则解析"><span class="nav-number">1.5.2.</span> <span class="nav-text">TCPRoute规则解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四层匹配规则L4MatchAttributes-VirtualService-tcp-match"><span class="nav-number">1.5.3.</span> <span class="nav-text">四层匹配规则L4MatchAttributes VirtualService.tcp.match.</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三种协议路由规则的对比"><span class="nav-number">1.6.</span> <span class="nav-text">三种协议路由规则的对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VirtualService的典型应用"><span class="nav-number">1.7.</span> <span class="nav-text">VirtualService的典型应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#多个服务的组合"><span class="nav-number">1.7.1.</span> <span class="nav-text">多个服务的组合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#路由规则的优先级"><span class="nav-number">1.7.2.</span> <span class="nav-text">路由规则的优先级</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复杂条件路由"><span class="nav-number">1.7.3.</span> <span class="nav-text">复杂条件路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#特定版本间的访问规则"><span class="nav-number">1.7.4.</span> <span class="nav-text">特定版本间的访问规则</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio目标规则配置：DestinationRule"><span class="nav-number">2.</span> <span class="nav-text">Istio目标规则配置：DestinationRule</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DestinationRule配置示例"><span class="nav-number">2.0.1.</span> <span class="nav-text">DestinationRule配置示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DestinationRule规则定义"><span class="nav-number">2.0.2.</span> <span class="nav-text">DestinationRule规则定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#流量策略-TrafficPolicy-DestinationRule-trafficPolicy"><span class="nav-number">2.0.3.</span> <span class="nav-text">流量策略 TrafficPolicy DestinationRule.trafficPolicy</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#负载均衡设置-LoadBalancerSettings-DestinationRule-trafficPolicy-loadBalancer"><span class="nav-number">2.0.3.1.</span> <span class="nav-text">负载均衡设置 LoadBalancerSettings DestinationRule.trafficPolicy.loadBalancer.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#连接池设置-ConnectionPoolSettings-DestinationRule-trafficPolicy-connectionPool"><span class="nav-number">2.0.3.2.</span> <span class="nav-text">连接池设置 ConnectionPoolSettings DestinationRule.trafficPolicy.connectionPool</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#TCP连接池配置-TCPSettings-DestinationRule-trafficPolicy-connectionPool-tcp"><span class="nav-number">2.0.3.2.1.</span> <span class="nav-text">TCP连接池配置 TCPSettings DestinationRule.trafficPolicy.connectionPool.tcp.</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#HTTP连接池配置-TCPSettings-DestinationRule-trafficPolicy-connectionPool-http"><span class="nav-number">2.0.3.2.2.</span> <span class="nav-text">HTTP连接池配置 TCPSettings DestinationRule.trafficPolicy.connectionPool.http.</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Istio连接池总结"><span class="nav-number">2.0.3.2.3.</span> <span class="nav-text">Istio连接池总结</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#异常实例检测设置-OutlierDetection-DestinationRule-trafficPolicy-outlierDetection"><span class="nav-number">2.0.3.3.</span> <span class="nav-text">异常实例检测设置 OutlierDetection DestinationRule.trafficPolicy.outlierDetection.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#端口流量策略设置-PortTrafficPolicy-DestinationRule-trafficePolicy-portLevelSettings"><span class="nav-number">2.0.3.4.</span> <span class="nav-text">端口流量策略设置 PortTrafficPolicy DestinationRule.trafficePolicy.portLevelSettings.</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务子集-subset-DestinationRule-subsets"><span class="nav-number">2.1.</span> <span class="nav-text">服务子集 subset DestinationRule.subsets.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DestinationRule的典型应用"><span class="nav-number">2.2.</span> <span class="nav-text">DestinationRule的典型应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#定义Subset"><span class="nav-number">2.2.1.</span> <span class="nav-text">定义Subset</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务熔断"><span class="nav-number">2.2.2.</span> <span class="nav-text">服务熔断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#负载均衡配置"><span class="nav-number">2.2.3.</span> <span class="nav-text">负载均衡配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS认证配置"><span class="nav-number">2.3.</span> <span class="nav-text">TLS认证配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio服务网关配置：Gateway"><span class="nav-number">3.</span> <span class="nav-text">Istio服务网关配置：Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway配置示例"><span class="nav-number">3.1.</span> <span class="nav-text">Gateway配置示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway规则定义"><span class="nav-number">3.2.</span> <span class="nav-text">Gateway规则定义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#后端服务Server-Gateway-servers"><span class="nav-number">3.2.1.</span> <span class="nav-text">后端服务Server Gateway.servers.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TLS选项-TLSOptions-Gateway-servers-tls"><span class="nav-number">3.2.2.</span> <span class="nav-text">TLS选项 TLSOptions Gateway.servers.tls</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Gateway的典型应用"><span class="nav-number">3.2.3.</span> <span class="nav-text">Gateway的典型应用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#将网格内的HTTP服务发布为HTTP外部服务"><span class="nav-number">3.2.3.1.</span> <span class="nav-text">将网格内的HTTP服务发布为HTTP外部服务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#将网格内的HTTPS服务发布为HTTPS外部服务"><span class="nav-number">3.2.3.2.</span> <span class="nav-text">将网格内的HTTPS服务发布为HTTPS外部服务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#将网格内的HTTP服务发布为HTTPS外部服务"><span class="nav-number">3.2.3.3.</span> <span class="nav-text">将网格内的HTTP服务发布为HTTPS外部服务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#将网格内的HTTP服务发布为双向HTTPS外部访问"><span class="nav-number">3.2.3.4.</span> <span class="nav-text">将网格内的HTTP服务发布为双向HTTPS外部访问</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#将网格内的HTTP服务发布为HTTPS外部访问和HTTPS内部访问"><span class="nav-number">3.2.3.5.</span> <span class="nav-text">将网格内的HTTP服务发布为HTTPS外部访问和HTTPS内部访问</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio外部服务配置：ServiceEntry"><span class="nav-number">4.</span> <span class="nav-text">Istio外部服务配置：ServiceEntry</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceEntry配置示例"><span class="nav-number">4.1.</span> <span class="nav-text">ServiceEntry配置示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceEntry规则的定义和用法"><span class="nav-number">4.2.</span> <span class="nav-text">ServiceEntry规则的定义和用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceEntry的典型应用"><span class="nav-number">4.3.</span> <span class="nav-text">ServiceEntry的典型应用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio代理规则配置：Sidecar"><span class="nav-number">5.</span> <span class="nav-text">Istio代理规则配置：Sidecar</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Sidecar配置示例"><span class="nav-number">5.1.</span> <span class="nav-text">Sidecar配置示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sidecar规则定义"><span class="nav-number">5.2.</span> <span class="nav-text">Sidecar规则定义</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio路由规则配置：VirtualService"><span class="nav-number">1.</span> <span class="nav-text">Istio路由规则配置：VirtualService</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#路由规则配置示例"><span class="nav-number">1.1.</span> <span class="nav-text">路由规则配置示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#路由规则定义"><span class="nav-number">1.2.</span> <span class="nav-text">路由规则定义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hosts"><span class="nav-number">1.2.1.</span> <span class="nav-text">hosts</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gateways"><span class="nav-number">1.2.2.</span> <span class="nav-text">gateways</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#http"><span class="nav-number">1.2.3.</span> <span class="nav-text">http</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tls"><span class="nav-number">1.2.4.</span> <span class="nav-text">tls</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp"><span class="nav-number">1.2.5.</span> <span class="nav-text">tcp</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#exportTo"><span class="nav-number">1.2.6.</span> <span class="nav-text">exportTo</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP路由-HTTPRoute-VirtualService-http"><span class="nav-number">1.3.</span> <span class="nav-text">HTTP路由 HTTPRoute VirtualService.http.</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTPRoute规则解析"><span class="nav-number">1.3.1.</span> <span class="nav-text">HTTPRoute规则解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP匹配规则-HTTPMatchRequest-VirtualService-http-match"><span class="nav-number">1.3.2.</span> <span class="nav-text">HTTP匹配规则 HTTPMatchRequest VirtualService.http.match.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP路由目标-HTTPRouteDestination-VirtualService-http-route"><span class="nav-number">1.3.3.</span> <span class="nav-text">HTTP路由目标 HTTPRouteDestination VirtualService.http.route.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP重定向-HTTPRedirect-VirtualService-http-redirect"><span class="nav-number">1.3.4.</span> <span class="nav-text">HTTP重定向 HTTPRedirect VirtualService.http.redirect.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP重写-HTTPRewrite-VirtualService-http-rewrite"><span class="nav-number">1.3.5.</span> <span class="nav-text">HTTP重写 HTTPRewrite VirtualService.http.rewrite.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP重试-HTTPRetry-VirtualService-http-retries"><span class="nav-number">1.3.6.</span> <span class="nav-text">HTTP重试 HTTPRetry VirtualService.http.retries.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP流量镜像-Mirror-VirtualService-http-mirror"><span class="nav-number">1.3.7.</span> <span class="nav-text">HTTP流量镜像 Mirror VirtualService.http.mirror.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP故障注入-HTTPFaultInjection-VirtualService-http-fault"><span class="nav-number">1.3.8.</span> <span class="nav-text">HTTP故障注入 HTTPFaultInjection VirtualService.http.fault.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP跨域资源共享-CorsPolicy-VirtualService-http-corsPolicy"><span class="nav-number">1.3.9.</span> <span class="nav-text">HTTP跨域资源共享 CorsPolicy VirtualService.http.corsPolicy.</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS路由-TLSRoute-VirtualService-tls"><span class="nav-number">1.4.</span> <span class="nav-text">TLS路由 TLSRoute VirtualService.tls.</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TLSRoute配置示例"><span class="nav-number">1.4.1.</span> <span class="nav-text">TLSRoute配置示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TLSRoute规则解析"><span class="nav-number">1.4.2.</span> <span class="nav-text">TLSRoute规则解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TLS匹配规则-TLSMatchAttributes-VirtualService-tls-match"><span class="nav-number">1.4.3.</span> <span class="nav-text">TLS匹配规则 TLSMatchAttributes VirtualService.tls.match</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TLS四层路由目标-RouteDestination-VirtualService-tls-route"><span class="nav-number">1.4.4.</span> <span class="nav-text">TLS四层路由目标 RouteDestination VirtualService.tls.route</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP路由-TCPRoute-VirtualService-tcp"><span class="nav-number">1.5.</span> <span class="nav-text">TCP路由 TCPRoute VirtualService.tcp.</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TCPRoute配置示例"><span class="nav-number">1.5.1.</span> <span class="nav-text">TCPRoute配置示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TCPRoute规则解析"><span class="nav-number">1.5.2.</span> <span class="nav-text">TCPRoute规则解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四层匹配规则L4MatchAttributes-VirtualService-tcp-match"><span class="nav-number">1.5.3.</span> <span class="nav-text">四层匹配规则L4MatchAttributes VirtualService.tcp.match.</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三种协议路由规则的对比"><span class="nav-number">1.6.</span> <span class="nav-text">三种协议路由规则的对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VirtualService的典型应用"><span class="nav-number">1.7.</span> <span class="nav-text">VirtualService的典型应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#多个服务的组合"><span class="nav-number">1.7.1.</span> <span class="nav-text">多个服务的组合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#路由规则的优先级"><span class="nav-number">1.7.2.</span> <span class="nav-text">路由规则的优先级</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复杂条件路由"><span class="nav-number">1.7.3.</span> <span class="nav-text">复杂条件路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#特定版本间的访问规则"><span class="nav-number">1.7.4.</span> <span class="nav-text">特定版本间的访问规则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VirtualService-字段-思维导图"><span class="nav-number">1.8.</span> <span class="nav-text">VirtualService 字段 思维导图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio目标规则配置：DestinationRule"><span class="nav-number">2.</span> <span class="nav-text">Istio目标规则配置：DestinationRule</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DestinationRule配置示例"><span class="nav-number">2.0.1.</span> <span class="nav-text">DestinationRule配置示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DestinationRule规则定义"><span class="nav-number">2.0.2.</span> <span class="nav-text">DestinationRule规则定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#流量策略-TrafficPolicy-DestinationRule-trafficPolicy"><span class="nav-number">2.0.3.</span> <span class="nav-text">流量策略 TrafficPolicy DestinationRule.trafficPolicy</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#负载均衡设置-LoadBalancerSettings-DestinationRule-trafficPolicy-loadBalancer"><span class="nav-number">2.0.3.1.</span> <span class="nav-text">负载均衡设置 LoadBalancerSettings DestinationRule.trafficPolicy.loadBalancer.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#连接池设置-ConnectionPoolSettings-DestinationRule-trafficPolicy-connectionPool"><span class="nav-number">2.0.3.2.</span> <span class="nav-text">连接池设置 ConnectionPoolSettings DestinationRule.trafficPolicy.connectionPool</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#TCP连接池配置-TCPSettings-DestinationRule-trafficPolicy-connectionPool-tcp"><span class="nav-number">2.0.3.2.1.</span> <span class="nav-text">TCP连接池配置 TCPSettings DestinationRule.trafficPolicy.connectionPool.tcp.</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#HTTP连接池配置-TCPSettings-DestinationRule-trafficPolicy-connectionPool-http"><span class="nav-number">2.0.3.2.2.</span> <span class="nav-text">HTTP连接池配置 TCPSettings DestinationRule.trafficPolicy.connectionPool.http.</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Istio连接池总结"><span class="nav-number">2.0.3.2.3.</span> <span class="nav-text">Istio连接池总结</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#异常实例检测设置-OutlierDetection-DestinationRule-trafficPolicy-outlierDetection"><span class="nav-number">2.0.3.3.</span> <span class="nav-text">异常实例检测设置 OutlierDetection DestinationRule.trafficPolicy.outlierDetection.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#端口流量策略设置-PortTrafficPolicy-DestinationRule-trafficePolicy-portLevelSettings"><span class="nav-number">2.0.3.4.</span> <span class="nav-text">端口流量策略设置 PortTrafficPolicy DestinationRule.trafficePolicy.portLevelSettings.</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务子集-subset-DestinationRule-subsets"><span class="nav-number">2.1.</span> <span class="nav-text">服务子集 subset DestinationRule.subsets.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DestinationRule的典型应用"><span class="nav-number">2.2.</span> <span class="nav-text">DestinationRule的典型应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#定义Subset"><span class="nav-number">2.2.1.</span> <span class="nav-text">定义Subset</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务熔断"><span class="nav-number">2.2.2.</span> <span class="nav-text">服务熔断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#负载均衡配置"><span class="nav-number">2.2.3.</span> <span class="nav-text">负载均衡配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS认证配置"><span class="nav-number">2.3.</span> <span class="nav-text">TLS认证配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DestinationRule-思维导图"><span class="nav-number">2.4.</span> <span class="nav-text">DestinationRule 思维导图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio服务网关配置：Gateway"><span class="nav-number">3.</span> <span class="nav-text">Istio服务网关配置：Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway配置示例"><span class="nav-number">3.1.</span> <span class="nav-text">Gateway配置示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway规则定义"><span class="nav-number">3.2.</span> <span class="nav-text">Gateway规则定义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#后端服务Server-Gateway-servers"><span class="nav-number">3.2.1.</span> <span class="nav-text">后端服务Server Gateway.servers.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TLS选项-TLSOptions-Gateway-servers-tls"><span class="nav-number">3.2.2.</span> <span class="nav-text">TLS选项 TLSOptions Gateway.servers.tls</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Gateway字段属性，官网摘录"><span class="nav-number">3.2.3.</span> <span class="nav-text">Gateway字段属性，官网摘录</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一级字段：Gateway"><span class="nav-number">3.2.3.1.</span> <span class="nav-text">一级字段：Gateway.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Gateway-servers"><span class="nav-number">3.2.3.2.</span> <span class="nav-text">Gateway.servers.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Gateway-servers-port"><span class="nav-number">3.2.3.3.</span> <span class="nav-text">Gateway.servers.port.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Gateway-servers-tls"><span class="nav-number">3.2.3.4.</span> <span class="nav-text">Gateway.servers.tls.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Gateway-servers-tls-mode"><span class="nav-number">3.2.3.5.</span> <span class="nav-text">Gateway.servers.tls.mode.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Gateway-servers-tls-minProtocolVersion-or-Gateway-servers-tls-maxProtocolVersion"><span class="nav-number">3.2.3.6.</span> <span class="nav-text">Gateway.servers.tls.minProtocolVersion or Gateway.servers.tls.maxProtocolVersion</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Gateway的典型应用"><span class="nav-number">3.2.4.</span> <span class="nav-text">Gateway的典型应用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#将网格内的HTTP服务发布为HTTP外部服务"><span class="nav-number">3.2.4.1.</span> <span class="nav-text">将网格内的HTTP服务发布为HTTP外部服务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#将网格内的HTTPS服务发布为HTTPS外部服务"><span class="nav-number">3.2.4.2.</span> <span class="nav-text">将网格内的HTTPS服务发布为HTTPS外部服务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#将网格内的HTTP服务发布为HTTPS外部服务"><span class="nav-number">3.2.4.3.</span> <span class="nav-text">将网格内的HTTP服务发布为HTTPS外部服务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#将网格内的HTTP服务发布为双向HTTPS外部访问"><span class="nav-number">3.2.4.4.</span> <span class="nav-text">将网格内的HTTP服务发布为双向HTTPS外部访问</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#将网格内的HTTP服务发布为HTTPS外部访问和HTTPS内部访问"><span class="nav-number">3.2.4.5.</span> <span class="nav-text">将网格内的HTTP服务发布为HTTPS外部访问和HTTPS内部访问</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway-思维导图"><span class="nav-number">3.3.</span> <span class="nav-text">Gateway 思维导图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio外部服务配置：ServiceEntry"><span class="nav-number">4.</span> <span class="nav-text">Istio外部服务配置：ServiceEntry</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceEntry配置示例"><span class="nav-number">4.1.</span> <span class="nav-text">ServiceEntry配置示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceEntry规则的定义和用法"><span class="nav-number">4.2.</span> <span class="nav-text">ServiceEntry规则的定义和用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceEntry的典型应用"><span class="nav-number">4.3.</span> <span class="nav-text">ServiceEntry的典型应用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio代理规则配置：Sidecar"><span class="nav-number">5.</span> <span class="nav-text">Istio代理规则配置：Sidecar</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Sidecar配置示例"><span class="nav-number">5.1.</span> <span class="nav-text">Sidecar配置示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sidecar规则定义"><span class="nav-number">5.2.</span> <span class="nav-text">Sidecar规则定义</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
