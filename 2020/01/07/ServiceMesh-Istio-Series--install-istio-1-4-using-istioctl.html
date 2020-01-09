@@ -62,7 +62,8 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--install-istio-1-4-using-istioctl&#x2F;istio-release-dir.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--install-istio-1-4-using-istioctl&#x2F;weather-forecast-example.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--install-istio-1-4-using-istioctl&#x2F;frontend-dashboard.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--install-istio-1-4-using-istioctl&#x2F;frontend-dashboard-err.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--install-istio-1-4-using-istioctl&#x2F;frontend-dashboard-ok.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;ServiceMesh-Istio-Series--install-istio-1-4-using-istioctl&#x2F;kiali-weather.png">
 <meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
 <meta property="og:updated_time" content="2020-01-06T16:00:00.000Z">
@@ -530,7 +531,11 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl -n istio-system get svc</span><br><span class="line">...</span><br><span class="line">istio-ingressgateway     NodePort    10.100.112.237   &lt;none&gt;        15020:31993/TCP,80:30903/TCP,443:31072/TCP,15029:32762/TCP,15030:31649/TCP,15031:32552/TCP,15032:32100/TCP,15443:31879/TCP   3d23h</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
 <p>80端口对应的NodePort是30903，所以，访问：<a href="http://x.x.x.x:30903即可，如下图：" target="_blank" rel="noopener">http://x.x.x.x:30903即可，如下图：</a></p>
-<p><img src="/images/ServiceMesh-Istio-Series--install-istio-1-4-using-istioctl/frontend-dashboard.png" alt></p>
+<p><img src="/images/ServiceMesh-Istio-Series--install-istio-1-4-using-istioctl/frontend-dashboard-err.png" alt></p>
+<p>注意：</p>
+<p>这里提示“当前advertisement服务不可用”,F12工具查看：提示：“Chrome net::ERR_BLOCKED_BY_CLIENT”，解决方法，将浏览器的广告拦截插件，我这里用的是Adblock Plus不再当前IP地址开启。</p>
+<p>正常的如下：</p>
+<p><img src="/images/ServiceMesh-Istio-Series--install-istio-1-4-using-istioctl/frontend-dashboard-ok.png" alt></p>
 <h2 id="通过Kiali-查看Weather服务调用链"><a href="#通过Kiali-查看Weather服务调用链" class="headerlink" title="通过Kiali 查看Weather服务调用链"></a>通过Kiali 查看Weather服务调用链</h2><p>更改kiali的Service类型为NodePort：</p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="string">$</span> <span class="string">kubectl</span> <span class="string">-n</span> <span class="string">istio-system</span> <span class="string">edit</span> <span class="string">svc</span> <span class="string">kiali</span></span><br><span class="line"><span class="string">...</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">NodePort</span> <span class="comment"># 修改成NodePort</span></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="string">$</span> <span class="string">kubectl</span> <span class="string">-n</span> <span class="string">istio-system</span> <span class="string">get</span> <span class="string">svc</span></span><br><span class="line"><span class="string">kiali</span>                    <span class="string">NodePort</span>    <span class="number">10.100</span><span class="number">.210</span><span class="number">.211</span>   <span class="string">&lt;none&gt;</span>        <span class="number">20001</span><span class="string">:32514/TCP</span></span><br></pre></td></tr></table></figure>
 
