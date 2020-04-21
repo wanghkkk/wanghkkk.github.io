@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="环境说明 Kubernetes 版本：1.13.5 Kubeadm 版本：1.14.1 Kubernetes HA集群，3台Master 总结先上总结，快速查看。 备份&#x2F;etc&#x2F;kubernetes 目录； 更新证书文件：kubeadm alpha certs renew all –config=kubernetes&#x2F;kubeadm-init.yaml； 更新配置文件：先删除，再更新：kubead">
+<meta name="keywords" content="Kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes HA Cluster 证书过期解决方案">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2020&#x2F;04&#x2F;20&#x2F;k8s-HA-Cluster-certificate-expiration.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="环境说明 Kubernetes 版本：1.13.5 Kubeadm 版本：1.14.1 Kubernetes HA集群，3台Master 总结先上总结，快速查看。 备份&#x2F;etc&#x2F;kubernetes 目录； 更新证书文件：kubeadm alpha certs renew all –config=kubernetes&#x2F;kubeadm-init.yaml； 更新配置文件：先删除，再更新：kubead">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;k8s-HA-Cluster-certificate-expiration&#x2F;k8s-cluster-rancher-cluster.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:updated_time" content="2020-04-20T13:53:21.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;k8s-HA-Cluster-certificate-expiration&#x2F;k8s-cluster-rancher-cluster.png">
+
+<link rel="canonical" href="https://knner.wang/2020/04/20/k8s-HA-Cluster-certificate-expiration.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Kubernetes HA Cluster 证书过期解决方案 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">20</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">24</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2020/04/20/k8s-HA-Cluster-certificate-expiration.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kubernetes HA Cluster 证书过期解决方案
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-20 21:53:21" itemprop="dateCreated datePublished" datetime="2020-04-20T21:53:21+08:00">2020-04-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">Kubernetes</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2020/04/20/k8s-HA-Cluster-certificate-expiration.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/04/20/k8s-HA-Cluster-certificate-expiration.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="环境说明"><a href="#环境说明" class="headerlink" title="环境说明"></a>环境说明</h1><ul>
+<li>Kubernetes 版本：1.13.5</li>
+<li>Kubeadm 版本：1.14.1</li>
+<li>Kubernetes HA集群，3台Master</li>
+</ul><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>先上总结，快速查看。</p><ol>
+<li><strong>备份/etc/kubernetes 目录；</strong></li>
+<li>更新证书文件：kubeadm alpha certs renew all –config=kubernetes/kubeadm-init.yaml；</li>
+<li>更新配置文件：先删除，再更新：kubeadm init phase kubeconfig all –config=kubernetes/kubeadm-init.yaml；</li>
+<li>Kubernetes版本不同，上面两步的命令位置不同，具体见下方详细说明；</li>
+<li>拷贝kubectl配置：cd ~/.kube &amp;&amp; cp config{,.bak} &amp;&amp; cp /etc/kubernetes/admin.conf ~/.kube/；</li>
+<li><strong>分别在所有Master节点上执行以上命令，而不能直接拷贝证书或者配置文件。</strong></li>
+</ol><a id="more"></a>
+
+
+<h1 id="Kubernetes-1-13以上的版本"><a href="#Kubernetes-1-13以上的版本" class="headerlink" title="Kubernetes 1.13以上的版本"></a>Kubernetes 1.13以上的版本</h1><h2 id="定位问题"><a href="#定位问题" class="headerlink" title="定位问题"></a>定位问题</h2><p>临近下班的时候有同事反映，Rancher Server的界面无法打开，亲测后发现提示无法连接。心想Rancher Server可是集群呢？而且前边有三台nginx ingress controller，再前边还有AWS NLB，怎么也不至于连不上啊，架构如下图：</p>
+<p><img src="/images/k8s-HA-Cluster-certificate-expiration/k8s-cluster-rancher-cluster.png" alt></p>
+<p>紧接着登陆<code>Kubernetes</code>，通过<code>kubectl</code>命令查看，问题来了：提示无法连接到<code>Kubernetes</code>，三台master节点，全军覆没，通过docker ps命令查看：etcd、api-server都在一直重启，而无法启动。</p>
+<p>通过<code>docker logs</code>查看etcd日志：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">2020-04-20 13:37:31.471260 W | rafthttp: health check <span class="keyword">for</span> peer 4898f4a4483db9e3 could not connect: dial tcp 172.17.21.60:2380: getsockopt: connection refused</span><br><span class="line">2020-04-20 13:37:32.273336 I | raft: 923b8cf0a7704360 is starting a new election at term 33044</span><br><span class="line">2020-04-20 13:37:32.273355 I | raft: 923b8cf0a7704360 became candidate at term 33045</span><br><span class="line">2020-04-20 13:37:32.273363 I | raft: 923b8cf0a7704360 received MsgVoteResp from 923b8cf0a7704360 at term 33045</span><br><span class="line">2020-04-20 13:37:32.273371 I | raft: 923b8cf0a7704360 [logterm: 11084, index: 167884379] sent MsgVote request to 4898f4a4483db9e3 at term 33045</span><br><span class="line">2020-04-20 13:37:33.973358 I | raft: 923b8cf0a7704360 is starting a new election at term 33045</span><br><span class="line">2020-04-20 13:37:33.973388 I | raft: 923b8cf0a7704360 became candidate at term 33046</span><br><span class="line">2020-04-20 13:37:33.973395 I | raft: 923b8cf0a7704360 received MsgVoteResp from 923b8cf0a7704360 at term 33046</span><br><span class="line">2020-04-20 13:37:33.973404 I | raft: 923b8cf0a7704360 [logterm: 11084, index: 167884379] sent MsgVote request to 4898f4a4483db9e3 at term 33046</span><br><span class="line">2020-04-20 13:37:34.420803 E | etcdserver: publish error: etcdserver: request timed out</span><br><span class="line">2020-04-20 13:37:35.573354 I | raft: 923b8cf0a7704360 is starting a new election at term 33046</span><br><span class="line">2020-04-20 13:37:35.573381 I | raft: 923b8cf0a7704360 became candidate at term 33047</span><br><span class="line">2020-04-20 13:37:35.573389 I | raft: 923b8cf0a7704360 received MsgVoteResp from 923b8cf0a7704360 at term 33047</span><br><span class="line">2020-04-20 13:37:35.573397 I | raft: 923b8cf0a7704360 [logterm: 11084, index: 167884379] sent MsgVote request to 4898f4a4483db9e3 at term 33047</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>docker logs</code>查看<code>kube-api-server</code>日志，发现如下证书过期的错误：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">E0420 13:49:46.438819       1 authentication.go:65] Unable to authenticate the request due to an error: [x509: certificate has expired or is not yet valid, x509: certificate has expired or is not yet valid]</span><br><span class="line">E0420 13:49:46.444011       1 authentication.go:65] Unable to authenticate the request due to an error: [x509: certificate has expired or is not yet valid, x509: certificate has expired or is not yet valid]</span><br><span class="line">E0420 13:49:46.448161       1 authentication.go:65] Unable to authenticate the request due to an error: [x509: certificate has expired or is not yet valid, x509: certificate has expired or is not yet valid]</span><br></pre></td></tr></table></figure>
+
+<p>在通过查看<code>kubelet</code>日志：<code>/var/logs/messages</code>日志也发现了证书过期的错误：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Apr 20 18:37:33 k8s01 systemd: Unit kubelet.service entered failed state.</span><br><span class="line">Apr 20 18:37:33 k8s01 systemd: kubelet.service failed.</span><br><span class="line">Apr 20 18:37:40 k8s01 dhclient[3397]: XMT: Solicit on eth0, interval 131610ms.</span><br><span class="line">Apr 20 18:37:43 k8s01 systemd: kubelet.service holdoff time over, scheduling restart.</span><br><span class="line">Apr 20 18:37:43 k8s01 systemd: Started kubelet: The Kubernetes Node Agent.</span><br><span class="line">Apr 20 18:37:43 k8s01 systemd: Starting kubelet: The Kubernetes Node Agent...</span><br><span class="line">Apr 20 18:37:43 k8s01 kubelet: Flag --cgroup-driver has been deprecated, This parameter should be <span class="built_in">set</span> via the config file specified by the Kubelet<span class="string">'s --config flag. See https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config</span></span><br><span class="line"><span class="string">-file/ for more information.</span></span><br><span class="line"><span class="string">Apr 20 18:37:43 k8s01 kubelet: Flag --cgroup-driver has been deprecated, This parameter should be set via the config file specified by the Kubelet'</span>s --config flag. See https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config</span><br><span class="line">-file/ <span class="keyword">for</span> more information.</span><br><span class="line">Apr 20 18:37:43 k8s01 systemd: Started Kubernetes systemd probe.</span><br><span class="line">Apr 20 18:37:43 k8s01 systemd: Starting Kubernetes systemd probe.</span><br><span class="line">Apr 20 18:37:43 k8s01 kubelet: I0420 18:37:43.785502   18338 server.go:407] Version: v1.13.5</span><br><span class="line">Apr 20 18:37:43 k8s01 kubelet: I0420 18:37:43.785637   18338 plugins.go:103] No cloud provider specified.</span><br><span class="line">Apr 20 18:37:43 k8s01 kubelet: E0420 18:37:43.787102   18338 bootstrap.go:209] Part of the existing bootstrap client certificate is expired: 2020-04-19 16:11:32 +0000 UTC</span><br><span class="line">Apr 20 18:37:43 k8s01 kubelet: F0420 18:37:43.787209   18338 server.go:261] failed to run Kubelet: unable to load bootstrap kubeconfig: Error loading config file <span class="string">"/etc/kubernetes/bootstrap-kubelet.conf"</span>: yaml: line 6: could not find e</span><br><span class="line">xpected <span class="string">':'</span></span><br><span class="line">Apr 20 18:37:43 k8s01 systemd: kubelet.service: main process exited, code=exited, status=255/n/a</span><br></pre></td></tr></table></figure>
+
+<p>回想一下，也差不多了，Kubernetes集群安装有一年了，默认的证书就是一年的期限，下面验证一下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 当前日期</span></span><br><span class="line"><span class="comment"># date</span></span><br><span class="line">Mon Apr 20 18:18:28 CST 2020</span><br><span class="line"></span><br><span class="line">$ sudo su -</span><br><span class="line"><span class="comment"># cd /etc/kubernetes/pki</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 发现文件都是2019年4月21号的更新时间</span></span><br><span class="line"><span class="comment"># ll</span></span><br><span class="line">total 56</span><br><span class="line">-rw-r--r-- 1 root root 1245 Apr 21  2019 apiserver.crt</span><br><span class="line">-rw-r--r-- 1 root root 1090 Apr 21  2019 apiserver-etcd-client.crt</span><br><span class="line">-rw------- 1 root root 1679 Apr 21  2019 apiserver-etcd-client.key</span><br><span class="line">-rw------- 1 root root 1675 Apr 21  2019 apiserver.key</span><br><span class="line">-rw-r--r-- 1 root root 1099 Apr 21  2019 apiserver-kubelet-client.crt</span><br><span class="line">-rw------- 1 root root 1675 Apr 21  2019 apiserver-kubelet-client.key</span><br><span class="line">-rw-r--r-- 1 root root 1025 Apr 21  2019 ca.crt</span><br><span class="line">-rw------- 1 root root 1675 Apr 21  2019 ca.key</span><br><span class="line">drwxr-xr-x 2 root root  162 Apr 21  2019 etcd</span><br><span class="line">-rw-r--r-- 1 root root 1038 Apr 21  2019 front-proxy-ca.crt</span><br><span class="line">-rw------- 1 root root 1675 Apr 21  2019 front-proxy-ca.key</span><br><span class="line">-rw-r--r-- 1 root root 1058 Apr 21  2019 front-proxy-client.crt</span><br><span class="line">-rw------- 1 root root 1679 Apr 21  2019 front-proxy-client.key</span><br><span class="line">drwxr-xr-x 2 root root  210 Apr 29  2019 helm</span><br><span class="line">-rw------- 1 root root 1675 Apr 21  2019 sa.key</span><br><span class="line">-rw------- 1 root root  451 Apr 21  2019 sa.pub</span><br><span class="line"><span class="comment"># ll etcd/</span></span><br><span class="line">total 32</span><br><span class="line">-rw-r--r-- 1 root root 1017 Apr 21  2019 ca.crt</span><br><span class="line">-rw------- 1 root root 1679 Apr 21  2019 ca.key</span><br><span class="line">-rw-r--r-- 1 root root 1094 Apr 21  2019 healthcheck-client.crt</span><br><span class="line">-rw------- 1 root root 1679 Apr 21  2019 healthcheck-client.key</span><br><span class="line">-rw-r--r-- 1 root root 1159 Apr 21  2019 peer.crt</span><br><span class="line">-rw------- 1 root root 1679 Apr 21  2019 peer.key</span><br><span class="line">-rw-r--r-- 1 root root 1159 Apr 21  2019 server.crt</span><br><span class="line">-rw------- 1 root root 1675 Apr 21  2019 server.key</span><br><span class="line"><span class="comment"># ll helm/</span></span><br><span class="line">total 48</span><br><span class="line">-rw-r--r-- 1 root root  2106 Apr 28  2019 ca.cert.pem</span><br><span class="line">-rw-r--r-- 1 root root  3243 Apr 28  2019 ca.key.pem</span><br><span class="line">-rw-r--r-- 1 root root    17 Apr 28  2019 ca.srl</span><br><span class="line">-rw-r--r-- 1 root root  1988 Apr 28  2019 helm.cert.pem</span><br><span class="line">-rw-r--r-- 1 root root 12008 Apr 29  2019 helm.certs.tar.gz</span><br><span class="line">-rw-r--r-- 1 root root  1744 Apr 28  2019 helm.csr.pem</span><br><span class="line">-rw-r--r-- 1 root root  3243 Apr 28  2019 helm.key.pem</span><br><span class="line">-rw-r--r-- 1 root root  2004 Apr 28  2019 tiller.cert.pem</span><br><span class="line">-rw-r--r-- 1 root root  1760 Apr 28  2019 tiller.csr.pem</span><br><span class="line">-rw-r--r-- 1 root root  3243 Apr 28  2019 tiller.key.pem</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看证书过期时间命令</span></span><br><span class="line">openssl x509 -noout -enddate -<span class="keyword">in</span> /etc/kubernetes/pki/ca.crt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 整体如下：</span></span><br><span class="line"><span class="comment"># tree /etc/kubernetes/pki/</span></span><br><span class="line">/etc/kubernetes/pki/</span><br><span class="line">├── apiserver.crt <span class="comment"># notAfter=Apr 19 16:11:28 2020 GMT 已过期</span></span><br><span class="line">├── apiserver-etcd-client.crt <span class="comment"># notAfter=Apr 19 16:11:30 2020 GMT 已过期</span></span><br><span class="line">├── apiserver-etcd-client.key</span><br><span class="line">├── apiserver.key</span><br><span class="line">├── apiserver-kubelet-client.crt  <span class="comment"># notAfter=Apr 19 16:11:29 2020 GMT 已过期</span></span><br><span class="line">├── apiserver-kubelet-client.key</span><br><span class="line">├── ca.crt <span class="comment"># notAfter=Apr 17 16:11:28 2029 GMT</span></span><br><span class="line">├── ca.key</span><br><span class="line">├── etcd</span><br><span class="line">│   ├── ca.crt <span class="comment"># notAfter=Apr 17 16:11:29 2029 GMT</span></span><br><span class="line">│   ├── ca.key</span><br><span class="line">│   ├── healthcheck-client.crt <span class="comment"># notAfter=Apr 19 16:11:31 2020 GMT 已过期</span></span><br><span class="line">│   ├── healthcheck-client.key</span><br><span class="line">│   ├── peer.crt <span class="comment"># notAfter=Apr 19 16:11:31 2020 GMT 已过期</span></span><br><span class="line">│   ├── peer.key</span><br><span class="line">│   ├── server.crt <span class="comment"># notAfter=Apr 19 16:11:30 2020 GMT 已过期</span></span><br><span class="line">│   └── server.key</span><br><span class="line">├── front-proxy-ca.crt <span class="comment"># notAfter=Apr 17 16:11:29 2029 GMT</span></span><br><span class="line">├── front-proxy-ca.key</span><br><span class="line">├── front-proxy-client.crt <span class="comment"># notAfter=Apr 19 16:11:29 2020 GMT 已过期</span></span><br><span class="line">├── front-proxy-client.key</span><br><span class="line">├── helm</span><br><span class="line">│   ├── ca.cert.pem <span class="comment"># notAfter=Apr 23 02:59:43 2039 GMT</span></span><br><span class="line">│   ├── ca.key.pem</span><br><span class="line">│   ├── ca.srl</span><br><span class="line">│   ├── helm.cert.pem <span class="comment"># notAfter=Apr 25 03:06:11 2029 GMT</span></span><br><span class="line">│   ├── helm.certs.tar.gz</span><br><span class="line">│   ├── helm.csr.pem</span><br><span class="line">│   ├── helm.key.pem</span><br><span class="line">│   ├── tiller.cert.pem <span class="comment"># notAfter=Apr 25 03:05:49 2029 GMT</span></span><br><span class="line">│   ├── tiller.csr.pem</span><br><span class="line">│   └── tiller.key.pem</span><br><span class="line">├── sa.key</span><br><span class="line">└── sa.pub</span><br><span class="line"></span><br><span class="line">2 directories, 32 files</span><br></pre></td></tr></table></figure>
+
+<p>确实7个证书已经过期了。</p>
+<h2 id="更新证书"><a href="#更新证书" class="headerlink" title="更新证书"></a>更新证书</h2><p>因为<code>Kubernetes</code>集群时通过<code>kubeadm</code>来安装的，默认kubeadm是有更新证书功能的：</p>
+<p>老规矩，查看<code>kubeadm</code>工具帮助：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 我的kubeadm是1.14.1版本，来安装的Kubernetes 1.13.5版本的。</span></span><br><span class="line"><span class="comment"># kubeadm version</span></span><br><span class="line">kubeadm version: &amp;version.Info&#123;Major:<span class="string">"1"</span>, Minor:<span class="string">"14"</span>, GitVersion:<span class="string">"v1.14.1"</span>, GitCommit:<span class="string">"b7394102d6ef778017f2ca4046abbaa23b88c290"</span>, GitTreeState:<span class="string">"clean"</span>, BuildDate:<span class="string">"2019-04-08T17:08:49Z"</span>, GoVersion:<span class="string">"go1.12.1"</span>, Compiler:<span class="string">"gc"</span>, Platform:<span class="string">"linux/amd64"</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl version</span></span><br><span class="line">Client Version: version.Info&#123;Major:<span class="string">"1"</span>, Minor:<span class="string">"13"</span>, GitVersion:<span class="string">"v1.13.5"</span>, GitCommit:<span class="string">"2166946f41b36dea2c4626f90a77706f426cdea2"</span>, GitTreeState:<span class="string">"clean"</span>, BuildDate:<span class="string">"2019-03-25T15:26:52Z"</span>, GoVersion:<span class="string">"go1.11.5"</span>, Compiler:<span class="string">"gc"</span>, Platform:<span class="string">"linux/amd64"</span>&#125;</span><br><span class="line">Unable to connect to the server: EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># kubeadm alpha -h</span></span><br><span class="line">Kubeadm experimental sub-commands</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  kubeadm alpha [<span class="built_in">command</span>]</span><br><span class="line"></span><br><span class="line">Available Commands:</span><br><span class="line">  certs       Commands related to handling kubernetes certificates <span class="comment"># 证书相关</span></span><br><span class="line">  kubeconfig  Kubeconfig file utilities</span><br><span class="line">  kubelet     Commands related to handling the kubelet</span><br><span class="line">  selfhosting Makes a kubeadm cluster self-hosted</span><br><span class="line"></span><br><span class="line">Flags:</span><br><span class="line">  -h, --<span class="built_in">help</span>   <span class="built_in">help</span> <span class="keyword">for</span> alpha</span><br><span class="line"></span><br><span class="line">Global Flags:</span><br><span class="line">      --<span class="built_in">log</span>-file string   If non-empty, use this <span class="built_in">log</span> file</span><br><span class="line">      --rootfs string     [EXPERIMENTAL] The path to the <span class="string">'real'</span> host root filesystem.</span><br><span class="line">      --skip-headers      If <span class="literal">true</span>, avoid header prefixes <span class="keyword">in</span> the <span class="built_in">log</span> messages</span><br><span class="line">  -v, --v Level           number <span class="keyword">for</span> the <span class="built_in">log</span> level verbosity</span><br><span class="line"></span><br><span class="line">Additional <span class="built_in">help</span> topics:</span><br><span class="line">  kubeadm alpha phase Invoke subsets of kubeadm <span class="built_in">functions</span> separately <span class="keyword">for</span> a manual install</span><br><span class="line"></span><br><span class="line">Use <span class="string">"kubeadm alpha [command] --help"</span> <span class="keyword">for</span> more information about a <span class="built_in">command</span>.</span><br><span class="line"></span><br><span class="line"><span class="comment"># kubeadm alpha certs -h</span></span><br><span class="line">Commands related to handling kubernetes certificates</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  kubeadm alpha certs [<span class="built_in">command</span>]</span><br><span class="line"></span><br><span class="line">Aliases:</span><br><span class="line">  certs, certificates</span><br><span class="line"></span><br><span class="line">Available Commands:</span><br><span class="line">  renew       Renews certificates <span class="keyword">for</span> a Kubernetes cluster <span class="comment"># 这里就是更新证书</span></span><br><span class="line"></span><br><span class="line">Flags:</span><br><span class="line">  -h, --<span class="built_in">help</span>   <span class="built_in">help</span> <span class="keyword">for</span> certs</span><br><span class="line"></span><br><span class="line">Global Flags:</span><br><span class="line">      --<span class="built_in">log</span>-file string   If non-empty, use this <span class="built_in">log</span> file</span><br><span class="line">      --rootfs string     [EXPERIMENTAL] The path to the <span class="string">'real'</span> host root filesystem.</span><br><span class="line">      --skip-headers      If <span class="literal">true</span>, avoid header prefixes <span class="keyword">in</span> the <span class="built_in">log</span> messages</span><br><span class="line">  -v, --v Level           number <span class="keyword">for</span> the <span class="built_in">log</span> level verbosity</span><br><span class="line"></span><br><span class="line">Use <span class="string">"kubeadm alpha certs [command] --help"</span> <span class="keyword">for</span> more information about a <span class="built_in">command</span>.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 7个已过期的，正好是这7个。</span></span><br><span class="line"><span class="comment"># kubeadm alpha certs renew -h </span></span><br><span class="line">This <span class="built_in">command</span> is not meant to be run on its own. See list of available subcommands.</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  kubeadm alpha certs renew [flags]</span><br><span class="line">  kubeadm alpha certs renew [<span class="built_in">command</span>]</span><br><span class="line"></span><br><span class="line">Available Commands:</span><br><span class="line">  all                      renew all available certificates</span><br><span class="line">  apiserver                Generates the certificate <span class="keyword">for</span> serving the Kubernetes API</span><br><span class="line">  apiserver-etcd-client    Generates the client apiserver uses to access etcd</span><br><span class="line">  apiserver-kubelet-client Generates the Client certificate <span class="keyword">for</span> the API server to connect to kubelet</span><br><span class="line">  etcd-healthcheck-client  Generates the client certificate <span class="keyword">for</span> liveness probes to healtcheck etcd</span><br><span class="line">  etcd-peer                Generates the credentials <span class="keyword">for</span> etcd nodes to communicate with each other</span><br><span class="line">  etcd-server              Generates the certificate <span class="keyword">for</span> serving etcd</span><br><span class="line">  front-proxy-client       Generates the client <span class="keyword">for</span> the front proxy</span><br><span class="line"></span><br><span class="line">Flags:</span><br><span class="line">  -h, --<span class="built_in">help</span>   <span class="built_in">help</span> <span class="keyword">for</span> renew</span><br><span class="line"></span><br><span class="line">Global Flags:</span><br><span class="line">      --<span class="built_in">log</span>-file string   If non-empty, use this <span class="built_in">log</span> file</span><br><span class="line">      --rootfs string     [EXPERIMENTAL] The path to the <span class="string">'real'</span> host root filesystem.</span><br><span class="line">      --skip-headers      If <span class="literal">true</span>, avoid header prefixes <span class="keyword">in</span> the <span class="built_in">log</span> messages</span><br><span class="line">  -v, --v Level           number <span class="keyword">for</span> the <span class="built_in">log</span> level verbosity</span><br><span class="line"></span><br><span class="line">Use <span class="string">"kubeadm alpha certs renew [command] --help"</span> <span class="keyword">for</span> more information about a <span class="built_in">command</span>.</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="备份"><a href="#备份" class="headerlink" title="备份"></a>备份</h3><p>先别急，操作之前一定要备份，以防误操作。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir etc.kubernet.bakcup</span><br><span class="line">cp -a /etc/kubernetes etc.kubernet.bakcup/</span><br></pre></td></tr></table></figure>
+
+<h3 id="更新证书-1"><a href="#更新证书-1" class="headerlink" title="更新证书"></a>更新证书</h3><p>找到之前<code>kubeadm</code>的init文件：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cat kubeadm-init.yaml </span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeadm.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">bootstrapTokens:</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">InitConfiguration</span></span><br><span class="line"><span class="attr">nodeRegistration:</span></span><br><span class="line">  <span class="attr">taints:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">effect:</span> <span class="string">NoSchedule</span></span><br><span class="line">    <span class="attr">key:</span> <span class="string">node-role.kubernetes.io/master</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiServer:</span></span><br><span class="line">  <span class="attr">timeoutForControlPlane:</span> <span class="string">4m0s</span></span><br><span class="line">  <span class="attr">extraArgs:</span></span><br><span class="line">    <span class="attr">runtime-config:</span> <span class="string">"api/all=true"</span></span><br><span class="line">    <span class="attr">audit-log-path:</span> <span class="string">/var/log/kubernetes/audit.log</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeadm.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">certificatesDir:</span> <span class="string">/etc/kubernetes/pki</span></span><br><span class="line"><span class="attr">clusterName:</span> <span class="string">kubernetes</span></span><br><span class="line"><span class="attr">controllerManager:</span></span><br><span class="line">  <span class="attr">extraArgs:</span></span><br><span class="line">    <span class="attr">horizontal-pod-autoscaler-use-rest-clients:</span> <span class="string">"true"</span></span><br><span class="line">    <span class="attr">horizontal-pod-autoscaler-sync-period:</span> <span class="string">"10s"</span></span><br><span class="line">    <span class="attr">node-monitor-grace-period:</span> <span class="string">"10s"</span></span><br><span class="line"><span class="attr">dns:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">CoreDNS</span></span><br><span class="line"><span class="attr">etcd:</span></span><br><span class="line">  <span class="attr">local:</span></span><br><span class="line">    <span class="attr">dataDir:</span> <span class="string">/var/lib/etcd</span></span><br><span class="line"><span class="attr">imageRepository:</span> <span class="string">k8s.gcr.io</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterConfiguration</span></span><br><span class="line"><span class="attr">kubernetesVersion:</span> <span class="string">v1.13.5</span></span><br><span class="line"><span class="attr">controlPlaneEndpoint:</span> <span class="number">172.17</span><span class="number">.0</span><span class="number">.180</span><span class="string">:6443</span></span><br><span class="line"><span class="attr">networking:</span></span><br><span class="line">  <span class="attr">dnsDomain:</span> <span class="string">cluster.local</span></span><br><span class="line">  <span class="attr">podSubnet:</span> <span class="number">10.101</span><span class="number">.0</span><span class="number">.0</span><span class="string">/16</span></span><br><span class="line">  <span class="attr">serviceSubnet:</span> <span class="number">10.100</span><span class="number">.0</span><span class="number">.0</span><span class="string">/16</span></span><br><span class="line"><span class="attr">scheduler:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeproxy.config.k8s.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">KubeProxyConfiguration</span></span><br><span class="line"><span class="attr">mode:</span> <span class="string">"ipvs"</span></span><br></pre></td></tr></table></figure>
+
+<p>如果已经找不到，新建一个也是可以的：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeadm.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterConfiguration</span></span><br><span class="line"><span class="attr">kubernetesVersion:</span> <span class="string">v1.13.5</span> <span class="comment">#--&gt;这里改成你集群对应的版本</span></span><br><span class="line"><span class="attr">imageRepository:</span> <span class="string">k8s.gcr.io</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 主要是告诉kubeadm中Kubernetes集群的版本，以防止它去网上查找，因为被墙，所以会报错如下：</span></span><br><span class="line"><span class="comment"># could not fetch a Kubernetes version from the internet: unable to get URL "https://dl.k8s.io/release/stable-1.txt"</span></span><br></pre></td></tr></table></figure>
+
+<p>开始更新：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubeadm alpha certs renew all --config=kubernetes/kubeadm-init.yaml</span><br></pre></td></tr></table></figure>
+
+<p>检查证书文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 发现</span></span><br><span class="line">[root@k8s01.dev.awsbj.cn ~]<span class="comment"># ll /etc/kubernetes/pki/</span></span><br><span class="line">total 56</span><br><span class="line">-rw-r--r-- 1 root root 1245 Apr 20 18:35 apiserver.crt <span class="comment"># 已更新</span></span><br><span class="line">-rw-r--r-- 1 root root 1090 Apr 20 18:35 apiserver-etcd-client.crt <span class="comment"># 已更新</span></span><br><span class="line">-rw------- 1 root root 1675 Apr 20 18:35 apiserver-etcd-client.key <span class="comment"># 已更新</span></span><br><span class="line">-rw------- 1 root root 1675 Apr 20 18:35 apiserver.key <span class="comment"># 已更新</span></span><br><span class="line">-rw-r--r-- 1 root root 1099 Apr 20 18:35 apiserver-kubelet-client.crt <span class="comment"># 已更新</span></span><br><span class="line">-rw------- 1 root root 1679 Apr 20 18:35 apiserver-kubelet-client.key <span class="comment"># 已更新</span></span><br><span class="line">-rw-r--r-- 1 root root 1025 Apr 21  2019 ca.crt</span><br><span class="line">-rw------- 1 root root 1675 Apr 21  2019 ca.key</span><br><span class="line">drwxr-xr-x 2 root root  162 Apr 21  2019 etcd</span><br><span class="line">-rw-r--r-- 1 root root 1038 Apr 21  2019 front-proxy-ca.crt</span><br><span class="line">-rw------- 1 root root 1675 Apr 21  2019 front-proxy-ca.key</span><br><span class="line">-rw-r--r-- 1 root root 1058 Apr 20 18:35 front-proxy-client.crt <span class="comment"># 已更新</span></span><br><span class="line">-rw------- 1 root root 1679 Apr 20 18:35 front-proxy-client.key <span class="comment"># 已更新</span></span><br><span class="line">drwxr-xr-x 2 root root  210 Apr 29  2019 helm</span><br><span class="line">-rw------- 1 root root 1675 Apr 21  2019 sa.key</span><br><span class="line">-rw------- 1 root root  451 Apr 21  2019 sa.pub</span><br><span class="line">[root@k8s01.dev.awsbj.cn ~]<span class="comment"># ll /etc/kubernetes/pki/etcd/</span></span><br><span class="line">total 32</span><br><span class="line">-rw-r--r-- 1 root root 1017 Apr 21  2019 ca.crt</span><br><span class="line">-rw------- 1 root root 1679 Apr 21  2019 ca.key</span><br><span class="line">-rw-r--r-- 1 root root 1094 Apr 20 18:35 healthcheck-client.crt <span class="comment"># 已更新</span></span><br><span class="line">-rw------- 1 root root 1679 Apr 20 18:35 healthcheck-client.key <span class="comment"># 已更新</span></span><br><span class="line">-rw-r--r-- 1 root root 1159 Apr 20 18:35 peer.crt <span class="comment"># 已更新</span></span><br><span class="line">-rw------- 1 root root 1679 Apr 20 18:35 peer.key <span class="comment"># 已更新</span></span><br><span class="line">-rw-r--r-- 1 root root 1159 Apr 20 18:35 server.crt <span class="comment"># 已更新</span></span><br><span class="line">-rw------- 1 root root 1675 Apr 20 18:35 server.key <span class="comment"># 已更新</span></span><br><span class="line">[root@k8s01.dev.awsbj.cn ~]<span class="comment"># ll /etc/kubernetes/pki/helm/</span></span><br><span class="line">total 48</span><br><span class="line">-rw-r--r-- 1 root root  2106 Apr 28  2019 ca.cert.pem</span><br><span class="line">-rw-r--r-- 1 root root  3243 Apr 28  2019 ca.key.pem</span><br><span class="line">-rw-r--r-- 1 root root    17 Apr 28  2019 ca.srl</span><br><span class="line">-rw-r--r-- 1 root root  1988 Apr 28  2019 helm.cert.pem</span><br><span class="line">-rw-r--r-- 1 root root 12008 Apr 29  2019 helm.certs.tar.gz</span><br><span class="line">-rw-r--r-- 1 root root  1744 Apr 28  2019 helm.csr.pem</span><br><span class="line">-rw-r--r-- 1 root root  3243 Apr 28  2019 helm.key.pem</span><br><span class="line">-rw-r--r-- 1 root root  2004 Apr 28  2019 tiller.cert.pem</span><br><span class="line">-rw-r--r-- 1 root root  1760 Apr 28  2019 tiller.csr.pem</span><br><span class="line">-rw-r--r-- 1 root root  3243 Apr 28  2019 tiller.key.pem</span><br><span class="line"></span><br><span class="line"><span class="comment"># 通过命令检查：</span></span><br><span class="line">$ openssl x509 -noout -enddate -<span class="keyword">in</span> apiserver.crt </span><br><span class="line">notAfter=Apr 20 10:35:36 2021 GMT</span><br></pre></td></tr></table></figure>
+
+<p>证书更新完了，还需要更新组件：<code>kubectl</code>,<code>kubelet</code>,<code>controller-manager</code>,<code>scheduler</code>对应的配置文件，因为这里面也集成了证书内容的。</p>
+<h2 id="更新配置文件"><a href="#更新配置文件" class="headerlink" title="更新配置文件"></a>更新配置文件</h2><p><code>kubeadm</code>工具，同样有这个功能，老规矩，查看对应的帮助：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># kubeadm init phase kubeconfig -h</span></span><br><span class="line">This <span class="built_in">command</span> is not meant to be run on its own. See list of available subcommands.</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  kubeadm init phase kubeconfig [flags]</span><br><span class="line">  kubeadm init phase kubeconfig [<span class="built_in">command</span>]</span><br><span class="line"></span><br><span class="line">Available Commands: <span class="comment"># 正好四个</span></span><br><span class="line">  admin              Generates a kubeconfig file <span class="keyword">for</span> the admin to use and <span class="keyword">for</span> kubeadm itself</span><br><span class="line">  all                Generates all kubeconfig files</span><br><span class="line">  controller-manager Generates a kubeconfig file <span class="keyword">for</span> the controller manager to use</span><br><span class="line">  kubelet            Generates a kubeconfig file <span class="keyword">for</span> the kubelet to use *only* <span class="keyword">for</span> cluster bootstrapping purposes</span><br><span class="line">  scheduler          Generates a kubeconfig file <span class="keyword">for</span> the scheduler to use</span><br><span class="line"></span><br><span class="line">Flags:</span><br><span class="line">  -h, --<span class="built_in">help</span>   <span class="built_in">help</span> <span class="keyword">for</span> kubeconfig</span><br><span class="line"></span><br><span class="line">Global Flags:</span><br><span class="line">      --<span class="built_in">log</span>-file string   If non-empty, use this <span class="built_in">log</span> file</span><br><span class="line">      --rootfs string     [EXPERIMENTAL] The path to the <span class="string">'real'</span> host root filesystem.</span><br><span class="line">      --skip-headers      If <span class="literal">true</span>, avoid header prefixes <span class="keyword">in</span> the <span class="built_in">log</span> messages</span><br><span class="line">  -v, --v Level           number <span class="keyword">for</span> the <span class="built_in">log</span> level verbosity</span><br><span class="line"></span><br><span class="line">Use <span class="string">"kubeadm init phase kubeconfig [command] --help"</span> <span class="keyword">for</span> more information about a <span class="built_in">command</span>.</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="备份-1"><a href="#备份-1" class="headerlink" title="备份"></a>备份</h3><p>一定要记得备份，因为之前已经备份了整个<code>/etc/kubernetes</code>文件夹了，所以这里略过。</p>
+<p>删除对应的conf文件，否则更新命令会直接用现有的而不会更新：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ rm -f admin.conf kubelet.conf controller-manager.conf scheduler.conf</span><br></pre></td></tr></table></figure>
+
+<h3 id="更新配置文件-1"><a href="#更新配置文件-1" class="headerlink" title="更新配置文件"></a>更新配置文件</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># kubeadm init phase kubeconfig all --config=kubernetes/kubeadm-init.yaml </span></span><br><span class="line">[kubeconfig] Using kubeconfig folder <span class="string">"/etc/kubernetes"</span></span><br><span class="line">[kubeconfig] Writing <span class="string">"admin.conf"</span> kubeconfig file</span><br><span class="line">[kubeconfig] Writing <span class="string">"kubelet.conf"</span> kubeconfig file</span><br><span class="line">[kubeconfig] Writing <span class="string">"controller-manager.conf"</span> kubeconfig file</span><br><span class="line">[kubeconfig] Writing <span class="string">"scheduler.conf"</span> kubeconfig file</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="拷贝kubectl配置文件"><a href="#拷贝kubectl配置文件" class="headerlink" title="拷贝kubectl配置文件"></a>拷贝kubectl配置文件</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/.kube</span><br><span class="line">$ cp config&#123;,.bak&#125;</span><br><span class="line">$ cp /etc/kubernetes/admin.conf ~/.kube/</span><br></pre></td></tr></table></figure>
+
+<p>稍等片刻，久违的node节点列表终于出来了：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl get node -o wide</span><br><span class="line">NAME                 STATUS   ROLES    AGE    VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE         KERNEL-VERSION                  CONTAINER-RUNTIME</span><br><span class="line">k8s01.dev.awsbj.cn   Ready    master   366d   v1.13.5   172.17.20.238   &lt;none&gt;        Amazon Linux 2   4.14.106-97.85.amzn2.x86_64     docker://18.6.3</span><br><span class="line">k8s02.dev.awsbj.cn   Ready    master   366d   v1.13.5   172.17.21.60    &lt;none&gt;        Amazon Linux 2   4.14.109-99.92.amzn2.x86_64     docker://18.6.3</span><br><span class="line">k8s03.dev.awsbj.cn   Ready    master   366d   v1.13.5   172.17.20.52    &lt;none&gt;        Amazon Linux 2   4.14.109-99.92.amzn2.x86_64     docker://18.6.3</span><br><span class="line">k8s04.dev.awsbj.cn   Ready    node     366d   v1.13.5   172.17.20.162   &lt;none&gt;        Amazon Linux 2   4.14.109-99.92.amzn2.x86_64     docker://18.6.3</span><br><span class="line">k8s05.dev.awsbj.cn   Ready    node     350d   v1.13.5   172.17.21.178   &lt;none&gt;        Amazon Linux 2   4.14.114-103.97.amzn2.x86_64    docker://18.6.3</span><br><span class="line">k8s06.dev.awsbj.cn   Ready    node     322d   v1.13.5   172.17.21.146   &lt;none&gt;        Amazon Linux 2   4.14.114-105.126.amzn2.x86_64   docker://18.6.3</span><br></pre></td></tr></table></figure>
+
+<p>rancher server 也终于正常了。</p>
+<h1 id="Kubernetes-1-13以下的版本"><a href="#Kubernetes-1-13以下的版本" class="headerlink" title="Kubernetes 1.13以下的版本"></a>Kubernetes 1.13以下的版本</h1><h2 id="备份-2"><a href="#备份-2" class="headerlink" title="备份"></a>备份</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir etc.kubernet.bakcup</span><br><span class="line">cp -a /etc/kubernetes etc.kubernet.bakcup/</span><br></pre></td></tr></table></figure>
+
+<p>对于Kubernetes的版本小于1.13.0的，命令变化如下：</p>
+<h2 id="更新证书-2"><a href="#更新证书-2" class="headerlink" title="更新证书"></a>更新证书</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 需要将已经过期的证书删掉，否则还是会使用现有的证书，而不会重新生成</span></span><br><span class="line">$ <span class="built_in">cd</span> /etc/kubernetes/pki</span><br><span class="line"><span class="comment"># 删除掉7个已经过期的证书，注意备份</span></span><br><span class="line">$ rm -rf apiserver.* apiserver-etcd-client.* apiserver-kubelet-client.* front-proxy-client.* etcd/healthcheck-client.* etcd/peer.* etcd/server.*</span><br><span class="line"><span class="comment"># 更新证书</span></span><br><span class="line">$ kubeadm alpha phase certs all --apiserver-advertise-address=<span class="variable">$&#123;MASTER_API_SERVER_IP&#125;</span> --apiserver-cert-extra-sans=Master1ip,Master2ip,MasterNip</span><br></pre></td></tr></table></figure>
+
+<h2 id="更新配置文件-2"><a href="#更新配置文件-2" class="headerlink" title="更新配置文件"></a>更新配置文件</h2><p>删除现有的配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ rm -f admin.conf kubelet.conf controller-manager.conf scheduler.conf</span><br></pre></td></tr></table></figure>
+
+<p>重新生成配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubeadm alpha phase kubeconfig all --apiserver-advertise-address=MasterIP</span><br></pre></td></tr></table></figure>
+
+<p>如果报错：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">unable to get URL &quot;https://dl.k8s.io/release/stable-1.9.txt&quot;:Get https://storage.googleapis.com/kubernetes-release/release/stable-1.9.txt: dial tcp 172.217.160.112:443: i/o timeout</span><br></pre></td></tr></table></figure>
+
+<p>则可以使用kubeadm的配置文件：</p>
+<figure class="highlight yaml"><figcaption><span>config.yaml</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">MasterConfiguration</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">kubeadm.k8s.io/v1alpha1</span></span><br><span class="line"><span class="attr">kubernetesVersion:</span> <span class="string">v1.9.6</span></span><br><span class="line"><span class="attr">api:</span></span><br><span class="line">  <span class="attr">advertiseAddress:</span> <span class="string">MasterIP</span></span><br></pre></td></tr></table></figure>
+
+<p>使用这个配置文件来重新生成配置配置：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubeadm alpha phase kubeconfig all --config=config.yaml</span><br></pre></td></tr></table></figure>
+
+<h2 id="拷贝kubectl配置文件-1"><a href="#拷贝kubectl配置文件-1" class="headerlink" title="拷贝kubectl配置文件"></a>拷贝kubectl配置文件</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/.kube</span><br><span class="line">$ cp config&#123;,.bak&#125;</span><br><span class="line">$ cp /etc/kubernetes/admin.conf ~/.kube/</span><br></pre></td></tr></table></figure>
+
+<h1 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h1><ul>
+<li><p>更新证书时，不要更新ca证书以及etcd的ca证书，如果这个ca变更了，会有其他手动的操作，远不止这么简单，而且默认ca的证书都是10年有效期。</p>
+</li>
+<li><p><strong>一定要备份</strong></p>
+</li>
+<li><p>注意：更新证书的命令是：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 是在kubeadm alpha命令里</span></span><br><span class="line">$ kubeadm alpha certs renew all --config=kubernetes/kubeadm-init.yaml</span><br></pre></td></tr></table></figure>
+
+<p>而不是：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 不是在kubeadm init命令里</span></span><br><span class="line">$ kubeadm init phase certs apiserver [flags]</span><br></pre></td></tr></table></figure>
+
+<p>更新配置文件的命令是：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 这个是kubeadm init 这个命令里的</span></span><br><span class="line">$ kubeadm init phase kubeconfig</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>参考：<a href="https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init-phase/#cmd-phase-certs" target="_blank" rel="noopener">https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init-phase/#cmd-phase-certs</a></p>
+</blockquote>
+<ul>
+<li>对于Kubernetes HA 多台Master，这些步骤，需要在每台master节点上都要执行，而<strong>不能直接拷贝</strong>，因为涉及到证书的运行：SAN：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ openssl x509 -text -<span class="keyword">in</span> /etc/kubernetes/pki/etcd/server.crt </span><br><span class="line">......</span><br><span class="line"><span class="comment"># 默认的etcd/peer.crt 和etcd/server.crt 可以的SAN</span></span><br><span class="line">            X509v3 Subject Alternative Name: </span><br><span class="line">                DNS:k8s01.dev.awsbj.cn, DNS:localhost, IP Address:172.17.20.238, IP Address:127.0.0.1, IP Address:0:0:0:0:0:0:0:1</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>如果图省事拷贝了，对于etcd集群时无法启动的，因为本机IP或者主机名不在证书的SAN列表内。</p>
+<h1 id="生产建议"><a href="#生产建议" class="headerlink" title="生产建议"></a>生产建议</h1><p>对于生产环境，一定不要等到证书过期了，再去更新，一定要在证书过期前将证书更新了，以免造成停机。</p>
+<p>对于手动通过Kubeadm安装Kubernetes集群，可以更改kubernetes源代码，将默认的证书过期时间1年调整更长，<a href="http://team.jiunile.com/blog/2019/05/k8s-kubeadm14-ca-upgrade.html" target="_blank" rel="noopener">具体参考这里</a></p>
+<hr>
+<blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+        <div class="reward-container">
+  <div>如有疏忽错误欢迎在留言区评论指正，如果对您有所帮助欢迎点击下方进行打赏。</div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/wechatpay.jpg" alt="Knner.Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/alipay.jpg" alt="Knner.Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2020/04/20/k8s-HA-Cluster-certificate-expiration.html" title="Kubernetes HA Cluster 证书过期解决方案">https://knner.wang/2020/04/20/k8s-HA-Cluster-certificate-expiration.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/04/14/upgrade-wsl1-to-wsl2.html" rel="next" title="升级Windows中Linux子系统WSL1到WSL2">
+                  <i class="fa fa-chevron-left"></i> 升级Windows中Linux子系统WSL1到WSL2
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#环境说明"><span class="nav-number">1.</span> <span class="nav-text">环境说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-1-13以上的版本"><span class="nav-number">3.</span> <span class="nav-text">Kubernetes 1.13以上的版本</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#定位问题"><span class="nav-number">3.1.</span> <span class="nav-text">定位问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新证书"><span class="nav-number">3.2.</span> <span class="nav-text">更新证书</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#备份"><span class="nav-number">3.2.1.</span> <span class="nav-text">备份</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新证书-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">更新证书</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新配置文件"><span class="nav-number">3.3.</span> <span class="nav-text">更新配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#备份-1"><span class="nav-number">3.3.1.</span> <span class="nav-text">备份</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新配置文件-1"><span class="nav-number">3.3.2.</span> <span class="nav-text">更新配置文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拷贝kubectl配置文件"><span class="nav-number">3.4.</span> <span class="nav-text">拷贝kubectl配置文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-1-13以下的版本"><span class="nav-number">4.</span> <span class="nav-text">Kubernetes 1.13以下的版本</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#备份-2"><span class="nav-number">4.1.</span> <span class="nav-text">备份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新证书-2"><span class="nav-number">4.2.</span> <span class="nav-text">更新证书</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新配置文件-2"><span class="nav-number">4.3.</span> <span class="nav-text">更新配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拷贝kubectl配置文件-1"><span class="nav-number">4.4.</span> <span class="nav-text">拷贝kubectl配置文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#注意事项"><span class="nav-number">5.</span> <span class="nav-text">注意事项</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#生产建议"><span class="nav-number">6.</span> <span class="nav-text">生产建议</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备19058691号 </a>
+      <img src="/images/knner/ga-icon.png" style="display: inline-block;"><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010802030660" rel="noopener" target="_blank">11010802030660 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang 版权所有</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: {page: {
+            url: "https://knner.wang/2020/04/20/k8s-HA-Cluster-certificate-expiration.html",
+            identifier: "2020/04/20/k8s-HA-Cluster-certificate-expiration.html",
+            title: "Kubernetes HA Cluster 证书过期解决方案"
+          }
+        }
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://knner.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    (function() {
+      var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+      if (offsetTop <= 0) {
+        // load directly when there's no a scrollbar
+        window.addEventListener('load', loadComments, false);
+      } else {
+        var disqus_scroll = () => {
+          // offsetTop may changes because of manually resizing browser window or lazy loading images.
+          var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+          var scrollTop = window.scrollY;
+
+          // pre-load comments a bit? (margin or anything else)
+          if (offsetTop - scrollTop < 60) {
+            window.removeEventListener('scroll', disqus_scroll);
+            loadComments();
+          }
+        };
+        window.addEventListener('scroll', disqus_scroll);
+      }
+    })();
+  
+</script>
+
+</body>
+</html>
