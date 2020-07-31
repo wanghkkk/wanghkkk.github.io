@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#222">
+  <link rel="manifest" href="/images/site.webmanifest">
+  <meta name="msapplication-config" content="/images/browserconfig.xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="问题说明  某一天收到报警，线上的Elasticsearch集群中的一台节点CPU达到了99%，查看Elasticsearch的其他节点CPU都是正常的，唯独这台服务器CPU久满不下。如下图：Elasticsearch 集群说明生产Elasticsearch 集群配置： 六台节点，其中数据节点为3台，两台master，1台client。 版本：5.6.4 出问题的节点为node-3。由于资源有限将">
+<meta name="keywords" content="elasticsearch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elasticsearch 集群节点CPU爆满的问题排查以及解决">
+<meta property="og:url" content="https:&#x2F;&#x2F;knner.wang&#x2F;2020&#x2F;07&#x2F;31&#x2F;Elasticsearch-Cluster-Node-CPU-Alert.html">
+<meta property="og:site_name" content="Knner.Wang&#39;s Blog">
+<meta property="og:description" content="问题说明  某一天收到报警，线上的Elasticsearch集群中的一台节点CPU达到了99%，查看Elasticsearch的其他节点CPU都是正常的，唯独这台服务器CPU久满不下。如下图：Elasticsearch 集群说明生产Elasticsearch 集群配置： 六台节点，其中数据节点为3台，两台master，1台client。 版本：5.6.4 出问题的节点为node-3。由于资源有限将">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Elasticsearch-Cluster-Node-CPU-Alert&#x2F;CPU.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Elasticsearch-Cluster-Node-CPU-Alert&#x2F;cpu-load.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;knner&#x2F;wx.jpg">
+<meta property="og:updated_time" content="2020-07-31T06:23:44.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;knner.wang&#x2F;images&#x2F;Elasticsearch-Cluster-Node-CPU-Alert&#x2F;CPU.png">
+
+<link rel="canonical" href="https://knner.wang/2020/07/31/Elasticsearch-Cluster-Node-CPU-Alert.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Elasticsearch 集群节点CPU爆满的问题排查以及解决 | Knner.Wang's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Knner.Wang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">20</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">25</span></a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://knner.wang/2020/07/31/Elasticsearch-Cluster-Node-CPU-Alert.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Knner.Wang">
+      <meta itemprop="description" content="Knner.Wang's Blog,for sharing IT technology and also my study notes.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Knner.Wang's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Elasticsearch 集群节点CPU爆满的问题排查以及解决
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-31 14:23:44" itemprop="dateCreated datePublished" datetime="2020-07-31T14:23:44+08:00">2020-07-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/elasticsearch/" itemprop="url" rel="index">
+                    <span itemprop="name">elasticsearch</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2020/07/31/Elasticsearch-Cluster-Node-CPU-Alert.html#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/07/31/Elasticsearch-Cluster-Node-CPU-Alert.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="问题说明"><a href="#问题说明" class="headerlink" title="问题说明"></a>问题说明</h2><p>  某一天收到报警，线上的Elasticsearch集群中的一台节点CPU达到了99%，查看Elasticsearch的其他节点CPU都是正常的，唯独这台服务器CPU久满不下。</p><p>如下图：</p><p><img src="/images/Elasticsearch-Cluster-Node-CPU-Alert/CPU.png" alt="CPU alert"></p><h2 id="Elasticsearch-集群说明"><a href="#Elasticsearch-集群说明" class="headerlink" title="Elasticsearch 集群说明"></a>Elasticsearch 集群说明</h2><p>生产Elasticsearch 集群配置：</p><ul>
+<li>六台节点，其中数据节点为3台，两台master，1台client。</li>
+<li>版本：5.6.4</li>
+</ul><p>出问题的节点为node-3。</p><p>由于资源有限将两个节点放到了一台机器上。</p><table>
+<thead>
+<tr>
+<th>role</th>
+<th>ip</th>
+<th>host</th>
+<th>port api</th>
+<th>transport</th>
+<th>hostname</th>
+<th>cpu</th>
+<th>mem</th>
+<th>disk</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>es master-1</td>
+<td>172.x.x.38</td>
+<td>da02</td>
+<td>9221</td>
+<td>9444</td>
+<td>da02</td>
+<td>4C</td>
+<td>16G</td>
+<td>500G</td>
+</tr>
+<tr>
+<td>es master-2</td>
+<td>172.x.x.221</td>
+<td>da03</td>
+<td>9221</td>
+<td>9444</td>
+<td>da03</td>
+<td>4C</td>
+<td>16G</td>
+<td>500G</td>
+</tr>
+<tr>
+<td>es clinet</td>
+<td>172.x.x.37</td>
+<td>da01</td>
+<td>9220</td>
+<td>9333</td>
+<td>da01</td>
+<td>4C</td>
+<td>16G</td>
+<td>500G</td>
+</tr>
+<tr>
+<td>es node-1</td>
+<td>172.x.x.37</td>
+<td>da01</td>
+<td>9221</td>
+<td>9334</td>
+<td>da01</td>
+<td>4C</td>
+<td>16G</td>
+<td>500G</td>
+</tr>
+<tr>
+<td>es node-2</td>
+<td>172.x.x.38</td>
+<td>da02</td>
+<td>9220</td>
+<td>9333</td>
+<td>da02</td>
+<td>4C</td>
+<td>16G</td>
+<td>500G</td>
+</tr>
+<tr>
+<td>es node-3</td>
+<td>172.x.x.221</td>
+<td>da03</td>
+<td>9222</td>
+<td>9555</td>
+<td>da03</td>
+<td>4C</td>
+<td>16G</td>
+<td>500G</td>
+</tr>
+</tbody></table><a id="more"></a>
+
+
+
+
+
+
+
+<h2 id="问题排查-思路1"><a href="#问题排查-思路1" class="headerlink" title="问题排查 思路1"></a>问题排查 思路1</h2><p>首先想到的就是CPU过高，是不是内存不够了，一直导致Full GC呢？</p>
+<p>排查命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># top命令获取es的进程的PID,大写P按照CPU使用排序</span></span><br><span class="line">$ top</span><br><span class="line"></span><br><span class="line"><span class="comment"># 通过jstat命令，查看gc情况，26299为CPu过高的es pid</span></span><br><span class="line"><span class="comment"># 2000 代表间隔2s刷新一次，总共显示20次</span></span><br><span class="line">$ jstat -gcutil 26299 2000 20</span><br><span class="line">  S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT   </span><br><span class="line">  0.00   0.00   3.96  57.41  93.08  84.84 139244 4365.998  1010   49.443 4415.441</span><br><span class="line">100.00   0.00  71.47  57.41  93.08  84.84 139244 4365.998  1010   49.443 4415.441</span><br><span class="line">  0.00 100.00  32.45  57.51  93.08  84.84 139245 4366.029  1010   49.443 4415.472</span><br><span class="line">  0.00 100.00  98.86  57.51  93.08  84.84 139245 4366.029  1010   49.443 4415.472</span><br><span class="line"> 99.34   0.00  54.29  57.67  93.08  84.84 139246 4366.062  1010   49.443 4415.505</span><br><span class="line">  0.00 100.00   7.90  57.82  93.08  84.84 139247 4366.102  1010   49.443 4415.545</span><br><span class="line">  0.00 100.00  67.13  57.82  93.08  84.84 139247 4366.102  1010   49.443 4415.545</span><br><span class="line">100.00   0.00  19.60  57.94  93.08  84.84 139248 4366.133  1010   49.443 4415.577</span><br><span class="line">100.00   0.00  79.07  57.94  93.08  84.84 139248 4366.133  1010   49.443 4415.577</span><br></pre></td></tr></table></figure>
+
+<p>发现Full GC在这20次内并没有增高，Young GC 也还好；</p>
+<p>鉴于当前机器的内存还剩余3个G，所以索性也增加这个es节点的内存：</p>
+<p>配置如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim config/jvm.options</span><br><span class="line">-Xms8g</span><br><span class="line">-Xmx8g</span><br></pre></td></tr></table></figure>
+
+<p>然后配置ES集群的：禁止分片再分配，以提高ES数据节点重启后，分片的再分配，以快速恢复：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 禁止分片分配：xxx为用户名，yyy为密码</span></span><br><span class="line">$ curl -XPUT localhost:9220/_cluster/settings -d <span class="string">'&#123;"transient" : &#123;"cluster.routing.allocation.enable" : "none"&#125;&#125;'</span>  -uxxx:yyy</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查配置</span></span><br><span class="line">curl -XGET localhost:9220/_cluster/settings -uxxx:yyy</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"persistent"</span>: &#123;&#125;,</span><br><span class="line">  <span class="string">"transient"</span>: &#123;</span><br><span class="line">    <span class="string">"cluster"</span>: &#123;</span><br><span class="line">      <span class="string">"routing"</span>: &#123;</span><br><span class="line">        <span class="string">"allocation"</span>: &#123;</span><br><span class="line">          <span class="string">"enable"</span>: <span class="string">"none"</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>重启后，当集群状态为Green后，查看该节点的CPU占用，问题依旧。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 开启分片在分配</span></span><br><span class="line">$ curl -XPUT localhost:9220/_cluster/settings -d <span class="string">'&#123;"transient" : &#123;"cluster.routing.allocation.enable" : "all"&#125;&#125;'</span>  -uxxx:yyy</span><br><span class="line"><span class="comment"># 检查配置</span></span><br><span class="line">curl -XGET localhost:9220/_cluster/settings -uxxx:yyy</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"persistent"</span>: &#123;&#125;,</span><br><span class="line">  <span class="string">"transient"</span>: &#123;</span><br><span class="line">    <span class="string">"cluster"</span>: &#123;</span><br><span class="line">      <span class="string">"routing"</span>: &#123;</span><br><span class="line">        <span class="string">"allocation"</span>: &#123;</span><br><span class="line">          <span class="string">"enable"</span>: <span class="string">"all"</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="问题排查-思路2"><a href="#问题排查-思路2" class="headerlink" title="问题排查 思路2"></a>问题排查 思路2</h2><p>查看该节点的日志输出：</p>
+<p>发现如下报错：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Caused by: org.elasticsearch.common.util.concurrent.EsRejectedExecutionException: rejected execution of org.elasticsearch.ingest.PipelineExecutionService$<span class="number">2</span>@<span class="number">3f</span>72e57a on EsThreadPoolExecutor[bulk, queue capac</span><br><span class="line">ity = <span class="number">200</span>, org.elasticsearch.common.util.concurrent.EsThreadPoolExecutor@<span class="number">4</span>c0b0cb6[Running, pool size = <span class="number">4</span>, active threads = <span class="number">4</span>, queued tasks = <span class="number">200</span>, completed tasks = <span class="number">45095</span>]]</span><br><span class="line">        at org.elasticsearch.common.util.concurrent.EsAbortPolicy.rejectedExecution(EsAbortPolicy.java:<span class="number">50</span>) ~[elasticsearch-<span class="number">5.6</span><span class="number">.4</span>.jar:<span class="number">5.6</span><span class="number">.4</span>]</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:<span class="number">823</span>) ~[?:<span class="number">1.8</span><span class="number">.0_111</span>]</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:<span class="number">1369</span>) ~[?:<span class="number">1.8</span><span class="number">.0_111</span>]</span><br><span class="line">        at org.elasticsearch.common.util.concurrent.EsThreadPoolExecutor.doExecute(EsThreadPoolExecutor.java:<span class="number">94</span>) ~[elasticsearch-<span class="number">5.6</span><span class="number">.4</span>.jar:<span class="number">5.6</span><span class="number">.4</span>]</span><br><span class="line">        ... <span class="number">49</span> more</span><br><span class="line">[<span class="number">2020</span>-<span class="number">07</span>-<span class="number">24</span>T00:<span class="number">08</span>:<span class="number">23</span>,<span class="number">969</span>][ERROR][o.e.a.b.TransportBulkAction] [node-<span class="number">3</span>] failed to execute pipeline <span class="keyword">for</span> a bulk request</span><br><span class="line">org.elasticsearch.common.util.concurrent.EsRejectedExecutionException: rejected execution of org.elasticsearch.ingest.PipelineExecutionService$<span class="number">2</span>@<span class="number">41</span>dd524d on EsThreadPoolExecutor[bulk, queue capacity = <span class="number">200</span>,</span><br><span class="line">org.elasticsearch.common.util.concurrent.EsThreadPoolExecutor@<span class="number">4</span>c0b0cb6[Running, pool size = <span class="number">4</span>, active threads = <span class="number">4</span>, queued tasks = <span class="number">200</span>, completed tasks = <span class="number">45095</span>]]</span><br><span class="line">        at org.elasticsearch.common.util.concurrent.EsAbortPolicy.rejectedExecution(EsAbortPolicy.java:<span class="number">50</span>) ~[elasticsearch-<span class="number">5.6</span><span class="number">.4</span>.jar:<span class="number">5.6</span><span class="number">.4</span>]</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:<span class="number">823</span>) ~[?:<span class="number">1.8</span><span class="number">.0_111</span>]</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:<span class="number">1369</span>) ~[?:<span class="number">1.8</span><span class="number">.0_111</span>]</span><br><span class="line">        at org.elasticsearch.common.util.concurrent.EsThreadPoolExecutor.doExecute(EsThreadPoolExecutor.java:<span class="number">94</span>) ~[elasticsearch-<span class="number">5.6</span><span class="number">.4</span>.jar:<span class="number">5.6</span><span class="number">.4</span>]</span><br><span class="line">        at org.elasticsearch.common.util.concurrent.EsThreadPoolExecutor.execute(EsThreadPoolExecutor.java:<span class="number">89</span>) ~[elasticsearch-<span class="number">5.6</span><span class="number">.4</span>.jar:<span class="number">5.6</span><span class="number">.4</span>]</span><br><span class="line">        at org.elasticsearch.ingest.PipelineExecutionService.executeBulkRequest(PipelineExecutionService.java:<span class="number">74</span>) ~[elasticsearch-<span class="number">5.6</span><span class="number">.4</span>.jar:<span class="number">5.6</span><span class="number">.4</span>]</span><br><span class="line">        at org.elasticsearch.action.bulk.TransportBulkAction.processBulkIndexIngestRequest(TransportBulkAction.java:<span class="number">508</span>) ~[elasticsearch-<span class="number">5.6</span><span class="number">.4</span>.jar:<span class="number">5.6</span><span class="number">.4</span>]</span><br><span class="line">        at org.elasticsearch.action.bulk.TransportBulkAction.doExecute(TransportBulkAction.java:<span class="number">136</span>) ~[elasticsearch-<span class="number">5.6</span><span class="number">.4</span>.jar:<span class="number">5.6</span><span class="number">.4</span>]</span><br><span class="line">        at org.elasticsearch.action.bulk.TransportBulkAction.doExecute(TransportBulkAction.java:<span class="number">85</span>) ~[elasticsearch-<span class="number">5.6</span><span class="number">.4</span>.jar:<span class="number">5.6</span><span class="number">.4</span>]</span><br><span class="line">        at org.elasticsearch.action.support.TransportAction$RequestFilterChain.proceed(TransportAction.java:<span class="number">170</span>) ~[elasticsearch-<span class="number">5.6</span><span class="number">.4</span>.jar:<span class="number">5.6</span><span class="number">.4</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+<p>关键字：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">on EsThreadPoolExecutor[bulk, queue capacity = <span class="number">200</span>, org.elasticsearch.common.util.concurrent.EsThreadPoolExecutor@<span class="number">4</span>c0b0cb6[Running, pool size = <span class="number">4</span>, active threads = <span class="number">4</span>, queued tasks = <span class="number">200</span>, completed tasks = <span class="number">45095</span>]]</span><br></pre></td></tr></table></figure>
+
+<p>bulk 线程总共4个，激活的线程也是4个，队列中有200个任务。同时有的任务被rejected（拒绝）了。</p>
+<p>查看ES API的线程情况：</p>
+<p>这里通过kibana的DevTools界面来查看，更加的方便些：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看线程池</span></span><br><span class="line">$ get _cat/thread_pool?v</span><br><span class="line">ode_name name                active queue rejected</span><br><span class="line">node-3    bulk                     4     365      120</span><br><span class="line">node-3    fetch_shard_started      0     0        0</span><br><span class="line">node-3    fetch_shard_store        0     0        0</span><br><span class="line">node-3    flush                    0     0        0</span><br><span class="line">node-3    force_merge              0     0        0</span><br><span class="line">node-3    generic                  0     0        0</span><br><span class="line">node-3    get                      0     0        0</span><br><span class="line">node-3    index                    0     0        0</span><br><span class="line">node-3    listener                 0     0        0</span><br><span class="line">node-3    management               2     0        0</span><br><span class="line">node-3    refresh                  4     425      0</span><br><span class="line">node-3    search                   0     0        0</span><br><span class="line">node-3    security-token-key       0     0        0</span><br><span class="line">node-3    snapshot                 0     0        0</span><br><span class="line">node-3    warmer                   0     0        0</span><br><span class="line">node-3    watcher                  0     0        0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看占用CPU过高的线程：</span></span><br><span class="line">$ get _nodes/hot_threads</span><br><span class="line"></span><br><span class="line"><span class="comment"># 该命令会列出所有节点的线程CPU占用排行，抱歉，看不懂。</span></span><br></pre></td></tr></table></figure>
+
+<p>其中的bulk和refresh的active都是满的，同时队列都已经上百了，同时rejected也不少了。</p>
+<p>好吧，线程池满了，就增大线程，队列满了就增大队列。ES配置如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim config/elasticsearch.yml</span><br><span class="line">thread_pool:</span><br><span class="line">    bulk:</span><br><span class="line">        size: 5</span><br><span class="line">        queue_size: 500</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>参考：这里是5.6的官方文档</p>
+<p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/5.6/modules-threadpool.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/reference/5.6/modules-threadpool.html</a></p>
+<p><strong>bulk</strong> 线程的说明：</p>
+<p>For bulk operations. Thread pool type is fixed with a size of # of available processors, queue_size of 200. The maximum size for this pool is 1 + # of available processors.</p>
+</blockquote>
+<p><strong>警告</strong>：</p>
+<p>thread_pool.bulk.zide 不是随意调整的。根据上面的官方文档说明：最大值为CPU核心数+1。默认的queue_size 为200。</p>
+<p>同样的配置禁用集群分片再分配，参考上面的配置，然后重启，记得再把分片在分配要改回来。</p>
+<p>好吧，问题依旧，CPU还是爆满。</p>
+<h2 id="问题排查-思路3"><a href="#问题排查-思路3" class="headerlink" title="问题排查 思路3"></a>问题排查 思路3</h2><p>在重启的过程中，查看当前激活的master节点的日志，有一些警告：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">[<span class="number">2020</span>-<span class="number">07</span>-<span class="number">31</span>T09:<span class="number">20</span>:<span class="number">29</span>,<span class="number">277</span>][WARN ][o.e.g.DanglingIndicesState] [client] [[.monitoring-alerts-<span class="number">6</span>/Jyne0wClRsWjd6g34mbHlQ]] can not be imported as a dangling index, as index with same name already exists in cluster metadata</span><br><span class="line">[<span class="number">2020</span>-<span class="number">07</span>-<span class="number">31</span>T09:<span class="number">20</span>:<span class="number">29</span>,<span class="number">278</span>][WARN ][o.e.g.DanglingIndicesState] [client] [[.monitoring-es-<span class="number">6</span>-<span class="number">2017.11</span><span class="number">.21</span>/fufshsZgQ-SA8wy3lc1qfg]] can not be imported as a dangling index, as an index with the same name and UUID exist in the index tombstones.  This situation is likely caused by copying over the data directory <span class="keyword">for</span> an index that was previously deleted.</span><br><span class="line">[<span class="number">2020</span>-<span class="number">07</span>-<span class="number">31</span>T09:<span class="number">20</span>:<span class="number">29</span>,<span class="number">278</span>][WARN ][o.e.g.DanglingIndicesState] [client] [[.monitoring-kibana-<span class="number">6</span>-<span class="number">2017.11</span><span class="number">.21</span>/I_3_Yq1ERy6SW_Q7P3JCKQ]] can not be imported as a dangling index, as an index with the same name and UUID exist in the index tombstones.  This situation is likely caused by copying over the data directory <span class="keyword">for</span> an index that was previously deleted.</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明</strong>：</p>
+<p>client节点上有些dangling index（悬空索引）了。而通过API查看，并没有这些index，而且都是2017年的监控的index了。</p>
+<blockquote>
+<p>参考：</p>
+<p><a href="https://elasticsearch.cn/question/7895" target="_blank" rel="noopener">https://elasticsearch.cn/question/7895</a></p>
+</blockquote>
+<p>解决方式：</p>
+<p>因为是Client节点，本身不存储数据，所以将data目录直接删掉了。</p>
+<p>如果你的是数据节点，注意备份，然后只删除掉data 目录中的具体的悬空索引：根据索引ID来删除：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">.monitoring-alerts-6/Jyne0wClRsWjd6g34mbHlQ</span><br><span class="line"></span><br><span class="line"><span class="comment"># 上面日志中：/后面的一串为索引ID</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 索引位置</span></span><br><span class="line">$ <span class="built_in">cd</span> data/nodes/0/indices/</span><br><span class="line">$ ls</span><br><span class="line">Jyne0wClRsWjd6g34mbHlQ I_3_Yq1ERy6SW_Q7P3JCKQ</span><br></pre></td></tr></table></figure>
+
+<p>然后重启client节点，发现master节点不再有这些dangling index的警告了。但是node-3节点 CPU还是100%。</p>
+<h2 id="问题排查-思路4-解决"><a href="#问题排查-思路4-解决" class="headerlink" title="问题排查 思路4 解决"></a>问题排查 思路4 解决</h2><p>通过上面的线程池查看：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看线程池</span></span><br><span class="line">$ get _cat/thread_pool?v</span><br><span class="line">ode_name name                active queue rejected</span><br><span class="line">node-3    bulk                     4     365      120</span><br><span class="line">node-3    fetch_shard_started      0     0        0</span><br><span class="line">node-3    fetch_shard_store        0     0        0</span><br><span class="line">node-3    flush                    0     0        0</span><br><span class="line">node-3    force_merge              0     0        0</span><br><span class="line">node-3    generic                  0     0        0</span><br><span class="line">node-3    get                      0     0        0</span><br><span class="line">node-3    index                    0     0        0</span><br><span class="line">node-3    listener                 0     0        0</span><br><span class="line">node-3    management               2     0        0</span><br><span class="line">node-3    refresh                  4     425      0</span><br><span class="line">node-3    search                   0     0        0</span><br><span class="line">node-3    security-token-key       0     0        0</span><br><span class="line">node-3    snapshot                 0     0        0</span><br><span class="line">node-3    warmer                   0     0        0</span><br><span class="line">node-3    watcher                  0     0        0</span><br></pre></td></tr></table></figure>
+
+<p>其中的bulk和refresh都是很高的。</p>
+<h3 id="调整1：调整所有的index的inde-refresh-interval-为60s"><a href="#调整1：调整所有的index的inde-refresh-interval-为60s" class="headerlink" title="调整1：调整所有的index的inde.refresh_interval 为60s"></a>调整1：调整所有的index的inde.refresh_interval 为60s</h3><blockquote>
+<p>参考：</p>
+<p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/6.8/indices-update-settings.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/reference/6.8/indices-update-settings.html</a></p>
+<p>The REST endpoint is /_settings (to update all indices) or {index}/_settings to update one (or more) indices settings.</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">// 更改所有index设置：</span><br><span class="line">$ PUT /_settings</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">"index"</span> : &#123;</span><br><span class="line">        <span class="string">"refresh_interval"</span> : <span class="string">"60s"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 获取单个index设置</span><br><span class="line">$ get logstash-2020.07.03/_settings</span><br><span class="line"></span><br><span class="line">// 获取所有index设置</span><br><span class="line">$ get /_settings</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：</p>
+<p>将index.refresh_interval时间间隔调长，这里为60s，所以看到其他index最新的数据会延迟1m钟。</p>
+<p>请根据自身情况进行修改。</p>
+<h3 id="调整2：-调整2台logstash-发送event到Elasticsearch的间隔和大小："><a href="#调整2：-调整2台logstash-发送event到Elasticsearch的间隔和大小：" class="headerlink" title="调整2： 调整2台logstash 发送event到Elasticsearch的间隔和大小："></a>调整2： 调整2台logstash 发送event到Elasticsearch的间隔和大小：</h3><blockquote>
+<p>参考：</p>
+<p><a href="https://www.leiyawu.com/2018/04/03/elk/" target="_blank" rel="noopener">https://www.leiyawu.com/2018/04/03/elk/</a></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim logstash-5.0.0/config/logstash.yml</span><br><span class="line">pipeline.output.workers: 4 <span class="comment"># 输出的work数量，一般为CPu核心数</span></span><br><span class="line">pipeline.batch.size: 500 <span class="comment"># 每次发送event数据的个数</span></span><br><span class="line">pipeline.batch.delay: 10 <span class="comment"># 发送延迟</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 思路就是：每次多发点，发送的频率小点。请根据自身情况进行修改。</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>说明</strong>：</p>
+<p>logstash向es发送event的间隔调长，同时将每次发送的event数量调大，以缓解bulk线程池满的情况。</p>
+<p>解决ES节点单台服务器CPU爆满的情况。</p>
+<p>查看CPU的负载：</p>
+<p><img src="/images/Elasticsearch-Cluster-Node-CPU-Alert/cpu-load.png" alt="cpu-load"></p>
+<p>问题终于得到解决。</p>
+<h2 id="其他优化"><a href="#其他优化" class="headerlink" title="其他优化"></a>其他优化</h2><p>其他的一些小优化：</p>
+<ul>
+<li><p>内存锁定：bootstrap.memory_lock: true</p>
+</li>
+<li><p>关闭机器学习模块，以减少内存占用： xpack.ml.enabled: false</p>
+</li>
+<li><p>开启transport的传输压缩，提高效率：transport.tcp.compress: true</p>
+</li>
+<li><p>将transport的host绑定到特定的IP上，提高安全性：transport.host: 172.x.x.221。同时API的host可以绑定的特定的IP上：network.host: x.x.x.x</p>
+</li>
+<li><p>跨域配置：http.cors</p>
+</li>
+</ul>
+<p>ES节点的配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9222</span></span><br><span class="line"><span class="attr">cluster.name:</span> <span class="string">microoak5.6</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">node-3</span></span><br><span class="line"><span class="attr">discovery.zen.ping.unicast.hosts:</span> <span class="string">["172.x.x.38:9333","172.x.x.221:9333","172.x.x.37:9333","172.x.x.221:9444","172.x.x.38:9444","172.x.x.37:9334"]</span></span><br><span class="line"><span class="attr">discovery.zen.minimum_master_nodes:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">node.master:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">http.cors.enabled :</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">http.cors.allow-origin :</span> <span class="string">"*.example.com"</span></span><br><span class="line"><span class="attr">http.cors.allow-methods :</span> <span class="string">OPTIONS,</span> <span class="string">HEAD,</span> <span class="string">GET,</span> <span class="string">POST,</span> <span class="string">PUT,</span> <span class="string">DELETE</span></span><br><span class="line"><span class="attr">http.cors.allow-headers :</span> <span class="string">WWW-Authenticate,X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization</span></span><br><span class="line"><span class="attr">bootstrap.memory_lock:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">transport.tcp.port:</span> <span class="number">9555</span></span><br><span class="line"><span class="attr">transport.host:</span> <span class="number">172.</span><span class="string">x.x.221</span></span><br><span class="line"><span class="attr">transport.tcp.compress:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">path.repo:</span> <span class="string">/data/esbackup</span></span><br><span class="line"><span class="attr">thread_pool:</span></span><br><span class="line">    <span class="attr">bulk:</span></span><br><span class="line">        <span class="attr">size:</span> <span class="number">5</span></span><br><span class="line">        <span class="attr">queue_size:</span> <span class="number">500</span></span><br><span class="line"><span class="attr">xpack.ml.enabled:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<hr>
+<blockquote>
+<p>本文到这里就结束了，欢迎期待后面的文章。您可以关注下方的公众号二维码，在第一时间查看新文章。</p>
+<p><img src="/images/knner/wx.jpg" alt="公众号"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+        <div class="reward-container">
+  <div>如有疏忽错误欢迎在留言区评论指正，如果对您有所帮助欢迎点击下方进行打赏。</div>
+  <button disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/wechatpay.jpg" alt="Knner.Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/knner/alipay.jpg" alt="Knner.Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Knner.Wang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://knner.wang/2020/07/31/Elasticsearch-Cluster-Node-CPU-Alert.html" title="Elasticsearch 集群节点CPU爆满的问题排查以及解决">https://knner.wang/2020/07/31/Elasticsearch-Cluster-Node-CPU-Alert.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/null" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/elasticsearch/" rel="tag"># elasticsearch</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2020/04/20/k8s-HA-Cluster-certificate-expiration.html" rel="next" title="Kubernetes HA Cluster 证书过期解决方案">
+                  <i class="fa fa-chevron-left"></i> Kubernetes HA Cluster 证书过期解决方案
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题说明"><span class="nav-number">1.</span> <span class="nav-text">问题说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elasticsearch-集群说明"><span class="nav-number">2.</span> <span class="nav-text">Elasticsearch 集群说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题排查-思路1"><span class="nav-number">3.</span> <span class="nav-text">问题排查 思路1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题排查-思路2"><span class="nav-number">4.</span> <span class="nav-text">问题排查 思路2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题排查-思路3"><span class="nav-number">5.</span> <span class="nav-text">问题排查 思路3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题排查-思路4-解决"><span class="nav-number">6.</span> <span class="nav-text">问题排查 思路4 解决</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#调整1：调整所有的index的inde-refresh-interval-为60s"><span class="nav-number">6.1.</span> <span class="nav-text">调整1：调整所有的index的inde.refresh_interval 为60s</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调整2：-调整2台logstash-发送event到Elasticsearch的间隔和大小："><span class="nav-number">6.2.</span> <span class="nav-text">调整2： 调整2台logstash 发送event到Elasticsearch的间隔和大小：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他优化"><span class="nav-number">7.</span> <span class="nav-text">其他优化</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Knner.Wang"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Knner.Wang</p>
+  <div class="site-description" itemprop="description">Knner.Wang's Blog,for sharing IT technology and also my study notes.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanghkkk" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://hub.docker.com/u/wanghkkk" title="DockerHub &amp;rarr; https:&#x2F;&#x2F;hub.docker.com&#x2F;u&#x2F;wanghkkk" rel="noopener" target="_blank"><i class="fa fa-fw fa-docker"></i>DockerHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wanghk@live.cn" title="E-Mail &amp;rarr; mailto:wanghk@live.cn" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备19058691号 </a>
+      <img src="/images/knner/ga-icon.png" style="display: inline-block;"><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010802030660" rel="noopener" target="_blank">11010802030660 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Knner.Wang 版权所有</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.0.0
+    和<a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank" rel="noopener"><img width="60" style="display: inline;" src="/images/logos/upyun_logo5.png"></a>提供CDN服务
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('div.pdf').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/pdfobject@2/pdfobject.min.js', () => {
+    document.querySelectorAll('div.pdf').forEach(element => {
+      PDFObject.embed(element.getAttribute('target'), element, {
+        pdfOpenParams: {
+          navpanes: 0,
+          toolbar: 0,
+          statusbar: 0,
+          pagemode: 'thumbs',
+          view: 'FitH'
+        },
+        PDFJS_URL: '/lib/pdf/web/viewer.html',
+        height: element.getAttribute('height') || '500px'
+      });
+    });
+  }, window.PDFObject);
+}
+</script>
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'forest',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://knner.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: {page: {
+            url: "https://knner.wang/2020/07/31/Elasticsearch-Cluster-Node-CPU-Alert.html",
+            identifier: "2020/07/31/Elasticsearch-Cluster-Node-CPU-Alert.html",
+            title: "Elasticsearch 集群节点CPU爆满的问题排查以及解决"
+          }
+        }
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://knner.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    (function() {
+      var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+      if (offsetTop <= 0) {
+        // load directly when there's no a scrollbar
+        window.addEventListener('load', loadComments, false);
+      } else {
+        var disqus_scroll = () => {
+          // offsetTop may changes because of manually resizing browser window or lazy loading images.
+          var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+          var scrollTop = window.scrollY;
+
+          // pre-load comments a bit? (margin or anything else)
+          if (offsetTop - scrollTop < 60) {
+            window.removeEventListener('scroll', disqus_scroll);
+            loadComments();
+          }
+        };
+        window.addEventListener('scroll', disqus_scroll);
+      }
+    })();
+  
+</script>
+
+</body>
+</html>
